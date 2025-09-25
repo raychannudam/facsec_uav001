@@ -1,0 +1,37 @@
+# Use Ubuntu as base image
+FROM ubuntu:24.04
+
+# Avoid prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update and install Python, pip, and Mosquitto
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    apt-get install -y python3 python3-pip && \
+    apt-add-repository ppa:mosquitto-dev/mosquitto-ppa && \
+    apt-get update && \
+    apt-get install -y mosquitto mosquitto-clients && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+
+RUN pip install --break-system-packages --timeout 120 -r requirements.txt
+
+
+# Copy FastAPI code
+COPY . .
+
+# Expose ports # 8001 for api service, 9002 & 8884 for mqtt broker
+EXPOSE 8000 9001 8883
+
+# Copy a script to start both Mosquitto and FastAPI
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Run the script
+CMD ["/start.sh"]

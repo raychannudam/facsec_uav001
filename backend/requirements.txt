@@ -1,0 +1,10 @@
+fastapi[standard]
+uvicorn
+pydantic
+passlib[bcrypt]
+pyjwt
+bcrypt==3.2.0
+alembic
+psycopg2-binary
+influxdb-client
+paho-mqtt

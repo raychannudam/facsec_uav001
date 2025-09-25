@@ -1,0 +1,43 @@
+# Byte-compiled / compiled files
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+ENV/
+.env/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Database files
+*.sqlite3
+*.db
+
+# Alembic
+alembic/versions/__pycache__/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# VSCode
+.vscode/
+
+# Docker
+*.pid
+
+# Environment files
+.env
+
+# Misc
+*.bak
+*.swp
+*.swo
+
+# Ignore database dump files
+*.sql
+*.dump
