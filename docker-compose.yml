@@ -1,41 +1,24 @@
 services:
-
-  pgdb:
-    container_name: pgdb
+  pgdb_facsec:
+    container_name: pgdb_facsec
     image: postgres
     restart: always
     # set shared memory limit when using docker compose
     shm_size: 1024mb
     ports:
-      - 5432:5432
-    volumes:
-      - ./databases/db:/var/lib/postgresql/data
+      - 5433:5432
+    # volumes:
+    #   - ./databases:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: pgsql_user
       POSTGRES_PASSWORD: pgsql_password
+      PGDATA: /var/lib/postgresql/data/pgdata
 
-  influxdb:
-    image: influxdb:2.7
-    container_name: influxdb
-    ports:
-      - "8086:8086"   # InfluxDB API
-    environment:
-      # Set up initial credentials
-      DOCKER_INFLUXDB_INIT_MODE: setup
-      DOCKER_INFLUXDB_INIT_USERNAME: admin
-      DOCKER_INFLUXDB_INIT_PASSWORD: adminpass
-      DOCKER_INFLUXDB_INIT_ORG: factory.io
-      DOCKER_INFLUXDB_INIT_BUCKET: iot_backend
-    volumes:
-      - ./influxdb/data:/var/lib/influxdb2
-    restart: always
-
-  backend:
+  backend_facsec:
     build:
       context: ./backend
       dockerfile: Dockerfile.backend
-    container_name: api
-    image: iot-config-backend 
+    container_name: backend_facsec
     restart: always
     volumes:
       - ./backend/mosquitto/config/mosquitto.conf:/app/mosquitto/config/mosquitto.conf
@@ -45,12 +28,11 @@ services:
       - ./backend/mosquitto/log/notice.log:/app/mosquitto/log/notice.log
       - ./backend:/app
     ports:
-      - 8000:8000
-      - 9001:9001
-      - 8883:8883
+      - 8001:8001
+      - 9002:9002
+      - 8884:8884
     depends_on:
-      - pgdb
-      - influxdb
+      - pgdb_facsec
 
 networks:
   default:
