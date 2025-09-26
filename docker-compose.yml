@@ -3,16 +3,13 @@ services:
     container_name: pgdb_facsec
     image: postgres
     restart: always
-    # set shared memory limit when using docker compose
-    shm_size: 1024mb
     ports:
       - 5433:5432
     # volumes:
-    #   - ./databases:/var/lib/postgresql/data
+      - ./databases/data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: pgsql_user
       POSTGRES_PASSWORD: pgsql_password
-      PGDATA: /var/lib/postgresql/data/pgdata
 
   backend_facsec:
     build:
@@ -33,6 +30,17 @@ services:
       - 8884:8884
     depends_on:
       - pgdb_facsec
+
+  frontend_facsec:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+    container_name: frontend_facsec
+    ports:
+      - "8081:80"
+    restart: always
+    volumes:
+      - ./frontend/nginx.conf:/etc/nginx/nginx.conf
 
 networks:
   default:
