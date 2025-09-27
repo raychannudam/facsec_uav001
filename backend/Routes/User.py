@@ -7,49 +7,50 @@ from Security.jwt import get_current_user
 
 router = APIRouter()
 
+def serialize_user(user: UserModel) -> UserResponseSchema:
+    return UserResponseSchema(
+        id=user.id,
+        email=user.email,
+        username=user.username,
+        fullname=user.fullname,
+        age=user.age,
+        gender=user.gender,
+        roles=[{"id": r.id, "name": r.name, "description": r.description, 
+                "created_at": str(r.created_at), "updated_at": str(r.updated_at)} 
+               for r in user.roles]
+    )
+
 @router.get("/users/me", response_model=UserResponseSchema)
 def get_me(current_user: UserModel = Depends(get_current_user)):
-    return UserResponseSchema(**current_user.__dict__)
+    return serialize_user(current_user)
 
 @router.post("/users/register", response_model=UserResponseSchema)
 def user_register(user: UserCreateSchema, db: Session = Depends(get_db)):
-    result = UserService.register(user, db)
-    if isinstance(result, dict) and "error" in result:
-        return result
-    return result
+    result = UserService.register(user.dict(), db)
+    return serialize_user(result)
 
-
-# Get all users
 @router.get("/users", response_model=list[UserResponseSchema])
 def get_users(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     users = UserService.get_users(db)
-    return [UserResponseSchema(**u.__dict__) for u in users]
+    return [serialize_user(u) for u in users]
 
-
-# Get user by ID
 @router.get("/users/{user_id}", response_model=UserResponseSchema)
 def get_user(user_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     user = UserService.get_user_by_id(user_id, db)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return UserResponseSchema(**user.__dict__)
+    return serialize_user(user)
 
-
-# Update user
 @router.put("/users/{user_id}", response_model=UserResponseSchema)
 def update_user(user_id: int, user_update: UserUpdateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    update_data = {k: v for k, v in user_update.dict().items() if v is not None}
-    user = UserService.update_user(user_id, update_data, db)
+    user = UserService.update_user(user_id, user_update.dict(), db)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return UserResponseSchema(**user.__dict__)
+    return serialize_user(user)
 
-
-# Delete user
 @router.delete("/users/{user_id}", response_model=UserResponseSchema)
 def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     user = UserService.delete_user(user_id, db)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    return UserResponseSchema(**user.__dict__)
-
+    return serialize_user(user)
