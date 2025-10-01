@@ -32,3 +32,15 @@ class StreamingClientResponseSchema(BaseModel):
     created_at: str = Field(..., description="Created timestamp")
     updated_at: str = Field(..., description="Updated timestamp")
     user: UserResponseSchema = Field(..., description="The user owning the streaming client")
+    
+class StreamingLoginSchema(BaseModel):
+    username: Optional[str] = Field(None, description="The username for the streaming client")
+    password: Optional[str] = Field(None, description="The password for the streaming client")
+    token: Optional[str] = Field(None, description="token from mediamtx")
+    ip: Optional[str] = Field(None, description="ip address of the client")
+    action: Optional[str] = Field(None, description="action of the client, e.g., publish, read, playback") 
+    path: Optional[str] = Field(None, description="path of the stream")
+    protocol: Optional[str] = Field(None, description="protocol used, e.g., rtsp, rtmp")
+    id: Optional[str] = Field(None, description="unique id for the session")
+    query: Optional[str] = Field(None, description="additional query parameters")
+    

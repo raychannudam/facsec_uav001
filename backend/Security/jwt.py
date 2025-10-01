@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 from jwt.exceptions import InvalidTokenError
 import jwt
 from pydantic import BaseModel
+from Schemas.StreamingClient import StreamingLoginSchema
 
 load_dotenv()
 
@@ -161,3 +162,14 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
     )
 
     return Token(access_token=new_access_token, refresh_token=new_refresh_token)
+
+@router.post("/streaming-login")
+def mediamtx_login(loginReq: StreamingLoginSchema = Depends(), db: Session = Depends(get_db)):
+    user = authenticate_user(loginReq.username, loginReq.password, db)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return {"status": "success"}
