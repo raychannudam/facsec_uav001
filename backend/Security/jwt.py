@@ -10,6 +10,7 @@ from jwt.exceptions import InvalidTokenError
 import jwt
 from pydantic import BaseModel
 from Schemas.StreamingClient import StreamingLoginSchema
+from fastapi import Form, Request
 
 load_dotenv()
 
@@ -164,8 +165,9 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
     return Token(access_token=new_access_token, refresh_token=new_refresh_token)
 
 @router.post("/streaming-login")
-def mediamtx_login(loginReq: StreamingLoginSchema = Depends(), db: Session = Depends(get_db)):
-    user = authenticate_user(loginReq.username, loginReq.password, db)
+def mediamtx_login(login_req: StreamingLoginSchema, db: Session = Depends(get_db)):
+    print("Received:", login_req.dict())
+    user = authenticate_user(login_req.user, login_req.password, db)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -173,3 +175,4 @@ def mediamtx_login(loginReq: StreamingLoginSchema = Depends(), db: Session = Dep
             headers={"WWW-Authenticate": "Bearer"},
         )
     return {"status": "success"}
+

@@ -10,8 +10,16 @@ from Routes.Uav import router as uav_router
 from Security.jwt import router as security_router
 from Security.jwt import require_roles
 from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # You can restrict later to e.g. ["http://localhost:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(user_router, prefix="/api/v1", tags=["users"])
 app.include_router(role_router, prefix="/api/v1", tags=["roles"], dependencies=[Depends(require_roles("admin"))])
 app.include_router(mqtt_client_router, prefix="/api/v1", tags=["mqtt_clients"])
