@@ -12,6 +12,7 @@ from Security.jwt import require_roles
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,

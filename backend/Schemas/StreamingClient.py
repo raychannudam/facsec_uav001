@@ -13,8 +13,6 @@ class StreamingClientCreateSchema(BaseModel):
 class StreamingClientUpdateSchema(BaseModel):
     name: Optional[str] = Field(None, description="The name of the streaming client")
     description: Optional[str] = Field(None, description="The description of the streaming client")
-    username: Optional[str] = Field(None, description="The username for the streaming client")
-    password: Optional[str] = Field(None, description="The password for the streaming client")
     config: Optional[Dict] = Field(None, description="Configuration for the streaming client")
     status: Optional[bool] = Field(None, description="The status of the streaming client")
 

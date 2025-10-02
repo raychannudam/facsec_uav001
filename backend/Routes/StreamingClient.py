@@ -191,3 +191,49 @@ def delete_streaming_client(client_id: int, db: Session = Depends(get_db), curre
             roles=roles
         )
     )
+
+@router.get("/streaming-clients/{client_id}/request-validation-code")
+async def request_validation_code(client_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    result = await StreamingClientService.request_validation_code(client_id, db)
+    if not result:
+        raise HTTPException(status_code=400, detail="Failed to send validation code")
+    return {"message": "Validation code sent to your email"}
+
+@router.put("/streaming-clients/{client_id}/update-password")
+def update_streaming_client_password(client_id: int, validation_code: str, new_password: str, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    result = StreamingClientService.update_streaming_client_password(client_id, validation_code, new_password, db)
+    if isinstance(result, dict) and "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    if not result:
+        raise HTTPException(status_code=404, detail="Streaming client not found or invalid validation code")
+    
+    user = result.user
+    roles = [RoleResponseSchema(
+        id=role.id,
+        name=role.name,
+        description=role.description,
+        created_at=str(role.created_at),
+        updated_at=str(role.updated_at)
+    ) for role in user.roles]
+    
+    return StreamingClientResponseSchema(
+        id=result.id,
+        user_id=result.user_id,
+        name=result.name,
+        description=result.description,
+        username=result.username,
+        password=result.password,
+        config=result.config,
+        status=result.status,
+        created_at=str(result.created_at),
+        updated_at=str(result.updated_at),
+        user=UserResponseSchema(
+            id=user.id,
+            email=user.email,
+            username=user.username,
+            fullname=user.fullname,
+            age=user.age,
+            gender=user.gender,
+            roles=roles
+        )
+    )

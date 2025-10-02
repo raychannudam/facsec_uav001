@@ -1,7 +1,10 @@
 from sqlalchemy.orm import Session
 from Models import StreamingClientModel, UserModel
 from Schemas.StreamingClient import StreamingClientCreateSchema
+from Services.Mail import MailService
 from passlib.context import CryptContext
+import random
+import string
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -19,6 +22,10 @@ class StreamingClientService:
         
         # Assign the current user's ID as the owner of the streaming client
         client_data["user_id"] = current_user.id
+        
+        # Assign random code to validation_code
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        client_data["validation_code"] = code
         
         new_client = StreamingClientModel(**client_data)
         db.add(new_client)
@@ -40,30 +47,53 @@ class StreamingClientService:
         if not client:
             return None
             
-        # Check if user_id exists if provided
-        if "user_id" in update_data and update_data["user_id"] is not None:
-            user = db.query(UserModel).filter(UserModel.id == update_data["user_id"]).first()
-            if not user:
-                return {"error": "User not found"}
-        
-        # Check if username is unique if provided
-        if "username" in update_data and update_data["username"] is not None:
-            existing_client = db.query(StreamingClientModel).filter(
-                StreamingClientModel.username == update_data["username"],
-                StreamingClientModel.id != client_id
-            ).first()
-            if existing_client:
-                return {"error": "Streaming client username already exists"}
-        
         # Update fields
         for key, value in update_data.items():
-            if key == "password" and value:
-                value = pwd_context.hash(value)
             setattr(client, key, value)
             
         db.commit()
         db.refresh(client)
         return client
+    
+    @staticmethod
+    def update_streaming_client_password(client_id: int, validation_code: str, new_password: str, db: Session):
+        client = db.query(StreamingClientModel).filter(StreamingClientModel.id == client_id).first()
+        if not client:
+            return None
+        
+        if client.validation_code != validation_code:
+            return None
+        
+        client.password = pwd_context.hash(new_password)
+        
+        # Generate new validation code after password change
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        client.validation_code = code
+        
+        db.commit()
+        db.refresh(client)
+        return client
+
+    @staticmethod
+    async def request_validation_code(client_id: int, db: Session):
+        client = db.query(StreamingClientModel).filter(StreamingClientModel.id == client_id).first()
+        
+        if not client:
+            return None
+        
+        email = client.user.email
+        
+        if not client.validation_code:
+            # Generate new validation code if not present
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            client.validation_code = code
+            db.commit()
+            db.refresh(client)
+            
+        # Send email with the validation code
+        await MailService.send_email(email, client.validation_code, subject="Your Email Validation Code")
+        
+        return True
 
     @staticmethod
     def delete_streaming_client(client_id: int, db: Session):
