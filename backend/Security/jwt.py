@@ -4,17 +4,23 @@ from fastapi import HTTPException, APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from Models import UserModel, get_db
+from Models import UserModel, get_db, StreamingClientModel, MqttClientModel
 from datetime import datetime, timedelta, timezone
 from jwt.exceptions import InvalidTokenError
 import jwt
 from pydantic import BaseModel
 from Schemas.StreamingClient import StreamingLoginSchema
 from fastapi import Form, Request
+from enum import Enum
 
 load_dotenv()
 
 router = APIRouter()
+
+class AUTH_SOURCE(str, Enum):
+    SYSTEM = "system"
+    MEDIAMTX = "mediamtx"
+    MOSQUITTO = "mosquitto"
 
 # Security and password hashing
 oauth2_scheme = OAuth2PasswordBearer(
@@ -47,13 +53,19 @@ def verify_password(plain_password, hashed_password):
         return False
 
 # Database user retrieval
-def get_user(username: str, db: Session):
-    return db.query(UserModel).filter(UserModel.username == username).first()
+def get_user(username: str, db: Session, source: AUTH_SOURCE):
+    if source == AUTH_SOURCE.SYSTEM:
+        return db.query(UserModel).filter(UserModel.username == username).first()
+    if source == AUTH_SOURCE.MEDIAMTX:
+        return db.query(StreamingClientModel).filter(StreamingClientModel.username == username, StreamingClientModel.status == True).first()
+    if source == AUTH_SOURCE.MOSQUITTO:
+        return db.query(MqttClientModel).filter(MqttClientModel.username == username, MqttClientModel.status == True).first()
+    return None
 
 # Authenticate user
-def authenticate_user(username: str, password: str, db: Session):
-    user = get_user(username, db)
-    if not user or not verify_password(password, user.password):
+def authenticate_user(username: str, password: str, db: Session, source: AUTH_SOURCE = AUTH_SOURCE.SYSTEM):
+    user = get_user(username, db, source)
+    if user is None or not verify_password(password, user.password):
         return False
     return user
 
