@@ -3,7 +3,6 @@ from typing import Optional, Dict
 from .User import UserResponseSchema
 
 class StreamingClientCreateSchema(BaseModel):
-    user_id: int = Field(..., description="The ID of the user owning the streaming client")
     name: str = Field(..., description="The name of the streaming client")
     description: Optional[str] = Field(None, description="The description of the streaming client")
     username: str = Field(..., description="The username for the streaming client")
@@ -12,7 +11,6 @@ class StreamingClientCreateSchema(BaseModel):
     status: bool = Field(..., description="The status of the streaming client")
 
 class StreamingClientUpdateSchema(BaseModel):
-    user_id: Optional[int] = Field(None, description="The ID of the user owning the streaming client")
     name: Optional[str] = Field(None, description="The name of the streaming client")
     description: Optional[str] = Field(None, description="The description of the streaming client")
     username: Optional[str] = Field(None, description="The username for the streaming client")

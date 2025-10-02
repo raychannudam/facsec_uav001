@@ -8,12 +8,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class StreamingClientService:
     
     @staticmethod
-    def create_streaming_client(client: StreamingClientCreateSchema, db: Session):
-        # Check if user exists
-        user = db.query(UserModel).filter(UserModel.id == client.user_id).first()
-        if not user:
-            return {"error": "User not found"}
-        
+    def create_streaming_client(client: StreamingClientCreateSchema, db: Session, current_user: UserModel):    
         # Check if username already exists
         if db.query(StreamingClientModel).filter(StreamingClientModel.username == client.username).first():
             return {"error": "Streaming client username already exists"}
@@ -21,6 +16,9 @@ class StreamingClientService:
         # Hash the password
         client_data = client.dict()
         client_data["password"] = pwd_context.hash(client_data["password"])
+        
+        # Assign the current user's ID as the owner of the streaming client
+        client_data["user_id"] = current_user.id
         
         new_client = StreamingClientModel(**client_data)
         db.add(new_client)

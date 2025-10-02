@@ -12,7 +12,7 @@ router = APIRouter()
 
 @router.post("/streaming-clients", response_model=StreamingClientResponseSchema)
 def create_streaming_client(client: StreamingClientCreateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    result = StreamingClientService.create_streaming_client(client, db)
+    result = StreamingClientService.create_streaming_client(client, db, current_user)
     if isinstance(result, dict) and "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
     
