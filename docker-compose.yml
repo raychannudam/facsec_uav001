@@ -44,7 +44,7 @@ services:
 
   mediamtx:
     image: bluenviron/mediamtx
-    container_name: mediamtx_
+    container_name: mediamtx_facsec
     restart: always
     ports:
       - 8554:8554
