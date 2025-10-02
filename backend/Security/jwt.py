@@ -178,7 +178,7 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
 
 @router.post("/streaming-login")
 def mediamtx_login(login_req: StreamingLoginSchema, db: Session = Depends(get_db)):
-    user = authenticate_user(login_req.user, login_req.password, db)
+    user = authenticate_user(login_req.user, login_req.password, db, source=AUTH_SOURCE.MEDIAMTX)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
