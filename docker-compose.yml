@@ -25,9 +25,9 @@ services:
       - ./backend/mosquitto/log/notice.log:/app/mosquitto/log/notice.log
       - ./backend:/app
     ports:
-      - 8001:8001
-      - 9002:9002
-      - 8884:8884
+      - 8001:8000
+      - 9002:9001
+      - 8884:8883
     depends_on:
       - pgdb_facsec
 
