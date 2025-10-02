@@ -44,7 +44,7 @@ services:
 
   mediamtx:
     image: bluenviron/mediamtx
-    container_name: mediamtx
+    container_name: mediamtx_
     restart: always
     ports:
       - 8554:8554
@@ -55,6 +55,8 @@ services:
       - 8189:8189/udp
     volumes:
       - ./mediamtx/mediamtx.yml:/mediamtx.yml:ro
+    depends_on:
+      - backend_facsec
 
 networks:
   default:
