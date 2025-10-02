@@ -178,7 +178,6 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
 
 @router.post("/streaming-login")
 def mediamtx_login(login_req: StreamingLoginSchema, db: Session = Depends(get_db)):
-    print("Received:", login_req.dict())
     user = authenticate_user(login_req.user, login_req.password, db)
     if not user:
         raise HTTPException(

@@ -98,7 +98,7 @@ authInternalUsers:
 # }
 # If the response code is 20x, authentication is accepted, otherwise
 # it is discarded.
-authHTTPAddress: http://backend_facsec:8001/api/v1/streaming-login
+authHTTPAddress: http://backend_facsec:8000/api/v1/streaming-login
 # Actions to exclude from HTTP-based authentication.
 # Format is the same as the one of user permissions.
 authHTTPExclude:
