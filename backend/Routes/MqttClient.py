@@ -161,13 +161,14 @@ def update_mqtt_client(mqtt_client_id: int, mqtt_client_update: MqttClientUpdate
         )
     )
 
-# Delete MQTT Client
 @router.delete("/mqtt-clients/{mqtt_client_id}", response_model=MqttClientResponseSchema)
 def delete_mqtt_client(mqtt_client_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    mqtt_client = MqttClientService.delete_mqtt_client(mqtt_client_id, db)
+    mqtt_client = db.query(MqttClientModel).filter(MqttClientModel.id == mqtt_client_id).first()
     if not mqtt_client:
         raise HTTPException(status_code=404, detail="MQTT Client not found")
-    return MqttClientResponseSchema(
+    
+    # Build response BEFORE deletion
+    response = MqttClientResponseSchema(
         id=mqtt_client.id,
         user_id=mqtt_client.user_id,
         name=mqtt_client.name,
@@ -198,3 +199,7 @@ def delete_mqtt_client(mqtt_client_id: int, db: Session = Depends(get_db), curre
             ]
         )
     )
+
+    # Now delete the client
+    MqttClientService.delete_mqtt_client(mqtt_client_id, db)
+    return response
