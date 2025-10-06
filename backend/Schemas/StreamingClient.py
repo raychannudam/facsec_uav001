@@ -5,8 +5,8 @@ from .User import UserResponseSchema
 class StreamingClientCreateSchema(BaseModel):
     name: str = Field(..., description="The name of the streaming client")
     description: Optional[str] = Field(None, description="The description of the streaming client")
-    username: str = Field(..., description="The username for the streaming client")
-    password: str = Field(..., description="The password for the streaming client")
+    username: Optional[str] = Field(None, description="The username for the streaming client")
+    password: Optional[str] = Field(None, description="The password for the streaming client")
     config: Dict = Field(..., description="Configuration for the streaming client")
     status: bool = Field(..., description="The status of the streaming client")
 
@@ -21,8 +21,6 @@ class StreamingClientResponseSchema(BaseModel):
     user_id: int = Field(..., description="The ID of the user owning the streaming client")
     name: str = Field(..., description="The name of the streaming client")
     description: Optional[str] = Field(None, description="The description of the streaming client")
-    username: str = Field(..., description="The username for the streaming client")
-    password: str = Field(..., description="The password for the streaming client")
     config: Dict = Field(..., description="Configuration for the streaming client")
     status: bool = Field(..., description="The status of the streaming client")
     created_at: str = Field(..., description="Created timestamp")

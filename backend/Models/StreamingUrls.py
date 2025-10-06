@@ -8,7 +8,7 @@ class StreamingUrlModel(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     streaming_client_id = Column(Integer, ForeignKey("streaming_clients.id", ondelete="CASCADE"), nullable=False)
-    name = Column(String, nullable=False, index=True)
+    name = Column(String, nullable=False, index=True, unique=True)
     description = Column(Text)
     config = Column(JSON, nullable=False)
     status = Column(Boolean, nullable=False)

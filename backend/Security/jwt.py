@@ -4,7 +4,7 @@ from fastapi import HTTPException, APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from Models import UserModel, get_db, StreamingClientModel, MqttClientModel
+from Models import UserModel, get_db, StreamingClientModel, MqttClientModel, StreamingUrlModel
 from datetime import datetime, timedelta, timezone
 from jwt.exceptions import InvalidTokenError
 import jwt
@@ -178,12 +178,36 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
 
 @router.post("/streaming-login")
 def mediamtx_login(login_req: StreamingLoginSchema, db: Session = Depends(get_db)):
-    user = authenticate_user(login_req.user, login_req.password, db, source=AUTH_SOURCE.MEDIAMTX)
-    if not user:
+    streaming_client = authenticate_user(login_req.user, login_req.password, db, source=AUTH_SOURCE.MEDIAMTX)
+    path = login_req.path if login_req.path else ""
+    action = login_req.action if login_req.action else ""
+    if path == "" or action == "":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Path and action are required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not streaming_client:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+    # Check if the user has access to the requested path
+    streaming_url = db.query(StreamingUrlModel).filter(StreamingUrlModel.streaming_client_id == streaming_client.id, StreamingUrlModel.status == True).first()
+    if not streaming_url:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No active streaming URLs found for this client",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if path != streaming_url.name:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Access to the requested path is forbidden",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
     return {"status": "success"}
 

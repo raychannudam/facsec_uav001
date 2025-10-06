@@ -16,9 +16,13 @@ class StreamingClientService:
         if db.query(StreamingClientModel).filter(StreamingClientModel.username == client.username).first():
             return {"error": "Streaming client username already exists"}
         
-        # Hash the password
         client_data = client.dict()
-        client_data["password"] = pwd_context.hash(client_data["password"])
+        if client_data["username"] is not None and client_data["password"] is not None:
+            # Hash the password before storing
+            client_data["password"] = pwd_context.hash(client_data["password"])
+        else:
+            client_data["username"] = current_user.username
+            client_data["password"] = current_user.password
         
         # Assign the current user's ID as the owner of the streaming client
         client_data["user_id"] = current_user.id
