@@ -179,8 +179,10 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
 @router.post("/streaming-login")
 def mediamtx_login(login_req: StreamingLoginSchema, db: Session = Depends(get_db)):
     streaming_client = authenticate_user(login_req.user, login_req.password, db, source=AUTH_SOURCE.MEDIAMTX)
+    action = login_req.action if login_req.action else ""
     path = login_req.path if login_req.path else ""
     action = login_req.action if login_req.action else ""
+    protocol = login_req.protocol if login_req.protocol else ""
     if path == "" or action == "":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -205,7 +207,20 @@ def mediamtx_login(login_req: StreamingLoginSchema, db: Session = Depends(get_db
     if path != streaming_url.name:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Access to the requested path is forbidden",
+            detail=f"Access to the {path} path is forbidden",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if protocol not in streaming_url.config["protocols"]:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Protocol '{protocol}' is not allowed for this path",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if action not in streaming_client.config["actions"]:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Action '{action}' is not permitted",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
