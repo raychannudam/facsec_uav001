@@ -28,3 +28,5 @@ class UserResponseSchema(BaseModel):
     age: int = Field(..., description="The age of the user")
     gender: str = Field(..., description="The gender of the user")
     roles: List[RoleResponseSchema] = Field(..., description="List of roles assigned to the user")
+    class Config:
+        orm_mode = True

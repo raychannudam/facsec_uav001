@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, Dict
 from .User import UserResponseSchema
+from datetime import datetime
 
 class StreamingClientCreateSchema(BaseModel):
     name: str = Field(..., description="The name of the streaming client")
@@ -18,14 +19,15 @@ class StreamingClientUpdateSchema(BaseModel):
 
 class StreamingClientResponseSchema(BaseModel):
     id: int = Field(..., description="The ID of the streaming client")
-    user_id: int = Field(..., description="The ID of the user owning the streaming client")
     name: str = Field(..., description="The name of the streaming client")
     description: Optional[str] = Field(None, description="The description of the streaming client")
     config: Dict = Field(..., description="Configuration for the streaming client")
     status: bool = Field(..., description="The status of the streaming client")
-    created_at: str = Field(..., description="Created timestamp")
-    updated_at: str = Field(..., description="Updated timestamp")
+    created_at: datetime = Field(..., description="Created timestamp")
+    updated_at: datetime = Field(..., description="Updated timestamp")
     user: UserResponseSchema = Field(..., description="The user owning the streaming client")
+    class Config:
+        orm_mode = True
     
 class StreamingLoginSchema(BaseModel):
     user: Optional[str] = Field("", description="The username for the streaming client")
