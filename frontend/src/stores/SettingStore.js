@@ -45,6 +45,21 @@ export const useSettingStore = defineStore("setting", {
         message: message,
         data: data
       }
+    },
+    async deleteMqttClient(id){
+      let message = ""
+      let status = ""
+      await api.delete(`/api/v1/mqtt-clients/${id}`).then(res=>{
+        status = "success";
+        message = "Successfully delete a MQTT client!";
+      }).catch(err=>{
+        status = "fail";
+        message = err.response?.data?.detail || "Failed to get all MQTT clients!"
+      });
+      return {
+        status: status,
+        message: message
+      }
     }
   },
 });

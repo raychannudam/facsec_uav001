@@ -7,8 +7,11 @@
             <MqttClientCreateFormComponent @onSubmit="onMqttClientCreateFormSubmit"
                 id="mqtt_client_confirm_create_popup"></MqttClientCreateFormComponent>
             <hr class="border-0.5 border-gray-200">
-            <MqttClientListComponent id="mqtt_client_list" :mqttClientList="allMqttClients"
+            <MqttClientListComponent @onCompletedDeleteMqttClient="triggerCompletedDeleteMqttClient" id="mqtt_client_list" :mqttClientList="allMqttClients"
                 v-if="allMqttClients.length > 0"></MqttClientListComponent>
+            <div v-else>
+                <p class="text-center italic">There is no available MQTT Client. Please create a new client!</p>
+            </div>
         </div>
     </div>
 </template>
@@ -59,6 +62,9 @@ export default {
             if (res.status == "success") {
                 this.allMqttClients = res.data
             }
+        },
+        async triggerCompletedDeleteMqttClient(){
+            await this.getAllMqttClients();
         }
     }
 }

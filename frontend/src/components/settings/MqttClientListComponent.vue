@@ -80,13 +80,14 @@
               </span>
               <p>Edit client</p>
             </button>
-            <button type="button"
+            <button type="button" @click="displayMqttClientDeleteComfirmPopup(data.id)" :data-modal-target="'delete_mqtt_client_confirm_popup'+data.id" :data-modal-toggle="'delete_mqtt_client_confirm_popup'+data.id"
               class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 rounded-lg text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
               <span class="material-symbols-outlined">
                 delete_forever
               </span>
               <p>Delete client</p>
             </button>
+            <ConfirmPopupModelComponent :model_id="'delete_mqtt_client_confirm_popup'+data.id"></ConfirmPopupModelComponent>
           </div>
           <div>
             <hr class="border-0.5 border-dashed">
@@ -111,7 +112,7 @@
                   placeholder="Search path, payload, config ..." required />
                 <button type="submit"
                   class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
-              </div>
+                </div>
             </form>
             </div>
           </div>
@@ -126,23 +127,65 @@
 <script>
 import MqttTopicTableComponent from './MqttTopicTableComponent.vue';
 import MqttTopicCreateFormComponent from './MqttTopicCreateFormComponent.vue';
+import ConfirmPopupModelComponent from '../utils/ConfirmPopupModelComponent.vue';
+import { useAppStore } from '@/stores/AppStore';
+import { useSettingStore } from '@/stores/SettingStore';
 import { initFlowbite } from 'flowbite';
+import { storeToRefs } from 'pinia';
 export default {
   name: "MqttClientListComponent",
   props: ['mqttClientList', 'id'],
   components: {
     MqttTopicTableComponent,
-    MqttTopicCreateFormComponent
+    MqttTopicCreateFormComponent,
+    ConfirmPopupModelComponent
+  },
+  setup(){
+    const appStore = useAppStore();
+    const settingStore = useSettingStore();
+    const {popupFeedback} = storeToRefs(appStore);
+    return {
+      appStore,
+      settingStore,
+      popupFeedback
+    }
   },
   data() {
     return {
-
+      toDeleteMqttClientId: undefined
     }
   },
   mounted() {
     initFlowbite();
   },
   methods: {
-  }
+    displayMqttClientDeleteComfirmPopup(id){
+      this.toDeleteMqttClientId = id
+      this.appStore.displayConfirmPopupModel("Are you sure to delete this MQTT client?", this.deleteMqttClient)
+    },
+    async deleteMqttClient(){
+      if (this.toDeleteMqttClientId != undefined){
+        this.appStore.displayPageLoading(true)
+        let res = await this.settingStore.deleteMqttClient(this.toDeleteMqttClientId)
+        this.appStore.displayPageLoading(false)
+        this.appStore.displayRightToast(res.status, res.message);
+        this.$emit("onCompletedDeleteMqttClient")
+      }
+      
+    }
+  },
+  watch: {
+        popupFeedback: {
+            handler(newValue, oldValue) {
+                if (newValue === true) {
+                    this.appStore.displayPageLoading(true)
+                    setTimeout(() => {
+                        this.appStore.displayPageLoading(false)
+                        this.appStore.popupCallBack()
+                    }, 1000)
+                }
+            },
+        },
+    }
 }
 </script>
