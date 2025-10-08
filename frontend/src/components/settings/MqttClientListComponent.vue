@@ -3,8 +3,7 @@
     <div v-for="data, index in mqttClientList">
       <h2 :id="'accordion-collapse-heading-' + index">
         <button v-if="index == 0" type="button"
-          class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
-          :class="index == 0, 'rounded-t-xl', 'rounded-t-none'"
+          class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 rounded-t-xl border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
           :data-accordion-target="'#accordion-collapse-body-' + index" aria-expanded="true"
           :aria-controls="'accordion-collapse-body-' + index">
           <div class="flex space-x-3 items-center justify-evenly flex-1">
@@ -25,8 +24,7 @@
           </svg>
         </button>
         <button v-else type="button"
-          class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-1 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
-          :class="index == 0, 'rounded-t-xl', 'rounded-t-none'"
+          class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-1 rounded-t-none border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
           :data-accordion-target="'#accordion-collapse-body-' + index" aria-expanded="true"
           :aria-controls="'accordion-collapse-body-' + index">
           <div class="flex space-x-3 items-center justify-evenly flex-1">

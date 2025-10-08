@@ -4,9 +4,11 @@
             <h1 class="text-2xl font-bold">MQTT Client </h1>
             <p class="text-gray-600 dark:text-gray-400">Manage your data communication from sensors on drone with your
                 application</p>
-            <MqttClientCreateFormComponent @onSubmit="onMqttClientCreateFormSubmit" id="mqtt_client_confirm_create_popup"></MqttClientCreateFormComponent>
+            <MqttClientCreateFormComponent @onSubmit="onMqttClientCreateFormSubmit"
+                id="mqtt_client_confirm_create_popup"></MqttClientCreateFormComponent>
             <hr class="border-0.5 border-gray-200">
-            <MqttClientListComponent id="mqtt_client_list" :mqttClientList="allMqttClients" v-if="allMqttClients.length > 0"></MqttClientListComponent>
+            <MqttClientListComponent id="mqtt_client_list" :mqttClientList="allMqttClients"
+                v-if="allMqttClients.length > 0"></MqttClientListComponent>
         </div>
     </div>
 </template>
@@ -19,7 +21,7 @@ import { useAppStore } from '@/stores/AppStore';
 
 export default {
     name: "SettingsIndexView",
-    setup(){
+    setup() {
         const settingStore = useSettingStore();
         const appStore = useAppStore();
         return {
@@ -38,21 +40,25 @@ export default {
     },
     async mounted() {
         initFlowbite();
-        this.appStore.displayPageLoading(true)
-        let res = await this.settingStore.getAllMqttClients();
-        this.appStore.displayPageLoading(false)
-        this.appStore.displayRightToast(res.status, res.message);
-        if (res.status == "success"){
-            this.allMqttClients = res.data
-        }
+        await this.getAllMqttClients();
 
     },
     methods: {
-        async onMqttClientCreateFormSubmit(data){
+        async onMqttClientCreateFormSubmit(data) {
             this.appStore.displayPageLoading(true)
             let res = await this.settingStore.createMqttClient(data);
             this.appStore.displayPageLoading(false);
             this.appStore.displayRightToast(res.status, res.message);
+            await this.getAllMqttClients();
+        },
+        async getAllMqttClients() {
+            this.appStore.displayPageLoading(true)
+            let res = await this.settingStore.getAllMqttClients();
+            this.appStore.displayPageLoading(false)
+            this.appStore.displayRightToast(res.status, res.message);
+            if (res.status == "success") {
+                this.allMqttClients = res.data
+            }
         }
     }
 }
