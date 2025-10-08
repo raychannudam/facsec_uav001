@@ -4,3 +4,12 @@ user admin
 topic read #user test
 topic readwrite #
 
+user test1
+topic readwrite #
+
+user test2
+topic readwrite #
+
+user test3
+topic readwrite #
+
