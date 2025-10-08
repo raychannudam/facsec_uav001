@@ -1,4 +1,6 @@
 pattern readwrite factory.io/%u/#
 
 user admin
-topic read #
+topic read #user test
+topic readwrite #
+

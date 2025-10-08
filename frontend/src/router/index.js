@@ -1,27 +1,71 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import SignInView from '@/views/auth/SignInView.vue'
+import LayoutView from '@/LayoutView.vue'
+import ControllerIndexView from '@/views/controller/ControllerIndexView.vue'
+import DronesIndexView from '@/views/drones/DronesIndexView.vue'
+import SettingsIndexView from '@/views/settings/SettingsIndexView.vue'
+import AccountIndexView from '@/views/account/AccountIndexView.vue'
 
 const routes = [
   {
-    path: '/',
-    name: 'home',
-    component: HomeView
+    path: "/",
+    redirect: "/controller"
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: function () {
-      return import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-    }
-  }
+    path: "/",
+    name: "layout",
+    component: LayoutView,
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "/controller",
+        name: "controller",
+        component: ControllerIndexView,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "/drones",
+        name: "drones",
+        component: DronesIndexView,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "/settings",
+        name: "settings",
+        component: SettingsIndexView,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "/account",
+        name: "account",
+        component: AccountIndexView,
+        meta: { requiresAuth: true }
+      }
+    ]
+  },
+  {
+    path: "/sign-in",
+    name: "sign-in",
+    component: SignInView
+  },
 ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
 })
+
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = localStorage.getItem("access_token"); 
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next({ name: 'sign-in' });
+  } else if (to.name === 'sign-in' && isAuthenticated) {
+    next({ name: 'controller' }); 
+  } else {
+    next();
+  }
+});
+
 
 export default router
