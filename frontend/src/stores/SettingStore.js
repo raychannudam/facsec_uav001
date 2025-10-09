@@ -166,6 +166,21 @@ export const useSettingStore = defineStore("setting", {
           status: status,
           message: message,
       };
-    }
+    },
+    async deleteStreamingClient(id){
+      let message = ""
+      let status = ""
+      await api.delete(`/api/v1/streaming-clients/${id}`).then(res=>{
+        status = "success";
+        message = "Successfully delete a streaming client!";
+      }).catch(err=>{
+        status = "fail";
+        message = err.response?.data?.detail || "Failed to delete this streaming client!"
+      });
+      return {
+        status: status,
+        message: message
+      }
+    },
   },
 });

@@ -74,13 +74,15 @@
               </span>
               <p>Edit client</p>
             </button>
-            <button type="button"
-              class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 rounded-lg text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
+            <button type="button" :data-modal-target="'delete_streaming_client_confirm_popup'+data.id"
+              :data-modal-toggle="'delete_streaming_client_confirm_popup'+data.id" @click="displayStreamingClientDeleteConfirmPopup(data.id)"
+            class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 rounded-lg text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
               <span class="material-symbols-outlined">
                 delete_forever
               </span>
               <p>Delete client</p>
             </button>
+            <ConfirmPopupModelComponent :model_id="'delete_streaming_client_confirm_popup'+data.id"></ConfirmPopupModelComponent>
           </div>
           <div>
             <hr class="border-0.5 border-dashed">
@@ -96,6 +98,7 @@ import { useAppStore } from '@/stores/AppStore';
 import { useSettingStore } from '@/stores/SettingStore';
 import { initFlowbite } from 'flowbite';
 import { storeToRefs } from 'pinia';
+import ConfirmPopupModelComponent from '../utils/ConfirmPopupModelComponent.vue';
 export default {
   name: "StreamingClientListComponent",
   // props: ['streamingClientList', 'id'],
@@ -107,7 +110,7 @@ export default {
     id: String
   },
   components: {
-
+    ConfirmPopupModelComponent
   },
   setup() {
     const appStore = useAppStore();
@@ -121,13 +124,26 @@ export default {
   },
   data() {
     return {
+      toDeleteStreamingClient: undefined
     }
   },
   async mounted() {
     initFlowbite();
   },
   methods: {
-
+    displayStreamingClientDeleteConfirmPopup(id){
+      this.toDeleteStreamingClient = id
+      this.appStore.displayConfirmPopupModel("Are you sure to delete this client?", this.deleteStreamingClient)
+    },
+    async deleteStreamingClient(){
+      if (this.toDeleteStreamingClient != undefined){
+        this.appStore.displayPageLoading(true)
+        let res = await this.settingStore.deleteStreamingClient(this.toDeleteStreamingClient)
+        this.appStore.displayPageLoading(false)
+        this.appStore.displayRightToast(res.status, res.message);
+        this.$emit("onCompletedDeleteStreamingClient")
+      }
+    }
   },
   watch: {
     popupFeedback: {

@@ -31,7 +31,7 @@
             <StreamingClientCreateFormComponent @onSubmit="onStreamingClientCreateFormSubmit"
                 id="streaming_client_confirm_create_popup"></StreamingClientCreateFormComponent>
             <hr class="border-0.5 border-gray-200">
-            <StreamingClientListComponent :streamingClientList="allStreamingClients"  v-if="allStreamingClients.length > 0"></StreamingClientListComponent>
+            <StreamingClientListComponent @onCompletedDeleteStreamingClient="triggerCompletedDeleteStreamingClient" :streamingClientList="allStreamingClients"  v-if="allStreamingClients.length > 0"></StreamingClientListComponent>
             <div v-else>
                 <p class="text-center italic">There is no available Streaming Client. Please create a new client!</p>
             </div>
@@ -112,6 +112,9 @@ export default {
             let res = await this.settingStore.createStreamingClient(data);
             this.appStore.displayPageLoading(false);
             this.appStore.displayRightToast(res.status, res.message);
+            await this.getAllStreamingClients();
+        },
+        async triggerCompletedDeleteStreamingClient(){
             await this.getAllStreamingClients();
         }
     }
