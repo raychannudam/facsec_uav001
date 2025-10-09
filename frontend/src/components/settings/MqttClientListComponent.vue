@@ -73,51 +73,57 @@
               </span>
               <p>Reset password</p>
             </button>
-            <button type="button"
+            <button type="button" :data-modal-target="'popup-modal-detail' + data.id"
+              :data-modal-toggle="'popup-modal-detail' + data.id"
               class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 rounded-lg text-center dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:focus:ring-yellow-800">
               <span class="material-symbols-outlined">
                 edit_note
               </span>
               <p>Edit client</p>
             </button>
-            <button type="button" @click="displayMqttClientDeleteComfirmPopup(data.id)" :data-modal-target="'delete_mqtt_client_confirm_popup'+data.id" :data-modal-toggle="'delete_mqtt_client_confirm_popup'+data.id"
+            <button type="button" @click="displayMqttClientDeleteComfirmPopup(data.id)"
+              :data-modal-target="'delete_mqtt_client_confirm_popup' + data.id"
+              :data-modal-toggle="'delete_mqtt_client_confirm_popup' + data.id"
               class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 rounded-lg text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
               <span class="material-symbols-outlined">
                 delete_forever
               </span>
               <p>Delete client</p>
             </button>
-            <ConfirmPopupModelComponent :model_id="'delete_mqtt_client_confirm_popup'+data.id"></ConfirmPopupModelComponent>
+            <MqtqClientUpdateComponent v-if="data" :data="data" @onClose="mqttClientEditModalClosed"></MqtqClientUpdateComponent>
+            <ConfirmPopupModelComponent :model_id="'delete_mqtt_client_confirm_popup' + data.id">
+            </ConfirmPopupModelComponent>
           </div>
           <div>
             <hr class="border-0.5 border-dashed">
           </div>
           <!-- Topic Info -->
           <div class="flex items-center justify-start space-x-3 ">
-            <MqttTopicCreateFormComponent class=""></MqttTopicCreateFormComponent>
+            <MqttTopicCreateFormComponent :mqttClientData="data" @onSubmit="createMqttTopic">
+            </MqttTopicCreateFormComponent>
             <div class="flex-1 flex justify-end">
               <form class="max-w-md w-full">
-              <label for="default-search"
-                class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                  <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                  </svg>
+                <label for="mqttTopicQuery"
+                  class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                <div class="relative">
+                  <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                    </svg>
+                  </div>
+                  <input type="search" id="mqttTopicQuery" v-model="mqttTopicQuery"
+                    class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="Search path, payload, config ..." required />
+                  <button type="submit"
+                    class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
                 </div>
-                <input type="search" id="default-search"
-                  class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Search path, payload, config ..." required />
-                <button type="submit"
-                  class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search</button>
-                </div>
-            </form>
+              </form>
             </div>
           </div>
           <div>
-            <MqttTopicTableComponent></MqttTopicTableComponent>
+            <MqttTopicTableComponent :allMqttTopic="allMqttTopic[data.id]"></MqttTopicTableComponent>
           </div>
         </div>
       </div>
@@ -128,22 +134,31 @@
 import MqttTopicTableComponent from './MqttTopicTableComponent.vue';
 import MqttTopicCreateFormComponent from './MqttTopicCreateFormComponent.vue';
 import ConfirmPopupModelComponent from '../utils/ConfirmPopupModelComponent.vue';
+import MqtqClientUpdateComponent from '@/components/settings/MqttClientUpdateComponent.vue';
 import { useAppStore } from '@/stores/AppStore';
 import { useSettingStore } from '@/stores/SettingStore';
 import { initFlowbite } from 'flowbite';
 import { storeToRefs } from 'pinia';
 export default {
   name: "MqttClientListComponent",
-  props: ['mqttClientList', 'id'],
+  // props: ['mqttClientList', 'id'],
+  props: {
+    mqttClientList: {
+      type: Array,
+      default: []
+    },
+    id: String
+  },
   components: {
     MqttTopicTableComponent,
     MqttTopicCreateFormComponent,
-    ConfirmPopupModelComponent
+    ConfirmPopupModelComponent,
+    MqtqClientUpdateComponent,
   },
-  setup(){
+  setup() {
     const appStore = useAppStore();
     const settingStore = useSettingStore();
-    const {popupFeedback} = storeToRefs(appStore);
+    const { popupFeedback } = storeToRefs(appStore);
     return {
       appStore,
       settingStore,
@@ -152,40 +167,60 @@ export default {
   },
   data() {
     return {
-      toDeleteMqttClientId: undefined
+      toDeleteMqttClientId: undefined,
+      allMqttTopic: {},
+      mqttTopicQuery: ""
     }
   },
-  mounted() {
+  async mounted() {
     initFlowbite();
+    await this.getAllMqttTopic();
   },
   methods: {
-    displayMqttClientDeleteComfirmPopup(id){
+    displayMqttClientDeleteComfirmPopup(id) {
       this.toDeleteMqttClientId = id
       this.appStore.displayConfirmPopupModel("Are you sure to delete this MQTT client?", this.deleteMqttClient)
     },
-    async deleteMqttClient(){
-      if (this.toDeleteMqttClientId != undefined){
+    async deleteMqttClient() {
+      if (this.toDeleteMqttClientId != undefined) {
         this.appStore.displayPageLoading(true)
         let res = await this.settingStore.deleteMqttClient(this.toDeleteMqttClientId)
         this.appStore.displayPageLoading(false)
         this.appStore.displayRightToast(res.status, res.message);
         this.$emit("onCompletedDeleteMqttClient")
       }
-      
+    },
+    async mqttClientEditModalClosed() {
+      this.$emit("onMqttClientEditModalClose")
+    },
+    async getAllMqttTopic() {
+      this.mqttClientList.forEach(async item => {
+        let res = await this.settingStore.getAllMqttTopicByMqttClientId(item.id)
+        if (res.status == "success") {
+          this.allMqttTopic[item.id] = res.data
+        }
+      })
+    },
+    async createMqttTopic(data) {
+      this.appStore.displayPageLoading(true);
+      let res = await this.settingStore.createMqttTopic(data);
+      this.appStore.displayPageLoading(false);
+      this.appStore.displayRightToast(res.status, res.message);
+      await this.getAllMqttTopic();
     }
   },
   watch: {
-        popupFeedback: {
-            handler(newValue, oldValue) {
-                if (newValue === true) {
-                    this.appStore.displayPageLoading(true)
-                    setTimeout(() => {
-                        this.appStore.displayPageLoading(false)
-                        this.appStore.popupCallBack()
-                    }, 1000)
-                }
-            },
-        },
-    }
+    popupFeedback: {
+      handler(newValue, oldValue) {
+        if (newValue === true) {
+          this.appStore.displayPageLoading(true)
+          setTimeout(() => {
+            this.appStore.displayPageLoading(false)
+            this.appStore.popupCallBack()
+          }, 1000)
+        }
+      },
+    },
+  }
 }
 </script>

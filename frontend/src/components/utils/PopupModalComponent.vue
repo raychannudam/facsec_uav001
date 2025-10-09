@@ -10,8 +10,8 @@
 
     <!-- Main modal -->
     <div :id="id" tabindex="-1" aria-hidden="true" @click.self="emitClose" @keydown.esc="emitClose"
-        class="hidden bg-black/80  overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-40 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-        <div class="relative p-4 w-full max-w-md max-h-full">
+        class="hidden bg-black/50  overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-lg max-h-full">
             <!-- Modal content -->
             <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
                 <!-- Modal header -->
@@ -49,10 +49,16 @@
 <script>
 export default {
     name: "PopupModalComponent",
-    props: ['id'],
+    props: {
+        id: String,
+        isEditingProp:{
+            type: Boolean,
+            default: true
+        }
+    },
     data() {
         return {
-            isEditing: false
+            isEditing: this.isEditingProp
         }
     },
     methods: {
@@ -66,8 +72,8 @@ export default {
         },
         emitClose() {
             this.$emit('onClose', this.id);
-            this.isEditing = false;
+            this.isEditing = true;
         }
-    }
+    },
 }
 </script>

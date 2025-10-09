@@ -1,6 +1,6 @@
 <template>
     <div v-if="appStore.isDisplayRightToast" id="toast-bottom-right"
-        class="fixed flex items-center justify-end w-full max-w-xl p-4 space-x-4 text-gray-50 divide-x rtl:divide-x-reverse rounded-lg right-5 bottom-5 dark:text-gray-400"
+        class="fixed z-50 flex items-center justify-end w-full max-w-xl p-4 space-x-4 text-gray-50 divide-x rtl:divide-x-reverse rounded-lg right-5 bottom-5 dark:text-gray-400"
         role="alert">
         <div v-if="status == 'success'" id="toast-success"
             class="flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800"

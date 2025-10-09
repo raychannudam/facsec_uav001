@@ -32,9 +32,6 @@
                 class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Client
                 Password *</label>
         </div>
-        <div>
-             <!-- <JsonEditorVue class="jse-theme-dark" mode="text" mainMenuBar="false" navigationBar="false" statusBar="false"/> -->
-        </div>
         <button type="submit"
             class="px-5 py-3 text-base font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add
             new client</button>
@@ -44,14 +41,14 @@
 </template>
 <script>
 import { initFlowbite } from 'flowbite';
-import JsonEditorVue from 'json-editor-vue'
+// import JsonEditorVue from 'json-editor-vue'
 import 'vanilla-jsoneditor/themes/jse-theme-dark.css'
 
 export default {
     name: "MqttClientCreateFormComponent",
     props: ["id"],
     components: {
-        JsonEditorVue
+        // JsonEditorVue
     },
     data() {
         return {
