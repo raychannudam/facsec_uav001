@@ -59,8 +59,8 @@ def create_mqtt_topic(mqtt_topic: MqttTopicCreateSchema, db: Session = Depends(g
 
 # Get all MQTT Topics
 @router.get("/mqtt-topics", response_model=list[MqttTopicResponseSchema])
-def get_mqtt_topics(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    mqtt_topics = MqttTopicService.get_mqtt_topics(db)
+def get_mqtt_topics(mqtt_client_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    mqtt_topics = MqttTopicService.get_mqtt_topics(mqtt_client_id, db)
     return [
         MqttTopicResponseSchema(
             id=m.id,

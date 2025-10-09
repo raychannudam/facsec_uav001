@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from Models import MqttTopicModel
+from Models import MqttTopicModel, UserModel
 from Schemas.MqttTopic import MqttTopicCreateSchema, MqttTopicUpdateSchema
 
 class MqttTopicService:
@@ -12,8 +12,8 @@ class MqttTopicService:
         return mqtt_topic
 
     @staticmethod
-    def get_mqtt_topics(db: Session):
-        return db.query(MqttTopicModel).all()
+    def get_mqtt_topics(mqtt_client_id, db: Session):
+        return db.query(MqttTopicModel).filter(MqttTopicModel.mqtt_client_id == mqtt_client_id).all()
 
     @staticmethod
     def get_mqtt_topic_by_id(mqtt_topic_id: int, db: Session):

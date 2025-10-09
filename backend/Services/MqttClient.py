@@ -78,124 +78,125 @@ class MqttClientService:
         else:
             update_dict = update_data
 
-        # Store old username for comparison
-        old_username = mqtt_client.username
-        new_username = update_dict.get("username", old_username)
+        # # Store old username for comparison
+        # old_username = mqtt_client.username
+        # new_username = update_dict.get("username", old_username)
         
         # 1. Handle password update if provided
-        if "password" in update_dict:
-            # Update password file with NEW username (in case username also changed)
-            subprocess.run([
-                "mosquitto_passwd", "-b", PWFILE_PATH,
-                new_username, update_dict["password"]
-            ], check=True)
+        # if "password" in update_dict:
+        #     # Update password file with NEW username (in case username also changed)
+        #     subprocess.run([
+        #         "mosquitto_passwd", "-b", PWFILE_PATH,
+        #         new_username, update_dict["password"]
+        #     ], check=True)
 
-            # Retrieve hashed password from pwfile
-            hashed_password = None
-            with open(PWFILE_PATH, "r") as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith(new_username + ":"):
-                        hashed_password = line.split(":", 1)[1]
-                        break
+        #     # Retrieve hashed password from pwfile
+        #     hashed_password = None
+        #     with open(PWFILE_PATH, "r") as f:
+        #         for line in f:
+        #             line = line.strip()
+        #             if line.startswith(new_username + ":"):
+        #                 hashed_password = line.split(":", 1)[1]
+        #                 break
 
-            if hashed_password is None:
-                raise ValueError("Failed to retrieve hashed password from pwfile")
+        #     if hashed_password is None:
+        #         raise ValueError("Failed to retrieve hashed password from pwfile")
 
-            update_dict["password"] = hashed_password
-        else:
-            # If password is NOT provided but username is changing, we need to copy the password
-            if "username" in update_dict and old_username != new_username:
-                # Read the current password for old username
-                old_hashed_password = None
-                with open(PWFILE_PATH, "r") as f:
-                    for line in f:
-                        line = line.strip()
-                        if line.startswith(old_username + ":"):
-                            old_hashed_password = line.split(":", 1)[1]
-                            break
+        #     update_dict["password"] = hashed_password
+        # else:
+        #     # If password is NOT provided but username is changing, we need to copy the password
+        #     if "username" in update_dict and old_username != new_username:
+        #         # Read the current password for old username
+        #         old_hashed_password = None
+        #         with open(PWFILE_PATH, "r") as f:
+        #             for line in f:
+        #                 line = line.strip()
+        #                 if line.startswith(old_username + ":"):
+        #                     old_hashed_password = line.split(":", 1)[1]
+        #                     break
                 
-                if old_hashed_password:
-                    # Create new entry with new username and old password
-                    subprocess.run([
-                        "mosquitto_passwd", "-b", PWFILE_PATH,
-                        new_username, "temp_password_placeholder"
-                    ], check=True)
+        #         if old_hashed_password:
+        #             # Create new entry with new username and old password
+        #             subprocess.run([
+        #                 "mosquitto_passwd", "-b", PWFILE_PATH,
+        #                 new_username, "temp_password_placeholder"
+        #             ], check=True)
                     
-                    # Now replace the temp password with the actual hashed password
-                    with open(PWFILE_PATH, "r") as f:
-                        lines = f.readlines()
+        #             # Now replace the temp password with the actual hashed password
+        #             with open(PWFILE_PATH, "r") as f:
+        #                 lines = f.readlines()
                     
-                    with open(PWFILE_PATH, "w") as f:
-                        for line in lines:
-                            if line.startswith(new_username + ":"):
-                                # Replace the line with old hashed password
-                                f.write(f"{new_username}:{old_hashed_password}\n")
-                            else:
-                                f.write(line)
+        #             with open(PWFILE_PATH, "w") as f:
+        #                 for line in lines:
+        #                     if line.startswith(new_username + ":"):
+        #                         # Replace the line with old hashed password
+        #                         f.write(f"{new_username}:{old_hashed_password}\n")
+        #                     else:
+        #                         f.write(line)
                     
-                    # Update the update_dict with the hashed password for database
-                    update_dict["password"] = old_hashed_password
+        #             # Update the update_dict with the hashed password for database
+        #             update_dict["password"] = old_hashed_password
 
         # 2. Update DB fields explicitly - only update password if it's in update_dict
-        for key in ["user_id", "name", "description", "username", "status", "config"]:
+        # for key in ["user_id", "name", "description", "username", "status", "config"]:
+        for key in ["name", "description", "status", "config"]:
             if key in update_dict:
                 setattr(mqtt_client, key, update_dict[key])
         
-        # Only update password if we have a new value in update_dict
-        if "password" in update_dict:
-            setattr(mqtt_client, "password", update_dict["password"])
+        # # Only update password if we have a new value in update_dict
+        # if "password" in update_dict:
+        #     setattr(mqtt_client, "password", update_dict["password"])
 
         db.commit()
         db.refresh(mqtt_client)
 
-        # 3. Handle ACL update if username changed
-        if "username" in update_dict and old_username != new_username:
-            # Read current ACL content
-            with open(ACLFILE_PATH, "r") as f:
-                acl_lines = f.readlines()
+        # # 3. Handle ACL update if username changed
+        # if "username" in update_dict and old_username != new_username:
+        #     # Read current ACL content
+        #     with open(ACLFILE_PATH, "r") as f:
+        #         acl_lines = f.readlines()
             
-            # Find and replace username in ACL file
-            updated_acl_lines = []
-            i = 0
-            while i < len(acl_lines):
-                line = acl_lines[i].strip()
-                if line.startswith(f"user {old_username}"):
-                    # Replace the user line
-                    updated_acl_lines.append(f"user {new_username}\n")
-                    i += 1  # Move to next line (topic line)
-                    # Keep the topic permissions as is
-                    if i < len(acl_lines):
-                        updated_acl_lines.append(acl_lines[i])
-                    i += 1  # Move to next line (empty line)
-                    # Keep the empty line if exists
-                    if i < len(acl_lines) and acl_lines[i].strip() == "":
-                        updated_acl_lines.append(acl_lines[i])
-                        i += 1
-                else:
-                    updated_acl_lines.append(acl_lines[i])
-                    i += 1
+        #     # Find and replace username in ACL file
+        #     updated_acl_lines = []
+        #     i = 0
+        #     while i < len(acl_lines):
+        #         line = acl_lines[i].strip()
+        #         if line.startswith(f"user {old_username}"):
+        #             # Replace the user line
+        #             updated_acl_lines.append(f"user {new_username}\n")
+        #             i += 1  # Move to next line (topic line)
+        #             # Keep the topic permissions as is
+        #             if i < len(acl_lines):
+        #                 updated_acl_lines.append(acl_lines[i])
+        #             i += 1  # Move to next line (empty line)
+        #             # Keep the empty line if exists
+        #             if i < len(acl_lines) and acl_lines[i].strip() == "":
+        #                 updated_acl_lines.append(acl_lines[i])
+        #                 i += 1
+        #         else:
+        #             updated_acl_lines.append(acl_lines[i])
+        #             i += 1
             
-            # Write updated ACL content back to file
-            with open(ACLFILE_PATH, "w") as f:
-                f.writelines(updated_acl_lines)
+        #     # Write updated ACL content back to file
+        #     with open(ACLFILE_PATH, "w") as f:
+        #         f.writelines(updated_acl_lines)
             
-            # Remove old username from password file if username changed
-            # Only remove if old username exists and is different from new username
-            if old_username != new_username:
-                # Check if old username exists in password file before trying to delete
-                old_user_exists = False
-                with open(PWFILE_PATH, "r") as f:
-                    for line in f:
-                        if line.startswith(old_username + ":"):
-                            old_user_exists = True
-                            break
+        #     # Remove old username from password file if username changed
+        #     # Only remove if old username exists and is different from new username
+        #     if old_username != new_username:
+        #         # Check if old username exists in password file before trying to delete
+        #         old_user_exists = False
+        #         with open(PWFILE_PATH, "r") as f:
+        #             for line in f:
+        #                 if line.startswith(old_username + ":"):
+        #                     old_user_exists = True
+        #                     break
                 
-                # Only delete if the old user actually exists
-                if old_user_exists:
-                    subprocess.run([
-                        "mosquitto_passwd", "-D", PWFILE_PATH, old_username
-                    ], check=True)
+        #         # Only delete if the old user actually exists
+        #         if old_user_exists:
+        #             subprocess.run([
+        #                 "mosquitto_passwd", "-D", PWFILE_PATH, old_username
+        #             ], check=True)
 
         return mqtt_client
 
