@@ -1,16 +1,39 @@
 <template>
     <div class="flex flex-col space-y-3">
         <div class="flex flex-col space-y-3">
-            <h1 class="text-2xl font-bold">MQTT Client </h1>
+            <div class="text-2xl font-bold flex items-center space-x-3">
+                <span class="text-2xl material-symbols-outlined">
+                    bigtop_updates
+                </span>
+                <p>Mqtt Client</p>
+            </div>
             <p class="text-gray-600 dark:text-gray-400">Manage your data communication from sensors on drone with your
-                application</p>
+                application.</p>
             <MqttClientCreateFormComponent @onSubmit="onMqttClientCreateFormSubmit"
                 id="mqtt_client_confirm_create_popup"></MqttClientCreateFormComponent>
             <hr class="border-0.5 border-gray-200">
-            <MqttClientListComponent @onCompletedDeleteMqttClient="triggerCompletedDeleteMqttClient" @onMqttClientEditModalClose="mqttClientEditModalClosed" id="mqtt_client_list" :mqttClientList="allMqttClients"
-                v-if="allMqttClients.length > 0"></MqttClientListComponent>
+            <MqttClientListComponent @onCompletedDeleteMqttClient="triggerCompletedDeleteMqttClient"
+                @onMqttClientEditModalClose="mqttClientEditModalClosed" id="mqtt_client_list"
+                :mqttClientList="allMqttClients" v-if="allMqttClients.length > 0"></MqttClientListComponent>
             <div v-else>
                 <p class="text-center italic">There is no available MQTT Client. Please create a new client!</p>
+            </div>
+        </div>
+        <div class="flex flex-col space-y-3">
+            <div class="text-2xl font-bold flex items-center space-x-3">
+                <span class="text-2xl material-symbols-outlined">
+                    cast
+                </span>
+                <p>Streaming Client</p>
+            </div>
+            <p class="text-gray-600 dark:text-gray-400">Manage your streaming channels from the cameras on drone with
+                your application.</p>
+            <StreamingClientCreateFormComponent @onSubmit="onStreamingClientCreateFormSubmit"
+                id="streaming_client_confirm_create_popup"></StreamingClientCreateFormComponent>
+            <hr class="border-0.5 border-gray-200">
+            <StreamingClientListComponent :streamingClientList="allStreamingClients"  v-if="allStreamingClients.length > 0"></StreamingClientListComponent>
+            <div v-else>
+                <p class="text-center italic">There is no available Streaming Client. Please create a new client!</p>
             </div>
         </div>
     </div>
@@ -18,6 +41,8 @@
 <script>
 import MqttClientCreateFormComponent from '@/components/settings/MqttClientCreateFormComponent.vue';
 import MqttClientListComponent from '@/components/settings/MqttClientListComponent.vue';
+import StreamingClientCreateFormComponent from '@/components/settings/StreamingClientCreateFormComponent.vue';
+import StreamingClientListComponent from '@/components/settings/StreamingClientListComponent.vue';
 import { initFlowbite } from 'flowbite';
 import { useSettingStore } from '@/stores/SettingStore';
 import { useAppStore } from '@/stores/AppStore';
@@ -35,15 +60,19 @@ export default {
     components: {
         MqttClientCreateFormComponent,
         MqttClientListComponent,
+        StreamingClientCreateFormComponent,
+        StreamingClientListComponent
     },
     data() {
         return {
-            allMqttClients: []
+            allMqttClients: [],
+            allStreamingClients: []
         };
     },
     async mounted() {
         initFlowbite();
         await this.getAllMqttClients();
+        await this.getAllStreamingClients();
 
     },
     methods: {
@@ -63,12 +92,28 @@ export default {
                 this.allMqttClients = res.data
             }
         },
-        async triggerCompletedDeleteMqttClient(){
+        async getAllStreamingClients() {
+            this.appStore.displayPageLoading(true)
+            let res = await this.settingStore.getAllStreamingClients();
+            this.appStore.displayPageLoading(false)
+            this.appStore.displayRightToast(res.status, res.message);
+            if (res.status == "success") {
+                this.allStreamingClients = res.data
+            }
+        },
+        async triggerCompletedDeleteMqttClient() {
             await this.getAllMqttClients();
         },
-        async mqttClientEditModalClosed(){
+        async mqttClientEditModalClosed() {
             await this.getAllMqttClients();
         },
+        async onStreamingClientCreateFormSubmit(data){
+            this.appStore.displayPageLoading(true)
+            let res = await this.settingStore.createStreamingClient(data);
+            this.appStore.displayPageLoading(false);
+            this.appStore.displayRightToast(res.status, res.message);
+            await this.getAllStreamingClients();
+        }
     }
 }
 </script>

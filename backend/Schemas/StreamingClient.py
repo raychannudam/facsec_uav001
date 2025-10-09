@@ -21,6 +21,7 @@ class StreamingClientResponseSchema(BaseModel):
     id: int = Field(..., description="The ID of the streaming client")
     name: str = Field(..., description="The name of the streaming client")
     description: Optional[str] = Field(None, description="The description of the streaming client")
+    username: str = Field(...)
     config: Dict = Field(..., description="Configuration for the streaming client")
     status: bool = Field(..., description="The status of the streaming client")
     created_at: datetime = Field(..., description="Created timestamp")

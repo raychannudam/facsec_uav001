@@ -113,6 +113,59 @@ export const useSettingStore = defineStore("setting", {
         message: message,
         data: data
       }
+    },
+    async deleteMqttTopic(id){
+      let message = ""
+      let status = ""
+      await api.delete(`/api/v1/mqtt-topics/${id}`).then(res=>{
+        status = "success";
+        message = "Successfully delete a MQTT topic!";
+      }).catch(err=>{
+        status = "fail";
+        message = err.response?.data?.detail || "Failed to delete this MQTT topic!"
+      });
+      return {
+        status: status,
+        message: message
+      }
+    },
+    async getAllStreamingClients(){
+      let message = ""
+      let status = ""
+      let data = ""
+      await api.get("/api/v1/streaming-clients").then((res)=>{
+        status = "success";
+        message = "Successfully get all streaming clients!";
+        data = res.data
+      }).catch(err=>{
+        status = "fail";
+        message = err.response?.data?.detail || "Failed to get all streaming clients!"
+      });
+      return {
+        status: status,
+        message: message,
+        data: data
+      }
+    },
+    async createStreamingClient(data){
+      data['config'] = {"actions": ["read", "publish"]}
+      data['status'] = true
+      let message = "";
+      let status = "";
+      await api
+          .post("/api/v1/streaming-clients", data)
+          .then((res) => {
+          status = "success";
+          message = "Successfully created streaming client!";
+          })
+          .catch((err) => {
+          status = "fail";
+          message = err.response?.data?.detail || "Failed to create streaming client!";
+          });
+      return {
+          status: status,
+          message: message,
+      };
     }
   },
 });
