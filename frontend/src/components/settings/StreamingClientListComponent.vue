@@ -92,6 +92,7 @@
           </div>
           <!-- URL Info -->
            <div class="flex items-center justify-start space-x-3 ">
+            <StreamingUrlCreateFormComponent :streamingClientData="data" @onSubmit="createStreamingUrl"></StreamingUrlCreateFormComponent>
             <div class="flex-1 flex justify-end">
               <form class="max-w-md w-full">
                 <label for="streamingUrlQuery"
@@ -113,6 +114,10 @@
               </form>
             </div>
           </div>
+          <div>
+            <StreamingUrlTableComponent @onDeleteStreamingUrl="streamingURLDeleted" :allStreamingUrls="allStreamingUrls[data.id]"></StreamingUrlTableComponent>
+            <!-- {{ allStreamingUrls }} -->
+          </div>
         </div>
       </div>
     </div>
@@ -126,6 +131,8 @@ import { storeToRefs } from 'pinia';
 import ConfirmPopupModelComponent from '../utils/ConfirmPopupModelComponent.vue';
 import StreamingClientUpdateComponent from './StreamingClientUpdateComponent.vue';
 import StreamingClientResetPasswordComponent from './StreamingClientResetPasswordComponent.vue';
+import StreamingUrlCreateFormComponent from './StreamingUrlCreateFormComponent.vue';
+import StreamingUrlTableComponent from './StreamingUrlTableComponent.vue';
 export default {
   name: "StreamingClientListComponent",
   // props: ['streamingClientList', 'id'],
@@ -139,7 +146,9 @@ export default {
   components: {
     ConfirmPopupModelComponent,
     StreamingClientUpdateComponent,
-    StreamingClientResetPasswordComponent
+    StreamingClientResetPasswordComponent,
+    StreamingUrlCreateFormComponent,
+    StreamingUrlTableComponent
   },
   setup() {
     const appStore = useAppStore();
@@ -154,11 +163,13 @@ export default {
   data() {
     return {
       toDeleteStreamingClient: undefined,
-      streamingUrlQuery: ""
+      streamingUrlQuery: "",
+      allStreamingUrls: {}
     }
   },
   async mounted() {
     initFlowbite();
+    await this.getAllStreamingUrl();
   },
   methods: {
     displayStreamingClientDeleteConfirmPopup(id){
@@ -176,6 +187,24 @@ export default {
     },
     streamingClientEditModalClosed(){
       this.$emit("onStreamingClientEditModalClose")
+    },
+    async createStreamingUrl(data){
+      this.appStore.displayPageLoading(true);
+      let res = await this.settingStore.crateStreamingUrl(data);
+      this.appStore.displayPageLoading(false);
+      this.appStore.displayRightToast(res.status, res.message)
+      await this.getAllStreamingUrl();
+    },
+    async getAllStreamingUrl(){
+      this.streamingClientList.forEach(async item=>{
+        let res = await this.settingStore.getAllStreamingUrls(item.id);
+        if (res.status == "success"){
+          this.allStreamingUrls[item.id] = res.data
+        }
+      })
+    },
+    async streamingURLDeleted(){
+      await this.getAllStreamingUrl();
     }
   },
   watch: {

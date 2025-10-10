@@ -226,6 +226,57 @@ export const useSettingStore = defineStore("setting", {
         status: status,
         message: message
       }
-    }
+    },
+    async crateStreamingUrl(data){
+      let status = ""
+      let message = ""
+      data['config'] = {"protocols":["rstp", "webrtc"]}
+      data['status'] = true
+      await api.post("/api/v1/streaming-urls", data).then((res) => {
+          status = "success";
+          message = "Successfully created streaming URL!";
+          })
+          .catch((err) => {
+          status = "fail";
+          message = err.response?.data?.detail || "Failed to create streaming URL!";
+          });
+      return {
+          status: status,
+          message: message,
+      };
+    },
+    async getAllStreamingUrls(streamingClientId){
+      let status = ""
+      let message = ""
+      let data = {}
+      await api.get(`/api/v1/streaming-urls/${streamingClientId}`).then((res)=>{
+        status = "success";
+        message = "Successfully get all streaming URLs!";
+        data = res.data
+      }).catch(err=>{
+        status = "fail";
+        message = err.response?.data?.detail || "Failed to get all streaming URLs!"
+      });
+      return {
+        status: status,
+        message: message,
+        data: data
+      }
+    },
+    async deleteStreamingUrl(id){
+      let message = ""
+      let status = ""
+      await api.delete(`/api/v1/streaming-urls/${id}`).then(res=>{
+        status = "success";
+        message = "Successfully delete a streaming URL!";
+      }).catch(err=>{
+        status = "fail";
+        message = err.response?.data?.detail || "Failed to delete this streaming URL!"
+      });
+      return {
+        status: status,
+        message: message
+      }
+    },
   },
 });

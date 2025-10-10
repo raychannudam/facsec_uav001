@@ -26,8 +26,8 @@ class StreamingUrlService:
         return new_url
 
     @staticmethod
-    def get_streaming_urls(db: Session):
-        return db.query(StreamingUrlModel).all()
+    def get_streaming_urls(streaming_client_id, db: Session):
+        return db.query(StreamingUrlModel).filter(StreamingUrlModel.streaming_client_id == streaming_client_id).all()
 
     @staticmethod
     def get_streaming_url_by_id(url_id: int, db: Session):

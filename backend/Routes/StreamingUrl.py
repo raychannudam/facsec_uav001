@@ -58,9 +58,9 @@ def create_streaming_url(url: StreamingUrlCreateSchema, db: Session = Depends(ge
         )
     )
 
-@router.get("/streaming-urls", response_model=list[StreamingUrlResponseSchema])
-def get_streaming_urls(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    urls = StreamingUrlService.get_streaming_urls(db)
+@router.get("/streaming-urls/{streaming_client_id}", response_model=list[StreamingUrlResponseSchema])
+def get_streaming_urls(streaming_client_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    urls = StreamingUrlService.get_streaming_urls(streaming_client_id, db)
     return [StreamingUrlResponseSchema(
         id=u.id,
         streaming_client_id=u.streaming_client_id,
