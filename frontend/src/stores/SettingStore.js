@@ -182,5 +182,50 @@ export const useSettingStore = defineStore("setting", {
         message: message
       }
     },
+    async updateStreamingClient(id, data){
+      let message = "";
+      let status = "";
+      await api.put(`/api/v1/streaming-clients/${id}`, data).then(res=>{
+        status = "success";
+        message = "Successfully update a streaming client!";
+      }).catch(err=>{
+        status = "fail";
+        message = err.response?.data?.detail || "Failed update this streaming clients!"
+      });
+      return {
+        status: status,
+        message: message
+      }
+    },
+    async requestValidationCode(id){
+      let message = "";
+      let status = "";
+      await api.get(`/api/v1/streaming-clients/${id}/request-validation-code`).then(res=>{
+        status = "success";
+        message = "Reset code was sent to your email! Pleae check your inbox.";
+      }).catch(err=>{
+        status = "fail";
+        message = err.response?.data?.detail || "Failed to send reset password code to your email!"
+      });
+      return {
+        status: status,
+        message: message
+      }
+    },
+    async updateStreamingClientPassword(id, data){
+      let message = "";
+      let status = "";
+      await api.put(`/api/v1/streaming-clients/${id}/update-password?validation_code=${data.validation_code}&new_password=${data.new_password}`, data).then(res=>{
+        status = "success";
+        message = "Successfully update the password!";
+      }).catch(err=>{
+        status = "fail";
+        message = err.response?.data?.detail || "Failed to to update the password!"
+      });
+      return {
+        status: status,
+        message: message
+      }
+    }
   },
 });

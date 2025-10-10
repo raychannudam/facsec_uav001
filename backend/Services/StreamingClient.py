@@ -95,7 +95,7 @@ class StreamingClientService:
             db.refresh(client)
             
         # Send email with the validation code
-        await MailService.send_email(email, client.validation_code, subject="Your Email Validation Code")
+        await MailService.send_email(email, client.validation_code, subject=f"Streaming Client: {client.name}, Validation Code")
         
         return True
 
