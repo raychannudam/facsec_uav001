@@ -30,8 +30,9 @@ COPY . .
 EXPOSE 8000 9001 8883
 
 # Copy a script to start both Mosquitto and FastAPI
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
+# COPY start.sh /start.sh
+# RUN chmod +x /start.sh
 
 # Run the script
-CMD ["/start.sh"]
+CMD ["./main.sh"]
+# CMD ["fastapi", "dev", "main.py"]
