@@ -5,6 +5,7 @@ import ControllerIndexView from '@/views/controller/ControllerIndexView.vue'
 import DronesIndexView from '@/views/drones/DronesIndexView.vue'
 import SettingsIndexView from '@/views/settings/SettingsIndexView.vue'
 import AccountIndexView from '@/views/account/AccountIndexView.vue'
+import StationIndexView from '@/views/stations/StationIndexView.vue'
 
 const routes = [
   {
@@ -27,6 +28,12 @@ const routes = [
         path: "/drones",
         name: "drones",
         component: DronesIndexView,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: "/stations",
+        name: "stations",
+        component: StationIndexView,
         meta: { requiresAuth: true }
       },
       {
