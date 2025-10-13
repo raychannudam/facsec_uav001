@@ -97,7 +97,9 @@ export default {
             this.appStore.displayPageLoading(false);
             this.appStore.displayRightToast(res.status, res.message);
             this.resetForm();
-            this.$emit("onStationCreate")
+            if (res.status == "success"){
+                this.$emit("onStationCreate");
+            }
         },
         resetForm(){
             this.name = "";

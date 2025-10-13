@@ -11,7 +11,7 @@ export const useStationStore = defineStore("station", {
         async createStation(data){
             let status = ""
             let message = ""
-            api.post("/api/v1/stations", data).then((res) => {
+            await api.post("/api/v1/stations", data).then((res) => {
                 status = "success";
                 message = "Successfully created station!";
             })
@@ -24,11 +24,11 @@ export const useStationStore = defineStore("station", {
                 message: message,
             };
         },
-        async getAllStations(){
+        async getAllStations(query=""){
             let status = ""
             let message = ""
             let data = []
-            await api.get("/api/v1/stations").then((res) => {
+            await api.get(`/api/v1/stations?query=${query}`).then((res) => {
                 status = "success";
                 message = "Successfully getting all stations!";
                 data = res.data

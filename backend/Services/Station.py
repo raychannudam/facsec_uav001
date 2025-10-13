@@ -18,7 +18,9 @@ class StationService:
         return new_station
 
     @staticmethod
-    def get_stations(db: Session):
+    def get_stations(db: Session, query=""):
+        if query != "":
+            return db.query(StationModel).filter(StationModel.name.like(f"%{query}%")).all()
         return db.query(StationModel).all()
 
     @staticmethod
