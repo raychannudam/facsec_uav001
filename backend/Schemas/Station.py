@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from datetime import datetime
 from typing import Optional
 
 class StationCreateSchema(BaseModel):
@@ -19,5 +20,7 @@ class StationResponseSchema(BaseModel):
     description: Optional[str] = Field(None, description="The description of the station")
     lat: float = Field(..., description="The latitude of the station")
     long: float = Field(..., description="The longitude of the station")
-    created_at: str = Field(..., description="Created timestamp")
-    updated_at: str = Field(..., description="Updated timestamp")
+    created_at: datetime = Field(..., description="Created timestamp")
+    updated_at: datetime = Field(..., description="Updated timestamp")
+    class Config:
+        orm_mode = True

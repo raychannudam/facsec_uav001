@@ -1,5 +1,5 @@
 <template>
-  <div v-if="windowWidth >= 1300" class="p-3 dark:bg-gray-900 min-h-screen flex flex-col dark:text-gray-100 text-gray-900">
+  <div v-if="windowWidth >= 1000" class="p-3 dark:bg-gray-900 min-h-screen flex flex-col dark:text-gray-100 text-gray-900">
     <router-view></router-view>
   </div>
   <div v-else class="flex flex-col items-center justify-center min-h-screen w-screen bg-gray-100 dark:bg-gray-900">

@@ -25,17 +25,9 @@ def create_station(station: StationCreateSchema, db: Session = Depends(get_db), 
     )
 
 @router.get("/stations", response_model=list[StationResponseSchema])
-def get_stations(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    stations = StationService.get_stations(db)
-    return [StationResponseSchema(
-        id=s.id,
-        name=s.name,
-        description=s.description,
-        lat=s.lat,
-        long=s.long,
-        created_at=str(s.created_at),
-        updated_at=str(s.updated_at)
-    ) for s in stations]
+def get_stations(query="", db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    stations = StationService.get_stations(db, query=query)
+    return stations
 
 @router.get("/stations/{station_id}", response_model=StationResponseSchema)
 def get_station(station_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):

@@ -24,6 +24,17 @@
                 </router-link>
             </li>
             <li class="me-2">
+                <router-link :to="{ name: 'stations' }"
+                    class="inline-flex items-center space-x-3 justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
+                    active-class="text-blue-600 border-blue-600 dark:border-blue-500 group"
+                    exact-active-class="text-blue-600 border-blue-600 dark:border-blue-500 group">
+                    <span class="material-symbols-outlined">
+                        warehouse
+                    </span>
+                    <p>All Stations</p>
+                </router-link>
+            </li>
+            <li class="me-2">
                 <router-link :to="{ name: 'settings' }"
                     class="inline-flex items-center space-x-3 justify-center p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
                     active-class="text-blue-600 border-blue-600 dark:border-blue-500 group"
