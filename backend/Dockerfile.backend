@@ -26,8 +26,8 @@ RUN pip install --break-system-packages --timeout 120 -r requirements.txt
 # Copy FastAPI code
 COPY . .
 
-# Expose ports # 8001 for api service, 9002 & 8884 for mqtt broker
-EXPOSE 8001 9002 8884
+# Expose ports # 8000 for api service, 9001 & 8883 for mqtt broker
+EXPOSE 8000 9001 8883
 
 # Copy a script to start both Mosquitto and FastAPI
 COPY start.sh /start.sh

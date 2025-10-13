@@ -1,1 +1,8 @@
-from Schemas.User import UserCreateSchema, UserUpdateSchema, UserResponseSchema  # Import User schemas to ensure they're registered with Bases
+from Schemas.User import UserCreateSchema, UserUpdateSchema, UserResponseSchema
+from Schemas.Role import RoleCreateSchema, RoleUpdateSchema, RoleResponseSchema
+from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema, MqttClientResponseSchema
+from Schemas.MqttTopic import MqttTopicCreateSchema, MqttTopicUpdateSchema, MqttTopicResponseSchema
+from Schemas.StreamingClient import StreamingClientCreateSchema, StreamingClientUpdateSchema, StreamingClientResponseSchema
+from Schemas.StreamingUrl import StreamingUrlCreateSchema, StreamingUrlUpdateSchema, StreamingUrlResponseSchema
+from Schemas.Uav import UavCreateSchema, UavUpdateSchema, UavResponseSchema
+from Schemas.Station import StationCreateSchema, StationUpdateSchema, StationResponseSchema

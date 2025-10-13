@@ -14,8 +14,10 @@ class UserModel(Base):
     age = Column(Integer)
     gender = Column(String)
     created_by = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
-    created_at = Column(DateTime, default=datetime.now())
-    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     creator = relationship("UserModel", remote_side=[id], backref="created_users", lazy='joined')
     roles = relationship("RoleModel", secondary="users_roles", back_populates="users", lazy='dynamic')
+    mqtt_clients = relationship("MqttClientModel", back_populates="user", cascade="all, delete-orphan")
+    streaming_clients = relationship("StreamingClientModel", back_populates="user", cascade="all, delete-orphan")

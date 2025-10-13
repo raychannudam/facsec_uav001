@@ -1,4 +1,11 @@
-pattern readwrite factory.io/%u/#
 
-user admin
-topic read #
+
+
+
+
+user office
+topic readwrite #
+
+user home
+topic readwrite #
+

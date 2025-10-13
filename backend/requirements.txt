@@ -8,3 +8,4 @@ alembic
 psycopg2-binary
 influxdb-client
 paho-mqtt
+fastapi-mail
