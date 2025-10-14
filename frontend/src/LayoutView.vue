@@ -48,40 +48,6 @@
         </ul>
         <!-- General Info -->
         <div class="flex items-center space-x-3 dark:text-gray-400 px-3">
-            <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                <span class="material-symbols-outlined">
-                    device_thermostat
-                </span>
-                <p>Temp, </p>
-                <p class="font-bold dark:text-white">-- &#8451;</p>
-            </div>
-            <div>
-                |
-            </div>
-            <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                <span class="material-symbols-outlined">
-                    speed
-                </span>
-                <p>Speed, </p>
-                <p class="font-bold dark:text-white">-- km/h</p>
-            </div>
-            <div>
-                |
-            </div>
-            <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                <span class="material-symbols-outlined">
-                    altitude
-                </span>
-                <p>Altitude, </p>
-                <p class="font-bold dark:text-white">---- m</p>
-            </div>
-            <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                <span class="material-symbols-outlined">
-                    timer
-                </span>
-                <p>Time, </p>
-                <p class="font-bold dark:text-white">-- mn</p>
-            </div>
             <div class="cursor-pointer">
                 <button @click="displaySignoutPopup" data-modal-target="signout_popup" data-modal-toggle="signout_popup"
                     class="text-xs inline-flex items-center space-x-3 justify-center p-4 group hover:text-gray-600 dark:hover:text-gray-300 group text-gray-400 dark:text-gray-500">
