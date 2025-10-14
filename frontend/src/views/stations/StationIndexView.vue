@@ -131,14 +131,14 @@ export default {
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition((position) => {
           let currentUserIcon = L.icon({
-            iconUrl: 'https://cdn-icons-png.flaticon.com/512/164/164600.png',
-            iconSize: [30, 30],
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/17419/17419361.png ',
+            iconSize: [32, 32],
             // iconAnchor: [22, 94],
             // popupAnchor: [-3, -76],
           });
           let stationIcon = L.icon({
-            iconUrl: 'https://cdn-icons-png.flaticon.com/512/1198/1198294.png',
-            iconSize: [30, 30],
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/1188/1188034.png ',
+            iconSize: [35, 35],
             // iconAnchor: [22, 94],
             // popupAnchor: [-3, -76],
           });
@@ -166,17 +166,12 @@ export default {
             })
           }
 
-          L.Control.geocoder({
-            position: "topleft",
-            defaultMarkGeocode: true // adds a marker when found
-          }).addTo(this.map);
-
           this.map.on("click", (e) => {
             this.isCreatingStation = true;
             this.clickedLatLong = e.latlng;
-            // this.map.off();
-            // this.map.remove();
-            // this.initMap(this.clickedLatLong.lat, this.clickedLatLong.lng);
+            this.map.off();
+            this.map.remove();
+            this.initMap(this.clickedLatLong.lat, this.clickedLatLong.lng);
           })
         });
       }
