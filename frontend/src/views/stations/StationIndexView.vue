@@ -13,7 +13,8 @@
         my_location
       </span>
     </button>
-    <div class="absolute dark:bg-black/70 bg-white/70 right-0 m-10 flex flex-col z-40 space-y-3 p-3 text-sm items-start rounded-md">
+    <div
+      class="absolute dark:bg-black/70 bg-white/70 right-0 m-10 flex flex-col z-40 space-y-3 p-3 text-sm items-start rounded-md">
       <div class="relative flex flex-col space-y-3">
         <form class="flex items-center max-w-sm mx-auto" @submit.prevent="searchStation">
           <label for="searchStationQuery" class="sr-only">Search</label>
@@ -111,7 +112,7 @@ export default {
     }
   },
   methods: {
-    initMap() {
+    initMap(lat = undefined, lng = undefined) {
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition((position) => {
           let currentUserIcon = L.icon({
@@ -126,7 +127,11 @@ export default {
             // iconAnchor: [22, 94],
             // popupAnchor: [-3, -76],
           });
-          this.map = L.map('map').setView([position.coords.latitude, position.coords.longitude], 16);
+          if (lat == undefined || lng == undefined) {
+            this.map = L.map('map').setView([position.coords.latitude, position.coords.longitude], 16);
+          } else {
+            this.map = L.map('map').setView([lat, lng], 16);
+          }
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           }).addTo(this.map);
@@ -145,9 +150,18 @@ export default {
               });
             })
           }
+
+          L.Control.geocoder({
+            position: "topleft",
+            defaultMarkGeocode: true // adds a marker when found
+          }).addTo(this.map);
+
           this.map.on("click", (e) => {
             this.isCreatingStation = true;
             this.clickedLatLong = e.latlng;
+            this.map.off();
+            this.map.remove();
+            this.initMap(this.clickedLatLong.lat, this.clickedLatLong.lng);
           })
         });
       }
@@ -191,16 +205,13 @@ export default {
     },
     async stationCreateFormClosed() {
       this.isCreatingStation = false
-      // this.map.off();
-      // this.map.remove();
-      // this.initMap();
     },
     async stationCreateFormSubmited() {
       this.isCreatingStation = false
       await this.getAllStations();
       this.map.off();
       this.map.remove();
-      this.initMap();
+      this.initMap(this.clickedLatLong.lat, this.clickedLatLong.lng);
     },
     moveToMyLocation() {
       if ("geolocation" in navigator) {
@@ -216,3 +227,15 @@ export default {
 }
 
 </script>
+
+<style>
+/* Change search box text color to black */
+.leaflet-control-geocoder-form input {
+  color: black !important;
+}
+
+/* Optional: change placeholder color too */
+.leaflet-control-geocoder-form input::placeholder {
+  color: #555 !important;
+}
+</style>
