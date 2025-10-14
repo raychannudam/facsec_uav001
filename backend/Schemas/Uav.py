@@ -36,6 +36,8 @@ class UavResponseSchema(BaseModel):
     operation_data: Dict = Field(..., description="Operational data for the UAV")
     created_at: str = Field(..., description="Created timestamp")
     updated_at: str = Field(..., description="Updated timestamp")
-    mqtt_client: Optional[MqttClientResponseSchema] = Field(None, description="The MQTT client associated with the UAV")
-    streaming_client: Optional[StreamingClientResponseSchema] = Field(None, description="The streaming client associated with the UAV")
-    station: Optional[StationResponseSchema] = Field(None, description="The station associated with the UAV")
+    # mqtt_client: Optional[MqttClientResponseSchema] = Field(None, description="The MQTT client associated with the UAV")
+    # streaming_client: Optional[StreamingClientResponseSchema] = Field(None, description="The streaming client associated with the UAV")
+    # station: Optional[StationResponseSchema] = Field(None, description="The station associated with the UAV")
+    class Config:
+        orm_mode = True

@@ -1,18 +1,19 @@
 <template>
   <!-- map + popup wrapper: popup will be positioned relative to this container -->
   <div class="relative">
-    <div @click.self="isCreatingStation = false" class="absolute z-40 text-xs bg-black/80 w-full h-full rounded-md flex items-center justify-center"
+    <div @click.self="stationCreateFormClosed"
+      class="absolute z-40 text-xs bg-black/80 w-full h-full rounded-md flex items-center justify-center"
       v-if="isCreatingStation">
-      <StationCreateFormComponent @onClose="isCreatingStation = false" @onStationCreate="stationCreateFormClosed"
+      <StationCreateFormComponent @onClose="stationCreateFormClosed" @onStationCreate="stationCreateFormSubmited"
         :lat="clickedLatLong.lat" :long="clickedLatLong.lng"></StationCreateFormComponent>
     </div>
     <button @click="moveToMyLocation"
-      class="absolute bg-black/70 bottom-0 left-0 m-10 flex flex-col z-40 space-y-3 p-3 text-sm items-start rounded-full">
+      class="absolute dark:bg-black/70 bg-white/70 bottom-0 left-0 m-10 flex flex-col z-40 space-y-3 p-3 text-sm items-start rounded-full">
       <span class="material-symbols-outlined">
         my_location
       </span>
     </button>
-    <div class="absolute bg-black/70 right-0 m-10 flex flex-col z-40 space-y-3 p-3 text-sm items-start rounded-md">
+    <div class="absolute dark:bg-black/70 bg-white/70 right-0 m-10 flex flex-col z-40 space-y-3 p-3 text-sm items-start rounded-md">
       <div class="relative flex flex-col space-y-3">
         <form class="flex items-center max-w-sm mx-auto" @submit.prevent="searchStation">
           <label for="searchStationQuery" class="sr-only">Search</label>
@@ -190,21 +191,27 @@ export default {
     },
     async stationCreateFormClosed() {
       this.isCreatingStation = false
+      // this.map.off();
+      // this.map.remove();
+      // this.initMap();
+    },
+    async stationCreateFormSubmited() {
+      this.isCreatingStation = false
       await this.getAllStations();
       this.map.off();
       this.map.remove();
       this.initMap();
     },
     moveToMyLocation() {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        this.map.flyTo([position.coords.latitude, position.coords.longitude], 16, {
-          animate: true,
-          duration: 0.5
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          this.map.flyTo([position.coords.latitude, position.coords.longitude], 16, {
+            animate: true,
+            duration: 0.5
+          })
         })
-      })
+      }
     }
-  }
   },
 }
 
