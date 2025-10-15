@@ -90,6 +90,9 @@
         <div id="map" style="height: 50vh;" class="rounded-md z-30"></div>
       </div>
     </div>
+    <div>
+      {{ clickedStation }}
+    </div>
   </div>
 
 </template>
@@ -98,14 +101,28 @@
 import StationCreateFormComponent from '@/components/stations/StationCreateFormComponent.vue';
 import { useAppStore } from '@/stores/AppStore';
 import { useStationStore } from '@/stores/StationStore';
-// import L from 'leaflet';
+import L from 'leaflet';
 export default {
   setup() {
     const appStore = useAppStore();
     const stationStore = useStationStore();
+    const currentUserIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/17419/17419361.png ',
+      iconSize: [32, 32],
+      // iconAnchor: [22, 94],
+      // popupAnchor: [-3, -76],
+    });
+    const stationIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/1188/1188034.png ',
+      iconSize: [35, 35],
+      // iconAnchor: [22, 94],
+      // popupAnchor: [-3, -76],
+    });
     return {
       appStore,
       stationStore,
+      currentUserIcon,
+      stationIcon
     }
   },
   components: {
@@ -124,24 +141,14 @@ export default {
       searchStationQuery: "",
       foundStationsByQuery: [],
       selectedStation: undefined,
+      clickedStation: undefined,
     }
   },
   methods: {
     initMap(lat = undefined, lng = undefined) {
+      if (this.map) return;
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition((position) => {
-          let currentUserIcon = L.icon({
-            iconUrl: 'https://cdn-icons-png.flaticon.com/512/17419/17419361.png ',
-            iconSize: [32, 32],
-            // iconAnchor: [22, 94],
-            // popupAnchor: [-3, -76],
-          });
-          let stationIcon = L.icon({
-            iconUrl: 'https://cdn-icons-png.flaticon.com/512/1188/1188034.png ',
-            iconSize: [35, 35],
-            // iconAnchor: [22, 94],
-            // popupAnchor: [-3, -76],
-          });
           if (lat == undefined || lng == undefined) {
             this.map = L.map('map').setView([position.coords.latitude, position.coords.longitude], 16);
           } else {
@@ -151,27 +158,22 @@ export default {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           }).addTo(this.map);
           L.marker([position.coords.latitude, position.coords.longitude], {
-            icon: currentUserIcon
+            icon: this.currentUserIcon
           }).addTo(this.map)
-            .bindPopup('You are here!')
-            .openPopup();
 
           if (this.allStations.length > 0) {
             this.allStations.forEach(station => {
               L.marker([station.lat, station.long], {
-                icon: stationIcon
-              }).addTo(this.map).on('click', () => {
-                L.popup().setLatLng([station.lat, station.long]).setContent(`${station.name}`).openOn(this.map)
-              });
+                icon: this.stationIcon
+              }).addTo(this.map).on("click", e => {
+                this.clickedStation = station
+              })
             })
           }
 
           this.map.on("click", (e) => {
             this.isCreatingStation = true;
             this.clickedLatLong = e.latlng;
-            this.map.off();
-            this.map.remove();
-            this.initMap(this.clickedLatLong.lat, this.clickedLatLong.lng);
           })
         });
       }
@@ -204,12 +206,6 @@ export default {
         animate: true,
         duration: 0.5
       })
-      this.map.once('moveend', () => {
-        L.popup()
-          .setLatLng([stationData.lat, stationData.long])
-          .setContent(`${stationData.name}`)
-          .openOn(this.map);
-      });
       this.foundStationsByQuery = ""
       this.searchStationQuery = ""
     },
@@ -219,9 +215,19 @@ export default {
     async stationCreateFormSubmited() {
       this.isCreatingStation = false
       await this.getAllStations();
-      this.map.off();
-      this.map.remove();
-      this.initMap(this.clickedLatLong.lat, this.clickedLatLong.lng);
+      if (this.map && this.clickedLatLong) {
+        let newStation = this.allStations && this.allStations.length > 0
+          ? this.allStations[this.allStations.length - 1]
+          : null;
+        L.marker([
+          this.clickedLatLong.lat,
+          this.clickedLatLong.lng
+        ], {
+          icon: this.stationIcon
+        }).addTo(this.map).on("click", () => {
+          this.clickedStation = newStation;
+        });
+      }
     },
     moveToMyLocation() {
       if ("geolocation" in navigator) {
@@ -237,15 +243,3 @@ export default {
 }
 
 </script>
-
-<style>
-/* Change search box text color to black */
-.leaflet-control-geocoder-form input {
-  color: black !important;
-}
-
-/* Optional: change placeholder color too */
-.leaflet-control-geocoder-form input::placeholder {
-  color: #555 !important;
-}
-</style>
