@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from Models import UavModel, MqttClientModel, StreamingClientModel, StationModel
 from Schemas.Uav import UavCreateSchema, UavUpdateSchema
 
@@ -41,7 +41,14 @@ class UavService:
 
     @staticmethod
     def get_uav_by_id(uav_id: int, db: Session):
-        return db.query(UavModel).filter(UavModel.id == uav_id).first()
+        return db.query(UavModel) \
+            .options(
+                joinedload(UavModel.mqtt_client),
+                joinedload(UavModel.streaming_client),
+                joinedload(UavModel.station)
+            ) \
+            .filter(UavModel.id == uav_id) \
+            .first()
 
     @staticmethod
     def update_uav(uav_id: int, update_data: dict, db: Session):
