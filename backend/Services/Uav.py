@@ -36,7 +36,9 @@ class UavService:
         return new_uav
 
     @staticmethod
-    def get_uavs(db: Session):
+    def get_uavs(db: Session, query=""):
+        if query != "":
+            return db.query(UavModel).filter(UavModel.name.like(f"%{query}%")).all()
         return db.query(UavModel).all()
 
     @staticmethod

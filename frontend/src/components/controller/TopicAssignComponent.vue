@@ -4,8 +4,9 @@
         <button :id="id + 'Button'" :data-dropdown-toggle="id" data-dropdown-placement="bottom"
             class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center  flex-1  dark:focus:ring-blue-800 border border-blue-600 shadow-blue-50"
             type="button">
-            <p class="flex-1 start">{{ dropDownDesc }}</p> <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <p class="flex-1 start" v-if="!selectTopic">{{ dropDownDesc }}</p>
+            <p class="flex-1 start" v-else>{{ selectTopic.name }}</p> <svg class="w-2.5 h-2.5 ms-3"
+                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="m1 1 4 4 4-4" />
             </svg>
@@ -29,66 +30,60 @@
             </div>
             <ul class="h-48 px-3 pb-3 overflow-y-auto text-sm text-gray-700 dark:text-gray-200"
                 :aria-labelledby="id + 'Button'">
-                <li>
+                <li v-for="item in data">
                     <div class="flex items-center ps-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                        <input id="checkbox-item-11" type="radio" value="1" v-model="topic"
+                        <input :id="'checkbox-item-' + id + '-' + item.name" type="radio" :value=item
+                            v-model="selectTopic"
                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                        <label for="checkbox-item-11"
-                            class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">Topic</label>
-                    </div>
-                </li>
-                <li>
-                    <div class="flex items-center ps-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                        <input id="checkbox-item-11" type="radio" value="2" v-model="topic"
-                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                        <label for="checkbox-item-11"
-                            class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">Topic</label>
+                        <label :for="'checkbox-item-' + id + '-' + item.name"
+                            class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">{{
+                            item.name }}</label>
                     </div>
                 </li>
             </ul>
         </div>
         <div class="relative" v-if="type != 'slider'">
-            <input type="text" id="topic1OnPayload" v-model="onPayload"
+            <input type="text" :id="id+'on'" v-model="onPayload"
                 class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-24 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" " />
-            <label for="topic1OnPayload"
+            <label :for="id+'on'"
                 class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">On
                 Payload</label>
         </div>
         <div class="relative" v-else>
-            <input type="text" id="topic1OnPayload" v-model="minPayload"
+            <input type="text" :id="id+'min'" v-model="minPayload"
                 class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-24 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" " />
-            <label for="topic1OnPayload"
+            <label :for="id+'min'"
                 class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Min
                 Payload</label>
         </div>
         <div class="relative" v-if="type != 'slider'">
-            <input type="text" id="topic1OffPayload" v-model="offPayload"
+            <input type="text" :id="id+'off'" v-model="offPayload"
                 class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-24 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" " />
-            <label for="topic1OffPayload"
+            <label :for="id+'off'"
                 class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Off
                 Payload</label>
         </div>
         <div class="relative" v-else>
-            <input type="text" id="topic1OffPayload" v-model="maxPayload"
+            <input type="text" :id="id+'max'" v-model="maxPayload"
                 class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-24 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" " />
-            <label for="topic1OffPayload"
+            <label :for="id+'max'"
                 class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Max
                 Payload</label>
         </div>
     </div>
 </template>
 <script>
-
+import { initFlowbite } from 'flowbite';
 export default {
-    props: ['id', 'name', 'dropDownDesc', 'type'],
+    props: ['id', 'name', 'dropDownDesc', 'type', 'data'],
     data() {
         return {
             query: "",
-            topic: "",
+            selectTopic: undefined,
             onPayload: "",
             offPayload: "",
             minPayload: "",
@@ -102,7 +97,7 @@ export default {
                     id: this.id,
                     name: this.name,
                     type: this.type,
-                    topic: this.topic,
+                    selectedTopic: this.selectTopic,
                     onPayload: this.onPayload,
                     offPayload: this.offPayload,
                 })
@@ -111,7 +106,7 @@ export default {
                     id: this.id,
                     name: this.name,
                     type: this.type,
-                    topic: this.topic,
+                    selectedTopic: this.selectTopic,
                     minPayload: this.minPayload,
                     maxPayload: this.maxPayload,
                 })
@@ -119,8 +114,11 @@ export default {
 
         }
     },
+    mounted(){
+        initFlowbite();
+    },
     watch: {
-        topic: {
+        selectTopic: {
             handler(newVal, oldVal) {
                 if (newVal != oldVal) {
                     this.topicSelected();

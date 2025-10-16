@@ -20,8 +20,8 @@ class ControllerService:
         return controller
 
     @staticmethod
-    def get_controllers(db: Session):
-        return db.query(ControllerModel).all()
+    def get_controllers(db: Session, current_user: UserModel):
+        return db.query(ControllerModel).filter(ControllerModel.user_id == current_user.id).all()
 
     @staticmethod
     def get_controller_by_id(controller_id: int, db: Session):

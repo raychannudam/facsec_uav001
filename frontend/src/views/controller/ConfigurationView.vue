@@ -1,21 +1,52 @@
 <template>
     <div class="flex flex-col space-y-3 h-full">
-        <div class="text-2xl font-bold flex items-center space-x-3">
-            <span class="text-2xl material-symbols-outlined">
-                settings_input_component
-            </span>
-            <p>Configuration</p>
+        <div class="flex flex-row space-x-3 items-end justify-between">
+            <div class="flex flex-col items-start space-y-3">
+                <div class="text-2xl  font-bold flex flex-row space-x-3">
+                    <span class="text-2xl material-symbols-outlined">
+                        settings_input_component
+                    </span>
+                    <p>Configuration</p>
+                </div>
+                <p class="text-gray-600 dark:text-gray-400">Manage your control panel.</p>
+            </div>
+            <div class="flex flex-row space-x-3">
+                <button type="button" @click="isEditing = !isEditing" v-if="!isEditing"
+                    class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 rounded-lg text-center dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:focus:ring-yellow-800">
+                    <span class="material-symbols-outlined">
+                        edit_note
+                    </span>
+                    <p>Edit</p>
+                </button>
+                <button type="button" @click="isEditing = !isEditing" v-if="isEditing"
+                    class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 rounded-lg text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-yellow-800">
+                    <span class="material-symbols-outlined">
+                        cancel
+                    </span>
+                    <p>Cancel</p>
+                </button>
+                <button type="button" @click="updateController"
+                    class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    <span class="material-symbols-outlined">
+                        save
+                    </span>
+                    <p>Save</p>
+                </button>
+            </div>
         </div>
-        <p class="text-gray-600 dark:text-gray-400">Manage your control panel.</p>
+
         <hr class="border-0.5 border-gray-200">
-        <div class="flex flex-col space-y-3 h-[50vh] overflow-scroll">
+        <div class="flex flex-col space-y-3 h-[50vh] overflow-scroll relative"
+            :class="{ 'pointer-events-none  opacity-50': !isEditing }">
             <!-- Select UAV -->
             <div class="flex flex-row space-x-3 items-center justify-start">
                 <p class="text-sm font-bold">Selected UAV</p>
                 <button id="selectDroneDropdownSearchButton" data-dropdown-toggle="selectDroneDropdownSearch"
                     data-dropdown-placement="bottom"
                     class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center   dark:focus:ring-blue-800 border border-blue-600 shadow-blue-50"
-                    type="button">Select a UAV <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true"
+                    type="button">
+                    <p v-if="!selectedDrone">Select a UAV</p>
+                    <p v-else>{{ selectedDrone.name }}</p> <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true"
                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="m1 1 4 4 4-4" />
@@ -42,82 +73,189 @@
                     </div>
                     <ul class="h-48 px-3 pb-3 overflow-y-auto text-sm text-gray-700 dark:text-gray-200"
                         aria-labelledby="selectDroneDropdownSearchButton">
-                        <li>
+                        <li v-for="drone in allDrones" v-if="allDrones.length > 0">
                             <div class="flex items-center ps-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                                <input id="checkbox-item-11" type="radio" value="1" v-model="selectedDrone"
+                                <input :id="drone.id" type="radio" :value=drone v-model="selectedDrone"
                                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                                <label for="checkbox-item-11"
-                                    class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">Bonnie
-                                    Green</label>
+                                <label :for="drone.id"
+                                    class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">{{
+                                        drone.name }}</label>
                             </div>
                         </li>
                     </ul>
                 </div>
             </div>
             <div class="flex items-center justify-center">
-                <img src="https://img1.wsimg.com/isteam/ip/c1baed06-ecd8-44e0-9dd4-c41e78892caf/agribot-drone-iotech-world-m3.png"
+                <img src="https://www.uavfordrone.com/wp-content/uploads/2019/05/%E7%BB%8F%E7%BA%AC-M600-Pro-%E9%9B%86%E5%A4%A7%E6%88%90%EF%BC%8C%E8%BE%BE%E8%BF%9C%E8%A7%81-DJI-%E5%A4%A7%E7%96%86%E5%88%9B%E6%96%B0-3.png"
                     class="h-40" alt="">
             </div>
             <!-- Streaming URL Section -->
             <div class="pb-2 border-dashed border-b">
                 <p class="font-bold">Streaming URLs</p>
             </div>
-            <StreamingUrlAssignComponent type="streaming" id="stream1" name="CAM 01 Streaming URL" dropDownDesc="Select a streaming URL" @onUrlSelect="assignStreamingUrl" />
-            <StreamingUrlAssignComponent type="streaming" id="stream2" name="CAM 02 Streaming URL" dropDownDesc="Select a streaming URL" @onUrlSelect="assignStreamingUrl" />
-            <StreamingUrlAssignComponent type="streaming" id="stream3" name="CAM 03 Streaming URL" dropDownDesc="Select a streaming URL" @onUrlSelect="assignStreamingUrl" />
-            <StreamingUrlAssignComponent type="streaming" id="stream4" name="CAM 04 Streaming URL" dropDownDesc="Select a streaming URL" @onUrlSelect="assignStreamingUrl" />
+            <div class="flex flex-col space-y-3" v-if="availableStreamingUrls.length > 0">
+                <StreamingUrlAssignComponent type="streaming" id="stream1" name="CAM 01 Streaming URL"
+                    dropDownDesc="Select a streaming URL" :data="availableStreamingUrls"
+                    @onUrlSelect="assignStreamingUrl" />
+                <StreamingUrlAssignComponent type="streaming" id="stream2" name="CAM 02 Streaming URL"
+                    dropDownDesc="Select a streaming URL" :data="availableStreamingUrls"
+                    @onUrlSelect="assignStreamingUrl" />
+                <StreamingUrlAssignComponent type="streaming" id="stream3" name="CAM 03 Streaming URL"
+                    dropDownDesc="Select a streaming URL" :data="availableStreamingUrls"
+                    @onUrlSelect="assignStreamingUrl" />
+                <StreamingUrlAssignComponent type="streaming" id="stream4" name="CAM 04 Streaming URL"
+                    dropDownDesc="Select a streaming URL" :data="availableStreamingUrls"
+                    @onUrlSelect="assignStreamingUrl" />
+            </div>
             <!-- Data Communication -->
             <div class="pb-2 border-dashed border-b">
                 <p class="font-bold">Data Communication</p>
             </div>
-            <TopicAssignComponent type="button" id="btn1" name="Button 01" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
-            <TopicAssignComponent type="button" id="btn2" name="Button 02" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
-            <TopicAssignComponent type="button" id="btn3" name="Button 03" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
-            <TopicAssignComponent type="button" id="btn4" name="Button 04" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
-            <hr class="border-dotted">
-            <TopicAssignComponent type="switch" id="swt1" name="Switch 01" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
-            <TopicAssignComponent type="switch" id="swt2" name="Switch 02" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
-            <TopicAssignComponent type="switch" id="swt3" name="Switch 03" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
-            <TopicAssignComponent type="switch" id="swt4" name="Switch 04" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
-            <hr class="border-dotted">
-            <TopicAssignComponent type="slider" id="sld1" name="Slider 01" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
-            <TopicAssignComponent type="slider" id="sld2" name="Slider 02" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
-            <TopicAssignComponent type="slider" id="sld3" name="Slider 03" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
-            <TopicAssignComponent type="slider" id="sld4" name="Slider 04" dropDownDesc="Select a topic" @onTopicSelect="assignTopic"></TopicAssignComponent>
+            <div class="flex flex-col space-y-3" v-if="availableMqttTopics.length > 0">
+                <TopicAssignComponent type="button" id="btn1" name="Button 01" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <TopicAssignComponent type="button" id="btn2" name="Button 02" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <TopicAssignComponent type="button" id="btn3" name="Button 03" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <TopicAssignComponent type="button" id="btn4" name="Button 04" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <hr class="border-dotted">
+                <TopicAssignComponent type="switch" id="swt1" name="Switch 01" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <TopicAssignComponent type="switch" id="swt2" name="Switch 02" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <TopicAssignComponent type="switch" id="swt3" name="Switch 03" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <TopicAssignComponent type="switch" id="swt4" name="Switch 04" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <hr class="border-dotted">
+                <TopicAssignComponent type="slider" id="sld1" name="Slider 01" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <TopicAssignComponent type="slider" id="sld2" name="Slider 02" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <TopicAssignComponent type="slider" id="sld3" name="Slider 03" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <TopicAssignComponent type="slider" id="sld4" name="Slider 04" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+            </div>
+
         </div>
     </div>
 </template>
 <script>
-import { useDroneStore } from '@/stores/droneStore';
+import { initFlowbite } from 'flowbite';
+import { useUavStore } from '@/stores/UavStore';
 import { useAppStore } from '@/stores/AppStore';
+import { useSettingStore } from '@/stores/SettingStore';
+import { useControllerStore } from '@/stores/Controller';
 import TopicAssignComponent from '@/components/controller/TopicAssignComponent.vue';
 import StreamingUrlAssignComponent from '@/components/controller/StreamingUrlAssignComponent.vue';
 export default {
     components: { TopicAssignComponent, StreamingUrlAssignComponent },
     setup() {
-        const droneStore = useDroneStore();
+        const uavStore = useUavStore();
         const appStore = useAppStore();
+        const settingStore = useSettingStore();
+        const controllerStore = useControllerStore();
         return {
-            droneStore,
-            appStore
+            uavStore,
+            appStore,
+            settingStore,
+            controllerStore
         }
     },
     data() {
         return {
-            allDrones: undefined,
+            allDrones: [],
             droneSearchQuery: "",
-            selectedDrone: undefined
+            selectedDrone: undefined,
+            availableMqttTopics: [],
+            availableStreamingUrls: [],
+            isEditing: false,
+            myController: undefined,
+            config: {
+                'selectedDrone': {},
+                'streamingClinets': [],
+                'mqtttopics': [],
+            }
         }
     },
     async mounted() {
-
+        initFlowbite();
+        await this.getAllController();
+        await this.getAllDrone();
     },
     methods: {
-        assignTopic(data){
+        async getAllDrone(query = "") {
+            let res = await this.uavStore.getAllUavs(query);
+            if (res.status == "success") {
+                this.allDrones = res.data
+            }
+        },
+        assignTopic(data) {
             console.log(data)
         },
         assignStreamingUrl(data) {
             console.log(data)
+        },
+        async getAllController() {
+            this.appStore.displayPageLoading(true);
+            let res = await this.controllerStore.getAllControllers();
+            this.appStore.displayPageLoading(false)
+            if (res.status == "success") {
+                this.myController = res.data[0]
+                if (
+                    typeof this.myController.config['selectedDrone'] === 'object' &&
+                    this.myController.config['selectedDrone'] !== null &&
+                    !Array.isArray(this.myController.config['selectedDrone']) &&
+                    Object.keys(this.myController.config['selectedDrone']).length === 0
+                ) {
+                    this.selectedDrone = undefined
+                } else {
+                    this.selectedDrone = this.myController.config['selectedDrone']
+                }
+            }
+
+        },
+        async updateController() {
+            if (this.isEditing == true) {
+                let data = {
+                    'name': this.myController.name,
+                    'description': this.myController.description,
+                    "config": this.config
+                }
+                this.appStore.displayPageLoading(true);
+                let res = await this.controllerStore.updateController(this.myController.id, data);
+                this.appStore.displayPageLoading(false);
+                this.appStore.displayRightToast(res.status, res.message);
+            }
+            this.isEditing = false;
+            await this.getAllController();
+        }
+    },
+    watch: {
+        droneSearchQuery: {
+            async handler(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    await this.getAllDrone(newVal);
+                }
+            }
+        },
+        selectedDrone: {
+            async handler(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    let mqttTopicRes = await this.settingStore.getAllMqttTopicByMqttClientId(newVal.mqtt_client_id)
+                    let streamingUrlRes = await this.settingStore.getAllStreamingUrls(newVal.streaming_client_id)
+                    if (mqttTopicRes.status == "success") {
+                        this.availableMqttTopics = mqttTopicRes.data
+                    }
+                    if (streamingUrlRes.status == "success") {
+                        this.availableStreamingUrls = streamingUrlRes.data
+                    }
+                }
+                this.config.selectedDrone = newVal
+            }
         }
     }
 

@@ -4,7 +4,8 @@
     <button :id="id + 'Button'" :data-dropdown-toggle="id" data-dropdown-placement="bottom"
       class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center flex-1 dark:focus:ring-blue-800 border border-blue-600 shadow-blue-50"
       type="button">
-      <p class="flex-1 start">{{ dropDownDesc }}</p>
+      <p class="flex-1 start" v-if="!selectedUrl">{{ dropDownDesc }}</p>
+      <p class="flex-1 start" v-else>{{ selectedUrl.name }}</p>
       <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
       </svg>
@@ -25,20 +26,12 @@
         </div>
       </div>
       <ul class="h-48 px-3 pb-3 overflow-y-auto text-sm text-gray-700 dark:text-gray-200" :aria-labelledby="id + 'Button'">
-        <li>
+        <li v-for="item in data">
           <div class="flex items-center ps-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-            <input :id="'checkbox-item-' + id + '-1'" type="radio" value="url1" v-model="selectedUrl"
+            <input :id="'checkbox-item-' + id + '-' + item.name" type="radio" :value="item" v-model="selectedUrl"
               class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-            <label :for="'checkbox-item-' + id + '-1'"
-              class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">URL 1</label>
-          </div>
-        </li>
-        <li>
-          <div class="flex items-center ps-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-            <input :id="'checkbox-item-' + id + '-2'" type="radio" value="url2" v-model="selectedUrl"
-              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-            <label :for="'checkbox-item-' + id + '-2'"
-              class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">URL 2</label>
+            <label :for="'checkbox-item-' + id + '-' + item.name"
+              class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">{{ item.name }}</label>
           </div>
         </li>
       </ul>
@@ -46,13 +39,14 @@
   </div>
 </template>
 <script>
+import { initFlowbite } from 'flowbite';
 export default {
   name: 'StreamingUrlAssignComponent',
-  props: ['id', 'name', 'dropDownDesc'],
+  props: ['id', 'name', 'dropDownDesc', 'data'],
   data() {
     return {
       query: '',
-      selectedUrl: ''
+      selectedUrl: undefined
     }
   },
   methods: {
@@ -60,9 +54,12 @@ export default {
       this.$emit('onUrlSelect', {
         id: this.id,
         name: this.name,
-        url: this.selectedUrl
+        selectedUrl: this.selectedUrl
       })
     }
+  },
+  mounted(){
+    initFlowbite();
   },
   watch: {
     selectedUrl(newVal, oldVal) {

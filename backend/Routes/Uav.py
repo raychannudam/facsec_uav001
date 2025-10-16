@@ -17,8 +17,8 @@ def create_uav(uav: UavCreateSchema, db: Session = Depends(get_db), current_user
     return result
 
 @router.get("/uavs", response_model=list[UavResponseSchema])
-def get_uavs(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    uavs = UavService.get_uavs(db)
+def get_uavs(query="", db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    uavs = UavService.get_uavs(db, query)
     return uavs
 
 @router.get("/uavs/{uav_id}", response_model=UavResponseSchema)

@@ -15,12 +15,16 @@
 import ConfigurationView from './ConfigurationView.vue';
 import ControlPanelView from './ControlPanelView.vue';
 import LiveStreamView from './LiveStreamView.vue';
+import { initFlowbite } from 'flowbite';
 
 export default {
     components:{
         LiveStreamView,
         ConfigurationView,
         ControlPanelView
+    },
+    mounted(){
+        initFlowbite();
     }
 }
 </script>

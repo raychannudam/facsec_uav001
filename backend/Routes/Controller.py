@@ -18,7 +18,7 @@ def create_controller(controller: ControllerCreateSchema, db: Session = Depends(
 
 @router.get("/", response_model=List[ControllerResponseSchema])
 def get_controllers(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    return ControllerService.get_controllers(db)
+    return ControllerService.get_controllers(db, current_user)
 
 @router.get("/{controller_id}", response_model=ControllerResponseSchema)
 def get_controller_by_id(controller_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
