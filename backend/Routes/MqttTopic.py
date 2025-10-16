@@ -13,7 +13,7 @@ router = APIRouter()
 
 # Create MQTT Topic
 @router.post("/mqtt-topics", response_model=MqttTopicResponseSchema)
-def create_mqtt_topic(mqtt_topic: MqttTopicCreateSchema, db: Session = Depends(get_db)):
+def create_mqtt_topic(mqtt_topic: MqttTopicCreateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     new_mqtt_topic = MqttTopicService.create_mqtt_topic(mqtt_topic, db)
     return MqttTopicResponseSchema(
         id=new_mqtt_topic.id,
@@ -204,7 +204,7 @@ def update_mqtt_topic(mqtt_topic_id: int, mqtt_topic_update: MqttTopicUpdateSche
 
 # Delete MQTT Topic
 @router.delete("/mqtt-topics/{mqtt_topic_id}", response_model=MqttTopicResponseSchema)
-def delete_mqtt_topic(mqtt_topic_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_db)):
+def delete_mqtt_topic(mqtt_topic_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     mqtt_topic = MqttTopicService.delete_mqtt_topic(mqtt_topic_id, db)
     if not mqtt_topic:
         raise HTTPException(status_code=404, detail="MQTT Topic not found")

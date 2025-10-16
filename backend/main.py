@@ -7,6 +7,7 @@ from Routes.StreamingClient import router as streaming_client_router
 from Routes.StreamingUrl import router as streaming_url_router
 from Routes.Station import router as station_router
 from Routes.Uav import router as uav_router
+from Routes.Controller import router as controller_router
 from Security.jwt import router as security_router
 from Security.jwt import require_roles
 from fastapi import FastAPI, Depends
@@ -29,6 +30,7 @@ app.include_router(streaming_client_router, prefix="/api/v1", tags=["streaming_c
 app.include_router(streaming_url_router, prefix="/api/v1", tags=["streaming_urls"])
 app.include_router(station_router, prefix="/api/v1", tags=["stations"])
 app.include_router(uav_router, prefix="/api/v1", tags=["uavs"])
+app.include_router(controller_router, prefix="/api/v1", tags=["controllers"])
 app.include_router(security_router, prefix="/api/v1", tags=["security"])
 
 Base.metadata.create_all(bind=engine)

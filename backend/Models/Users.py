@@ -21,3 +21,4 @@ class UserModel(Base):
     roles = relationship("RoleModel", secondary="users_roles", back_populates="users", lazy='dynamic')
     mqtt_clients = relationship("MqttClientModel", back_populates="user", cascade="all, delete-orphan")
     streaming_clients = relationship("StreamingClientModel", back_populates="user", cascade="all, delete-orphan")
+    controllers = relationship("ControllerModel", back_populates="user", cascade="all, delete-orphan")
