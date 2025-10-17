@@ -1,7 +1,7 @@
 import os
 from sqlalchemy.orm import Session
 from Models import MqttClientModel
-from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema
+from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema, MqttClientResetPasswordSchema
 import subprocess
 from fastapi import HTTPException
 
@@ -248,4 +248,41 @@ class MqttClientService:
         # 3. Delete from DB
         db.delete(mqtt_client)
         db.commit()
+        return mqtt_client
+
+    @staticmethod
+    def reset_mqtt_client_password(mqtt_client_id: int, password_data: MqttClientResetPasswordSchema, db: Session):
+        """
+        Reset password for an MQTT client
+        """
+        mqtt_client = db.query(MqttClientModel).filter(MqttClientModel.id == mqtt_client_id).first()
+        if not mqtt_client:
+            return None
+
+        # 1. Update password in Mosquitto password file
+        try:
+            subprocess.run([
+                "mosquitto_passwd", "-b", PWFILE_PATH,
+                mqtt_client.username, password_data.password
+            ], check=True)
+        except subprocess.CalledProcessError as e:
+            raise HTTPException(status_code=500, detail=f"Failed to update password in Mosquitto: {str(e)}")
+
+        # 2. Retrieve hashed password from pwfile
+        hashed_password = None
+        with open(PWFILE_PATH, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith(mqtt_client.username + ":"):
+                    hashed_password = line.split(":", 1)[1]
+                    break
+
+        if hashed_password is None:
+            raise HTTPException(status_code=500, detail="Failed to retrieve hashed password from pwfile")
+
+        # 3. Update password in database
+        mqtt_client.password = hashed_password
+        db.commit()
+        db.refresh(mqtt_client)
+
         return mqtt_client

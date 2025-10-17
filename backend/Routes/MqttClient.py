@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from Models import MqttClientModel, get_db
-from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema, MqttClientResponseSchema
+from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema, MqttClientResponseSchema, MqttClientResetPasswordSchema
 from Schemas.User import UserResponseSchema
 from Schemas.Role import RoleResponseSchema
 from Services.MqttClient import MqttClientService
@@ -205,3 +205,49 @@ def delete_mqtt_client(mqtt_client_id: int, db: Session = Depends(get_db), curre
     # Now delete the client
     MqttClientService.delete_mqtt_client(mqtt_client_id, db)
     return response
+
+@router.post("/mqtt-clients/{mqtt_client_id}/reset-password", response_model=MqttClientResponseSchema)
+def reset_mqtt_client_password(
+    mqtt_client_id: int, 
+    password_data: MqttClientResetPasswordSchema, 
+    db: Session = Depends(get_db), 
+    current_user: UserModel = Depends(get_current_user)
+):
+    """
+    Reset password for an MQTT client
+    """
+    mqtt_client = MqttClientService.reset_mqtt_client_password(mqtt_client_id, password_data, db)
+    if not mqtt_client:
+        raise HTTPException(status_code=404, detail="MQTT Client not found")
+    
+    return MqttClientResponseSchema(
+        id=mqtt_client.id,
+        user_id=mqtt_client.user_id,
+        name=mqtt_client.name,
+        description=mqtt_client.description,
+        username=mqtt_client.username,
+        password=mqtt_client.password,
+        config=mqtt_client.config,
+        status=mqtt_client.status,
+        created_at=str(mqtt_client.created_at),
+        updated_at=str(mqtt_client.updated_at),
+        user=UserResponseSchema(
+            id=mqtt_client.user.id,
+            email=mqtt_client.user.email,
+            username=mqtt_client.user.username,
+            fullname=mqtt_client.user.fullname,
+            age=mqtt_client.user.age,
+            gender=mqtt_client.user.gender,
+            created_at=str(mqtt_client.user.created_at),
+            updated_at=str(mqtt_client.user.updated_at),
+            roles=[
+                RoleResponseSchema(
+                    id=role.id,
+                    name=role.name,
+                    description=role.description,
+                    created_at=str(role.created_at),
+                    updated_at=str(role.updated_at)
+                ) for role in mqtt_client.user.roles
+            ]
+        )
+    )
