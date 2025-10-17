@@ -79,7 +79,7 @@
 <script>
 import { initFlowbite } from 'flowbite';
 export default {
-    props: ['id', 'name', 'dropDownDesc', 'type', 'data'],
+    props: ['id', 'name', 'dropDownDesc', 'type', 'data', 'selected'],
     data() {
         return {
             query: "",
@@ -116,6 +116,10 @@ export default {
     },
     mounted(){
         initFlowbite();
+        console.log(this.selected)
+        if (Object.keys(this.selected).length != 0){
+            this.selectTopic = this.selected
+        }
     },
     watch: {
         selectTopic: {

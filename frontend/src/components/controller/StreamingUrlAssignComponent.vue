@@ -42,7 +42,7 @@
 import { initFlowbite } from 'flowbite';
 export default {
   name: 'StreamingUrlAssignComponent',
-  props: ['id', 'name', 'dropDownDesc', 'data'],
+  props: ['id', 'name', 'dropDownDesc', 'data', 'selected'],
   data() {
     return {
       query: '',
@@ -60,6 +60,9 @@ export default {
   },
   mounted(){
     initFlowbite();
+    if (Object.keys(this.selected).length != 0){
+      this.selectedUrl = this.selected
+    }
   },
   watch: {
     selectedUrl(newVal, oldVal) {

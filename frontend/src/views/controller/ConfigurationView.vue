@@ -94,16 +94,8 @@
                 <p class="font-bold">Streaming URLs</p>
             </div>
             <div class="flex flex-col space-y-3" v-if="availableStreamingUrls.length > 0">
-                <StreamingUrlAssignComponent type="streaming" id="stream1" name="CAM 01 Streaming URL"
-                    dropDownDesc="Select a streaming URL" :data="availableStreamingUrls"
-                    @onUrlSelect="assignStreamingUrl" />
-                <StreamingUrlAssignComponent type="streaming" id="stream2" name="CAM 02 Streaming URL"
-                    dropDownDesc="Select a streaming URL" :data="availableStreamingUrls"
-                    @onUrlSelect="assignStreamingUrl" />
-                <StreamingUrlAssignComponent type="streaming" id="stream3" name="CAM 03 Streaming URL"
-                    dropDownDesc="Select a streaming URL" :data="availableStreamingUrls"
-                    @onUrlSelect="assignStreamingUrl" />
-                <StreamingUrlAssignComponent type="streaming" id="stream4" name="CAM 04 Streaming URL"
+                <StreamingUrlAssignComponent v-for="streamingUrl in config.streamingUrls" type="streaming"
+                    :id="streamingUrl.id" :name="streamingUrl.name" :selected="streamingUrl.selectedUrl"
                     dropDownDesc="Select a streaming URL" :data="availableStreamingUrls"
                     @onUrlSelect="assignStreamingUrl" />
             </div>
@@ -112,32 +104,8 @@
                 <p class="font-bold">Data Communication</p>
             </div>
             <div class="flex flex-col space-y-3" v-if="availableMqttTopics.length > 0">
-                <TopicAssignComponent type="button" id="btn1" name="Button 01" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
-                <TopicAssignComponent type="button" id="btn2" name="Button 02" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
-                <TopicAssignComponent type="button" id="btn3" name="Button 03" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
-                <TopicAssignComponent type="button" id="btn4" name="Button 04" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
-                <hr class="border-dotted">
-                <TopicAssignComponent type="switch" id="swt1" name="Switch 01" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
-                <TopicAssignComponent type="switch" id="swt2" name="Switch 02" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
-                <TopicAssignComponent type="switch" id="swt3" name="Switch 03" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
-                <TopicAssignComponent type="switch" id="swt4" name="Switch 04" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
-                <hr class="border-dotted">
-                <TopicAssignComponent type="slider" id="sld1" name="Slider 01" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
-                <TopicAssignComponent type="slider" id="sld2" name="Slider 02" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
-                <TopicAssignComponent type="slider" id="sld3" name="Slider 03" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
-                <TopicAssignComponent type="slider" id="sld4" name="Slider 04" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic"></TopicAssignComponent>
+                <TopicAssignComponent v-for="mqttTopic in config.mqttTopics" :type="mqttTopic.type" :id="mqttTopic.id" :name="mqttTopic.name" dropDownDesc="Select a topic"
+                    :data="availableMqttTopics" @onTopicSelect="assignTopic" :selected="mqttTopic.selectedTopic"></TopicAssignComponent>
             </div>
 
         </div>
@@ -176,8 +144,26 @@ export default {
             myController: undefined,
             config: {
                 'selectedDrone': {},
-                'streamingClinets': [],
-                'mqtttopics': [],
+                'streamingUrls': [
+                    { id: 'stream1', name: 'CAM 01 Streaming URL', selectedUrl: {} },
+                    { id: 'stream2', name: 'CAM 02 Streaming URL', selectedUrl: {} },
+                    { id: 'stream3', name: 'CAM 03 Streaming URL', selectedUrl: {} },
+                    { id: 'stream4', name: 'CAM 04 Streaming URL', selectedUrl: {} },
+                ],
+                'mqttTopics': [
+                    { id: 'btn1', type: 'button', name: "Button 01", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                    { id: 'btn2', type: 'button', name: "Button 02", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                    { id: 'btn3', type: 'button', name: "Button 03", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                    { id: 'btn4', type: 'button', name: "Button 04", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                    { id: 'swt1', type: 'switch', name: "Switch 01", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                    { id: 'swt2', type: 'switch', name: "Switch 02", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                    { id: 'swt3', type: 'switch', name: "Switch 03", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                    { id: 'swt4', type: 'switch', name: "Switch 04", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                    { id: 'sld1', type: 'slider', name: "Slider 01", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
+                    { id: 'sld2', type: 'slider', name: "Slider 02", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
+                    { id: 'sld3', type: 'slider', name: "Slider 03", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
+                    { id: 'sld4', type: 'slider', name: "Slider 04", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
+                ],
             }
         }
     },
@@ -195,9 +181,17 @@ export default {
         },
         assignTopic(data) {
             console.log(data)
+            const mqttTopic = this.config.mqttTopics.find(item => item.id == data.id)
+            if (mqttTopic) {
+                mqttTopic.selectedTopic = data.selectedTopic
+            }
         },
         assignStreamingUrl(data) {
             console.log(data)
+            const streamingUrl = this.config.streamingUrls.find(item => item.id == data.id)
+            if (streamingUrl) {
+                streamingUrl.selectedUrl = data.selectedUrl
+            }
         },
         async getAllController() {
             this.appStore.displayPageLoading(true);
@@ -206,14 +200,17 @@ export default {
             if (res.status == "success") {
                 this.myController = res.data[0]
                 if (
-                    typeof this.myController.config['selectedDrone'] === 'object' &&
-                    this.myController.config['selectedDrone'] !== null &&
-                    !Array.isArray(this.myController.config['selectedDrone']) &&
-                    Object.keys(this.myController.config['selectedDrone']).length === 0
-                ) {
-                    this.selectedDrone = undefined
-                } else {
+
+                    Object.keys(this.myController.config['selectedDrone']).length != 0
+                ){
                     this.selectedDrone = this.myController.config['selectedDrone']
+                }
+                if (this.myController.config['streamingUrls'].length > 0){
+                    this.config.streamingUrls = this.myController.config['streamingUrls']
+                }
+                if (this.myController.config['mqttTopics'].length > 0){
+                    console.log(this.myController.config['mqttTopics'])
+                    this.config.mqttTopics = this.myController.config['mqttTopics']
                 }
             }
 

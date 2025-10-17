@@ -2,6 +2,9 @@ from sqlalchemy.orm import Session
 from Models import UserModel, RoleModel
 from Schemas import UserCreateSchema, UserResponseSchema
 from passlib.context import CryptContext
+from Services.Controller import ControllerService
+from Schemas.Controller import ControllerCreateSchema
+from uuid import uuid4
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -30,6 +33,39 @@ class UserService:
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
+        
+        # create default controller
+        # create default controller (cleanup user if controller creation fails)
+        try:
+            controller_name = str(uuid4())
+            controller_description = "Default controller"
+            controller_config = {
+                'selectedDrone': {},
+                'streamingUrls': [],
+                'mqttTopics': [],
+            }
+            
+            controller_data = ControllerCreateSchema(
+                name=controller_name,
+                description=controller_description,
+                config=controller_config
+            )
+            
+            ControllerService.create_controller(
+                controller_data=controller_data,
+                db=db,
+                current_user=new_user
+            )
+        except Exception:
+            print("Controller creation failed, attempting to remove created user")
+            try:
+                db.delete(new_user)
+                db.commit()
+            except Exception:
+                db.rollback()
+                print("Failed to cleanup user after controller creation failure")
+            raise
+            
         return new_user
 
     @staticmethod
