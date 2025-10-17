@@ -1,5 +1,5 @@
 data
-config/pwfile
+# config/pwfile
 Logs
 node_modules
 *.log

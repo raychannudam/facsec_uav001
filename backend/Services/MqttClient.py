@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from Models import MqttClientModel
 from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema
 import subprocess
+from fastapi import HTTPException
+
 
 MOSQUITTO_CONFIG_DIR = "/app/mosquitto/config"  # inside container
 PWFILE_PATH = os.path.join(MOSQUITTO_CONFIG_DIR, "pwfile")
@@ -12,6 +14,14 @@ ACLFILE_PATH = os.path.join(MOSQUITTO_CONFIG_DIR, "aclfile")
 class MqttClientService:
     @staticmethod
     def create_mqtt_client(mqtt_client_data: MqttClientCreateSchema, db: Session):
+        existing_client_name = db.query(MqttClientModel).filter(MqttClientModel.name == mqtt_client_data.name).first()
+        if existing_client_name:
+            return {"error": "Client name already exists"}
+        
+        existing_client_username = db.query(MqttClientModel).filter(MqttClientModel.username == mqtt_client_data.username).first()
+        if existing_client_username:
+            return {"error": "Client username already exists"}
+
         # 1. Add user to Mosquitto password file (Mosquitto handles hashing)
         subprocess.run([
             "mosquitto_passwd", "-b", PWFILE_PATH,
@@ -38,7 +48,7 @@ class MqttClientService:
             username=mqtt_client_data.username,
             password=hashed_password,
             status=mqtt_client_data.status,
-            config=mqtt_client_data.config  # requires JSON/Dict column in model
+            config=mqtt_client_data.config
         )
         db.add(mqtt_client)
         db.commit()
@@ -55,7 +65,6 @@ class MqttClientService:
             with open(ACLFILE_PATH, "a") as f:
                 f.write(f"user {mqtt_client.username}\n")
                 f.write(f"topic readwrite #\n\n")
-
         return mqtt_client
 
     @staticmethod

@@ -12,3 +12,9 @@ topic readwrite #
 user 007
 topic readwrite #
 
+user string
+topic readwrite #
+
+user string1
+topic readwrite #
+

@@ -14,6 +14,8 @@ router = APIRouter()
 @router.post("/mqtt-clients", response_model=MqttClientResponseSchema)
 def create_mqtt_client(mqtt_client: MqttClientCreateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     new_mqtt_client = MqttClientService.create_mqtt_client(mqtt_client, db)
+    if isinstance(new_mqtt_client, dict) and "error" in new_mqtt_client:
+        raise HTTPException(status_code=400, detail=new_mqtt_client["error"])
     return MqttClientResponseSchema(
         id=new_mqtt_client.id,
         user_id=new_mqtt_client.user_id,
