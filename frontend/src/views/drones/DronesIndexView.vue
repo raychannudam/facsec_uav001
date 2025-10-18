@@ -17,9 +17,8 @@
             </button>
         </div>
         <hr class="border-0.5 border-gray-200 dark:border-gray-700 mb-6">
-        <DroneListComponent :drones="droneStore.drones" :loading="droneStore.loading" @refresh="droneStore.fetchDrones"
-            @edit="handleEditDrone" @delete="handleDeleteDrone" @detail="handleDroneDetail"
-            @create="handleCreateDrone" />
+        <DroneListComponent :drones="droneStore.drones" @refresh="droneStore.fetchDrones" @edit="handleEditDrone"
+            @delete="handleDeleteDrone" @detail="handleDroneDetail" @create="handleCreateDrone" />
 
         <DroneModalComponent v-if="showCreateModal" :is-open="showCreateModal" :is-edit="false"
             @close="showCreateModal = false" @save="handleCreateDrone" />
