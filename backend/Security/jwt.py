@@ -183,6 +183,7 @@ def mediamtx_login(login_req: StreamingLoginSchema, db: Session = Depends(get_db
     path = login_req.path if login_req.path else ""
     action = login_req.action if login_req.action else ""
     protocol = login_req.protocol if login_req.protocol else ""
+    print(login_req)
     if path == "" or action == "":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

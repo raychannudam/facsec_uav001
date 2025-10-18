@@ -116,13 +116,53 @@ export default {
     },
     mounted(){
         initFlowbite();
-        console.log(this.selected)
-        if (Object.keys(this.selected).length != 0){
-            this.selectTopic = this.selected
+        if (this.selected.selectedTopic &&
+            Object.keys(this.selected.selectedTopic).length != 0){
+            this.selectTopic = this.selected.selectedTopic
+        }
+        if (this.selected.onPayload != ""){
+            this.onPayload = this.selected.offPayload
+        }
+        if (this.selected.offPayload != ""){
+            this.offPayload = this.selected.onPayload
+        }
+        if(this.selected.minPayload != ""){
+            this.minPayload = this.selected.minPayload
+        }
+        if(this.selected.maxPayload != ""){
+            this.maxPayload = this.selected.maxPayload
         }
     },
     watch: {
         selectTopic: {
+            handler(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    this.topicSelected();
+                }
+            }
+        },
+        onPayload: {
+            handler(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    this.topicSelected();
+                }
+            }
+        },
+        offPayload: {
+            handler(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    this.topicSelected();
+                }
+            }
+        },
+        minPayload: {
+            handler(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    this.topicSelected();
+                }
+            }
+        },
+        maxPayload: {
             handler(newVal, oldVal) {
                 if (newVal != oldVal) {
                     this.topicSelected();
