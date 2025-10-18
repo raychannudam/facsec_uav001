@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
-from Models import UavModel, MqttClientModel, StreamingClientModel, StationModel
+from sqlalchemy.exc import IntegrityError
+from Models import UavModel, MqttClientModel, StreamingClientModel, StationModel, UserModel
 from Schemas.Uav import UavCreateSchema, UavUpdateSchema
 
 class UavService:
@@ -30,16 +31,27 @@ class UavService:
         
         uav_data = uav.dict()
         new_uav = UavModel(**uav_data)
-        db.add(new_uav)
-        db.commit()
-        db.refresh(new_uav)
-        return new_uav
+        try:
+            db.add(new_uav)
+            db.commit()
+            db.refresh(new_uav)
+            return new_uav
+        except IntegrityError:
+            db.rollback()
+            return {"error": "UAV name already exists"}
 
     @staticmethod
-    def get_uavs(db: Session, query=""):
-        if query != "":
+    def get_uavs(db: Session, query: str = ""):
+        if query:
             return db.query(UavModel).filter(UavModel.name.like(f"%{query}%")).all()
         return db.query(UavModel).all()
+
+    @staticmethod
+    def get_uavs_by_user(user_id: int, db: Session, query: str = ""):
+        query_obj = db.query(UavModel).join(StreamingClientModel).filter(StreamingClientModel.user_id == user_id)
+        if query:
+            query_obj = query_obj.filter(UavModel.name.like(f"%{query}%"))
+        return query_obj.all()
 
     @staticmethod
     def get_uav_by_id(uav_id: int, db: Session):
@@ -89,9 +101,13 @@ class UavService:
         for key, value in update_data.items():
             setattr(uav, key, value)
             
-        db.commit()
-        db.refresh(uav)
-        return uav
+        try:
+            db.commit()
+            db.refresh(uav)
+            return uav
+        except IntegrityError:
+            db.rollback()
+            return {"error": "UAV name already exists"}
 
     @staticmethod
     def delete_uav(uav_id: int, db: Session):

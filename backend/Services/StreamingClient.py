@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from Models import StreamingClientModel, UserModel
-from Schemas.StreamingClient import StreamingClientCreateSchema
+from Schemas.StreamingClient import StreamingClientCreateSchema, StreamingClientUpdateSchema
 from Services.Mail import MailService
 from passlib.context import CryptContext
 import random
@@ -9,7 +9,6 @@ import string
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class StreamingClientService:
-    
     @staticmethod
     def create_streaming_client(client: StreamingClientCreateSchema, db: Session, current_user: UserModel):    
         # Check if username already exists
@@ -42,6 +41,10 @@ class StreamingClientService:
         return db.query(StreamingClientModel).all()
 
     @staticmethod
+    def get_streaming_clients_by_user(user_id: int, db: Session):
+        return db.query(StreamingClientModel).filter(StreamingClientModel.user_id == user_id).all()
+
+    @staticmethod
     def get_streaming_client_by_id(client_id: int, db: Session):
         return db.query(StreamingClientModel).filter(StreamingClientModel.id == client_id).first()
 
@@ -66,7 +69,7 @@ class StreamingClientService:
             return None
         
         if client.validation_code != validation_code:
-            return None
+            return {"error": "Invalid validation code"}
         
         client.password = pwd_context.hash(new_password)
         

@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from Models import StreamingUrlModel, StreamingClientModel
-from Schemas import StreamingUrlCreateSchema
+from Schemas.StreamingUrl import StreamingUrlCreateSchema, StreamingUrlUpdateSchema
 
 class StreamingUrlService:
     
@@ -20,14 +21,23 @@ class StreamingUrlService:
         
         url_data = url.dict()
         new_url = StreamingUrlModel(**url_data)
-        db.add(new_url)
-        db.commit()
-        db.refresh(new_url)
-        return new_url
+        try:
+            db.add(new_url)
+            db.commit()
+            db.refresh(new_url)
+            return new_url
+        except IntegrityError:
+            db.rollback()
+            return {"error": "Streaming URL name already exists for this streaming client"}
 
     @staticmethod
-    def get_streaming_urls(streaming_client_id, db: Session):
+    def get_streaming_urls(streaming_client_id: int, db: Session):
         return db.query(StreamingUrlModel).filter(StreamingUrlModel.streaming_client_id == streaming_client_id).all()
+
+    @staticmethod
+    def get_streaming_urls_by_user(user_id: int, db: Session):
+        # Join StreamingUrlModel with StreamingClientModel to filter by user_id
+        return db.query(StreamingUrlModel).join(StreamingClientModel).filter(StreamingClientModel.user_id == user_id).all()
 
     @staticmethod
     def get_streaming_url_by_id(url_id: int, db: Session):
@@ -62,9 +72,13 @@ class StreamingUrlService:
         for key, value in update_data.items():
             setattr(url, key, value)
             
-        db.commit()
-        db.refresh(url)
-        return url
+        try:
+            db.commit()
+            db.refresh(url)
+            return url
+        except IntegrityError:
+            db.rollback()
+            return {"error": "Streaming URL name already exists for this streaming client"}
 
     @staticmethod
     def delete_streaming_url(url_id: int, db: Session):
