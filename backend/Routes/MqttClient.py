@@ -1,21 +1,33 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from Models import MqttClientModel, get_db
+from Models import MqttClientModel, get_db, UserModel
 from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema, MqttClientResponseSchema, MqttClientResetPasswordSchema
 from Schemas.User import UserResponseSchema
 from Schemas.Role import RoleResponseSchema
 from Services.MqttClient import MqttClientService
 from Security.jwt import get_current_user
-from Models import UserModel
 
 router = APIRouter()
 
+def is_admin(user: UserModel) -> bool:
+    """Check if the user has an admin role."""
+    return any(role.name.lower() == "admin" for role in user.roles)
+
 # Create MQTT Client
 @router.post("/mqtt-clients", response_model=MqttClientResponseSchema)
-def create_mqtt_client(mqtt_client: MqttClientCreateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+def create_mqtt_client(
+    mqtt_client: MqttClientCreateSchema,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    # Only admins can create clients for other users; regular users create for themselves
+    if not is_admin(current_user) and mqtt_client.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to create MQTT client for another user")
+    
     new_mqtt_client = MqttClientService.create_mqtt_client(mqtt_client, db)
     if isinstance(new_mqtt_client, dict) and "error" in new_mqtt_client:
         raise HTTPException(status_code=400, detail=new_mqtt_client["error"])
+    
     return MqttClientResponseSchema(
         id=new_mqtt_client.id,
         user_id=new_mqtt_client.user_id,
@@ -50,8 +62,16 @@ def create_mqtt_client(mqtt_client: MqttClientCreateSchema, db: Session = Depend
 
 # Get all MQTT Clients
 @router.get("/mqtt-clients", response_model=list[MqttClientResponseSchema])
-def get_mqtt_clients(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    mqtt_clients = MqttClientService.get_mqtt_clients(db)
+def get_mqtt_clients(
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    # Admins see all clients; regular users see only their own
+    if is_admin(current_user):
+        mqtt_clients = MqttClientService.get_mqtt_clients(db)
+    else:
+        mqtt_clients = MqttClientService.get_mqtt_clients_by_user(current_user.id, db)
+    
     return [
         MqttClientResponseSchema(
             id=m.id,
@@ -88,10 +108,19 @@ def get_mqtt_clients(db: Session = Depends(get_db), current_user: UserModel = De
 
 # Get MQTT Client by ID
 @router.get("/mqtt-clients/{mqtt_client_id}", response_model=MqttClientResponseSchema)
-def get_mqtt_client(mqtt_client_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+def get_mqtt_client(
+    mqtt_client_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
     mqtt_client = MqttClientService.get_mqtt_client_by_id(mqtt_client_id, db)
     if not mqtt_client:
         raise HTTPException(status_code=404, detail="MQTT Client not found")
+    
+    # Regular users can only access their own clients
+    if not is_admin(current_user) and mqtt_client.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this MQTT client")
+    
     return MqttClientResponseSchema(
         id=mqtt_client.id,
         user_id=mqtt_client.user_id,
@@ -126,11 +155,25 @@ def get_mqtt_client(mqtt_client_id: int, db: Session = Depends(get_db), current_
 
 # Update MQTT Client
 @router.put("/mqtt-clients/{mqtt_client_id}", response_model=MqttClientResponseSchema)
-def update_mqtt_client(mqtt_client_id: int, mqtt_client_update: MqttClientUpdateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+def update_mqtt_client(
+    mqtt_client_id: int,
+    mqtt_client_update: MqttClientUpdateSchema,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    mqtt_client = MqttClientService.get_mqtt_client_by_id(mqtt_client_id, db)
+    if not mqtt_client:
+        raise HTTPException(status_code=404, detail="MQTT Client not found")
+    
+    # Regular users can only update their own clients
+    if not is_admin(current_user) and mqtt_client.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this MQTT client")
+    
     update_data = {k: v for k, v in mqtt_client_update.dict(exclude_unset=True).items()}
     mqtt_client = MqttClientService.update_mqtt_client(mqtt_client_id, update_data, db)
     if not mqtt_client:
         raise HTTPException(status_code=404, detail="MQTT Client not found")
+    
     return MqttClientResponseSchema(
         id=mqtt_client.id,
         user_id=mqtt_client.user_id,
@@ -163,11 +206,20 @@ def update_mqtt_client(mqtt_client_id: int, mqtt_client_update: MqttClientUpdate
         )
     )
 
+# Delete MQTT Client
 @router.delete("/mqtt-clients/{mqtt_client_id}", response_model=MqttClientResponseSchema)
-def delete_mqtt_client(mqtt_client_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    mqtt_client = db.query(MqttClientModel).filter(MqttClientModel.id == mqtt_client_id).first()
+def delete_mqtt_client(
+    mqtt_client_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    mqtt_client = MqttClientService.get_mqtt_client_by_id(mqtt_client_id, db)
     if not mqtt_client:
         raise HTTPException(status_code=404, detail="MQTT Client not found")
+    
+    # Regular users can only delete their own clients
+    if not is_admin(current_user) and mqtt_client.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this MQTT client")
     
     # Build response BEFORE deletion
     response = MqttClientResponseSchema(
@@ -206,16 +258,22 @@ def delete_mqtt_client(mqtt_client_id: int, db: Session = Depends(get_db), curre
     MqttClientService.delete_mqtt_client(mqtt_client_id, db)
     return response
 
+# Reset MQTT Client Password
 @router.post("/mqtt-clients/{mqtt_client_id}/reset-password", response_model=MqttClientResponseSchema)
 def reset_mqtt_client_password(
-    mqtt_client_id: int, 
-    password_data: MqttClientResetPasswordSchema, 
-    db: Session = Depends(get_db), 
+    mqtt_client_id: int,
+    password_data: MqttClientResetPasswordSchema,
+    db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
-    """
-    Reset password for an MQTT client
-    """
+    mqtt_client = MqttClientService.get_mqtt_client_by_id(mqtt_client_id, db)
+    if not mqtt_client:
+        raise HTTPException(status_code=404, detail="MQTT Client not found")
+    
+    # Regular users can only reset passwords for their own clients
+    if not is_admin(current_user) and mqtt_client.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to reset password for this MQTT client")
+    
     mqtt_client = MqttClientService.reset_mqtt_client_password(mqtt_client_id, password_data, db)
     if not mqtt_client:
         raise HTTPException(status_code=404, detail="MQTT Client not found")
