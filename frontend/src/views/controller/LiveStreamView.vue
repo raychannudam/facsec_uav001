@@ -21,7 +21,8 @@
             </div>
             <div class="col-span-4 h-[50vh]">
                 <div class="grid grid-rows-3 gap-3 w-full h-full">
-                    <div class="bg-gray-500 rounded-md flex items-center justify-center space-x-3 overflow-clip w-full h-full">
+                    <div
+                        class="bg-gray-500 rounded-md flex items-center justify-center space-x-3 overflow-clip w-full h-full">
                         <div v-if="streamingUrls.stream2 == undefined"
                             class="flex items-center justify-center space-x-3">
                             <span class="material-symbols-outlined animate-pulse">
@@ -84,20 +85,22 @@ export default {
         if (res.status == "success") {
             this.controller = res.data[0]
         }
-        if (this.controller.config.streamingUrls.length > 0) {
-            if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream1").selectedUrl).length > 0) {
-                this.streamingUrls.stream1 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream1").selectedUrl.name
-            }
-            if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream2").selectedUrl).length > 0) {
-                this.streamingUrls.stream2 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream2").selectedUrl.name
-            }
-            if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream3").selectedUrl).length > 0) {
-                this.streamingUrls.stream3 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream3").selectedUrl.name
-            }
-            if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream4").selectedUrl).length > 0) {
-                this.streamingUrls.stream4 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream4").selectedUrl.name
-            }
+        if (this.controller.config) {
+            if (this.controller.config.streamingUrls.length > 0) {
+                if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream1").selectedUrl).length > 0) {
+                    this.streamingUrls.stream1 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream1").selectedUrl.name
+                }
+                if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream2").selectedUrl).length > 0) {
+                    this.streamingUrls.stream2 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream2").selectedUrl.name
+                }
+                if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream3").selectedUrl).length > 0) {
+                    this.streamingUrls.stream3 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream3").selectedUrl.name
+                }
+                if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream4").selectedUrl).length > 0) {
+                    this.streamingUrls.stream4 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream4").selectedUrl.name
+                }
 
+            }
         }
     }
 }
