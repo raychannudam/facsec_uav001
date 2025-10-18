@@ -22,16 +22,16 @@
                         </p>
                         <p>
                             <span class="font-semibold">MQTT: </span>
-                            <span class="text-gray-900 dark:text-gray-300">{{ drone.mqtt_client_name }}</span>
+                            <span class="text-gray-900 dark:text-gray-300">{{ drone.mqtt_client.name }}</span>
                         </p>
                         <p>
                             <span class="font-semibold">Streaming: </span>
-                            <span class="text-gray-900 dark:text-gray-300">{{ drone.streaming_client_name }}</span>
+                            <span class="text-gray-900 dark:text-gray-300">{{ drone.streaming_client.name }}</span>
                         </p>
                     </div>
 
                     <div class="flex gap-2">
-                        <button @click="$emit('detail', drone)"
+                        <button
                             class="flex-1 px-3 py-2 text-xs font-medium text-white bg-blue-500 hover:bg-blue-600 rounded transition-colors">
                             Detail
                         </button>
