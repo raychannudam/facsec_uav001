@@ -19,7 +19,7 @@ def create_streaming_client(client: StreamingClientCreateSchema, db: Session = D
 
 @router.get("/streaming-clients", response_model=list[StreamingClientResponseSchema])
 def get_streaming_clients(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    clients = StreamingClientService.get_streaming_clients(db)
+    clients = StreamingClientService.get_streaming_clients(db ,current_user)
     return clients
 
 @router.get("/streaming-clients/{client_id}", response_model=StreamingClientResponseSchema)

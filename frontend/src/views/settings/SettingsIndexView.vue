@@ -81,7 +81,9 @@ export default {
             let res = await this.settingStore.createMqttClient(data);
             this.appStore.displayPageLoading(false);
             this.appStore.displayRightToast(res.status, res.message);
-            await this.getAllMqttClients();
+            if (res.status == "success"){
+                await this.getAllMqttClients();
+            }
         },
         async getAllMqttClients() {
             this.appStore.displayPageLoading(true)
@@ -112,7 +114,9 @@ export default {
             let res = await this.settingStore.createStreamingClient(data);
             this.appStore.displayPageLoading(false);
             this.appStore.displayRightToast(res.status, res.message);
-            await this.getAllStreamingClients();
+            if (res.status == "success"){
+                await this.getAllStreamingClients();
+            }
         },
         async triggerCompletedDeleteStreamingClient(){
             await this.getAllStreamingClients();

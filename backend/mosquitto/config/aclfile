@@ -16,3 +16,6 @@ topic readwrite #
 user string1
 topic readwrite #
 
+user test
+topic readwrite #
+

@@ -1,10 +1,10 @@
 <template>
     <div class="w-full grid grid-cols-12 gap-3">
         <div class="col-span-8">
-            <LiveStreamView></LiveStreamView>
+            <LiveStreamView :key="triggerConfigUpdate"></LiveStreamView>
         </div>
         <div class="col-span-4">
-            <ConfigurationView></ConfigurationView>
+            <ConfigurationView @onUpdate="updateConfig"></ConfigurationView>
         </div>
         <div class="col-span-12">
             <ControlPanelView></ControlPanelView>
@@ -25,6 +25,16 @@ export default {
     },
     mounted(){
         initFlowbite();
+    },
+    data(){
+        return{
+            triggerConfigUpdate: 0
+        }
+    },
+    methods:{
+        updateConfig(){
+            this.triggerConfigUpdate = this.triggerConfigUpdate + 1
+        }
     }
 }
 </script>

@@ -38,8 +38,8 @@ class StreamingClientService:
         return new_client
 
     @staticmethod
-    def get_streaming_clients(db: Session):
-        return db.query(StreamingClientModel).all()
+    def get_streaming_clients(db: Session, current_user: UserModel):
+        return db.query(StreamingClientModel).filter(StreamingClientModel.user_id == current_user.id).all()
 
     @staticmethod
     def get_streaming_client_by_id(client_id: int, db: Session):

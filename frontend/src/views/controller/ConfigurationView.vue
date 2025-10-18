@@ -11,14 +11,14 @@
                 <p class="text-gray-600 dark:text-gray-400">Manage your control panel.</p>
             </div>
             <div class="flex flex-row space-x-3">
-                <button type="button" @click="isEditing = !isEditing" v-if="!isEditing"
+                <button type="button" @click="isEditing = true" v-if="!isEditing"
                     class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-yellow-700 hover:bg-yellow-800 focus:ring-4 focus:outline-none focus:ring-yellow-300 rounded-lg text-center dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:focus:ring-yellow-800">
                     <span class="material-symbols-outlined">
                         edit_note
                     </span>
                     <p>Edit</p>
                 </button>
-                <button type="button" @click="isEditing = !isEditing" v-if="isEditing"
+                <button type="button" @click="cancle" v-if="isEditing"
                     class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 rounded-lg text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-yellow-800">
                     <span class="material-symbols-outlined">
                         cancel
@@ -76,6 +76,7 @@
                         <li v-for="drone in allDrones" v-if="allDrones.length > 0">
                             <div class="flex items-center ps-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
                                 <input :id="drone.id" type="radio" :value=drone v-model="selectedDrone"
+                                    @change="selectDrone"
                                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                 <label :for="drone.id"
                                     class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">{{
@@ -96,7 +97,7 @@
             <div class="flex flex-col space-y-3" v-if="availableStreamingUrls.length > 0">
                 <StreamingUrlAssignComponent v-for="streamingUrl in config.streamingUrls" type="streaming"
                     :id="streamingUrl.id" :name="streamingUrl.name" :selected="streamingUrl.selectedUrl"
-                    dropDownDesc="Select a streaming URL" :data="availableStreamingUrls"
+                    dropDownDesc="Select a streaming URL" :data="availableStreamingUrls" :key="streamingUrl.selectedUrl"
                     @onUrlSelect="assignStreamingUrl" />
             </div>
             <!-- Data Communication -->
@@ -104,8 +105,16 @@
                 <p class="font-bold">Data Communication</p>
             </div>
             <div class="flex flex-col space-y-3" v-if="availableMqttTopics.length > 0">
-                <TopicAssignComponent v-for="mqttTopic in config.mqttTopics" :type="mqttTopic.type" :id="mqttTopic.id" :name="mqttTopic.name" dropDownDesc="Select a topic"
-                    :data="availableMqttTopics" @onTopicSelect="assignTopic" :selected="mqttTopic.selectedTopic"></TopicAssignComponent>
+                <TopicAssignComponent v-for="mqttTopic in config.mqttTopics" :type="mqttTopic.type" :id="mqttTopic.id"
+                    :name="mqttTopic.name" dropDownDesc="Select a topic" :data="availableMqttTopics"
+                    @onTopicSelect="assignTopic" :selected="{
+                        'selectedTopic': mqttTopic.selectedTopic,
+                        'onPayload': mqttTopic.onPayload,
+                        'offPayload': mqttTopic.offPayload,
+                        'minPayload': mqttTopic.minPayload,
+                        'maxPayload': mqttTopic.maxPayload
+                    }"
+                    :key="mqttTopic.selectedTopic"></TopicAssignComponent>
             </div>
 
         </div>
@@ -184,10 +193,14 @@ export default {
             const mqttTopic = this.config.mqttTopics.find(item => item.id == data.id)
             if (mqttTopic) {
                 mqttTopic.selectedTopic = data.selectedTopic
+                mqttTopic.minPayload = data.minPayload
+                mqttTopic.maxPayload = data.maxPayload
+                mqttTopic.onPayload = data.onPayload
+                mqttTopic.offPayload = data.offPayload
             }
         },
         assignStreamingUrl(data) {
-            console.log(data)
+            // console.log(data)
             const streamingUrl = this.config.streamingUrls.find(item => item.id == data.id)
             if (streamingUrl) {
                 streamingUrl.selectedUrl = data.selectedUrl
@@ -200,16 +213,14 @@ export default {
             if (res.status == "success") {
                 this.myController = res.data[0]
                 if (
-
                     Object.keys(this.myController.config['selectedDrone']).length != 0
-                ){
+                ) {
                     this.selectedDrone = this.myController.config['selectedDrone']
                 }
-                if (this.myController.config['streamingUrls'].length > 0){
+                if (this.myController.config['streamingUrls'].length > 0) {
                     this.config.streamingUrls = this.myController.config['streamingUrls']
                 }
-                if (this.myController.config['mqttTopics'].length > 0){
-                    console.log(this.myController.config['mqttTopics'])
+                if (this.myController.config['mqttTopics'].length > 0) {
                     this.config.mqttTopics = this.myController.config['mqttTopics']
                 }
             }
@@ -226,7 +237,47 @@ export default {
                 let res = await this.controllerStore.updateController(this.myController.id, data);
                 this.appStore.displayPageLoading(false);
                 this.appStore.displayRightToast(res.status, res.message);
+                await this.getAllController();
             }
+            this.isEditing = false;
+            await this.getAllController();
+            this.$emit("onUpdate")
+        },
+        async selectDrone() {
+            let mqttTopicRes = await this.settingStore.getAllMqttTopicByMqttClientId(this.selectedDrone.mqtt_client_id)
+            let streamingUrlRes = await this.settingStore.getAllStreamingUrls(this.selectedDrone.streaming_client_id)
+            if (mqttTopicRes.status == "success") {
+                this.availableMqttTopics = mqttTopicRes.data
+            }
+            if (streamingUrlRes.status == "success") {
+                this.availableStreamingUrls = streamingUrlRes.data
+            }
+            this.config.selectedDrone = this.selectedDrone;
+            this.resetUrlsAndTopics();
+        },
+        resetUrlsAndTopics() {
+            this.config.streamingUrls = [
+                { id: 'stream1', name: 'CAM 01 Streaming URL', selectedUrl: {} },
+                { id: 'stream2', name: 'CAM 02 Streaming URL', selectedUrl: {} },
+                { id: 'stream3', name: 'CAM 03 Streaming URL', selectedUrl: {} },
+                { id: 'stream4', name: 'CAM 04 Streaming URL', selectedUrl: {} },
+            ];
+            this.config.mqttTopics = [
+                { id: 'btn1', type: 'button', name: "Button 01", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                { id: 'btn2', type: 'button', name: "Button 02", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                { id: 'btn3', type: 'button', name: "Button 03", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                { id: 'btn4', type: 'button', name: "Button 04", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                { id: 'swt1', type: 'switch', name: "Switch 01", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                { id: 'swt2', type: 'switch', name: "Switch 02", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                { id: 'swt3', type: 'switch', name: "Switch 03", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                { id: 'swt4', type: 'switch', name: "Switch 04", onPayload: "1", offPayload: "0", selectedTopic: {} },
+                { id: 'sld1', type: 'slider', name: "Slider 01", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
+                { id: 'sld2', type: 'slider', name: "Slider 02", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
+                { id: 'sld3', type: 'slider', name: "Slider 03", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
+                { id: 'sld4', type: 'slider', name: "Slider 04", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
+            ];
+        },
+        async cancle() {
             this.isEditing = false;
             await this.getAllController();
         }
@@ -250,8 +301,8 @@ export default {
                     if (streamingUrlRes.status == "success") {
                         this.availableStreamingUrls = streamingUrlRes.data
                     }
+                    this.config.selectedDrone = newVal
                 }
-                this.config.selectedDrone = newVal
             }
         }
     }
