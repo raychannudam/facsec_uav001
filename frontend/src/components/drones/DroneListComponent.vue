@@ -99,6 +99,7 @@ const openEditModal = (drone) => {
 const closeModal = () => {
     showCreateModal.value = false
     showEditModal.value = false
+    showDeleteModal.value = false
     editingDrone.value = null
 }
 

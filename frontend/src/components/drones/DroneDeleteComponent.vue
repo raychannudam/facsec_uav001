@@ -36,9 +36,9 @@
                                 class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 transition-colors">
                                 Cancel
                             </button>
-                            <button type="button" @click="handleDelete" :disabled="isDeleting"
+                            <button type="button" @click="handleDelete"
                                 class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                {{ isDeleting ? 'Deleting...' : 'Delete' }}
+                                Delete
                             </button>
                         </div>
                     </div>
@@ -68,8 +68,6 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'confirm'])
 
-const isDeleting = ref(false)
-
 // Lock body scroll when modal opens
 watch(
     () => props.isOpen,
@@ -85,7 +83,6 @@ watch(
             document.body.style.top = ''
             document.body.style.width = ''
             window.scrollTo(0, parseInt(scrollY || '0') * -1)
-            isDeleting.value = false
         }
     },
     { immediate: true }
@@ -99,7 +96,6 @@ onBeforeUnmount(() => {
 
 const handleDelete = () => {
     if (!props.drone || !props.drone.id) return
-    isDeleting.value = true
     emit('confirm', props.drone.id)
 }
 </script>
