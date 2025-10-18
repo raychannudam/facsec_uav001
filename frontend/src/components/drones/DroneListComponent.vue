@@ -39,7 +39,7 @@
                             class="flex-1 px-3 py-2 text-xs font-medium text-white bg-green-500 hover:bg-green-600 rounded transition-colors">
                             Edit
                         </button>
-                        <button @click="$emit('delete', drone.id)"
+                        <button @click="handleDeleteDrone(drone)"
                             class="flex-1 px-3 py-2 text-xs font-medium text-white bg-red-500 hover:bg-red-600 rounded transition-colors">
                             Delete
                         </button>
@@ -58,14 +58,19 @@
             </button>
         </div>
 
-        <DroneModalComponent v-if="showCreateModal || showEditModal" :is-open="showCreateModal || showEditModal"
-            :is-edit="showEditModal" :drone="editingDrone" @close="closeModal" @save="handleSave" />
+        <DroneModalComponent :is-open="showCreateModal || showEditModal" :is-edit="showEditModal" :drone="editingDrone"
+            @close="closeModal" @save="handleSave" />
+
+        <DroneDeleteComponent :is-open="showDeleteModal"
+            :message="'Are you sure you want to delete this drone? This will permanently remove all associated data.'"
+            :drone="droneToDelete" @close="showDeleteModal = false" @confirm="confirmDelete" />
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import DroneModalComponent from './DroneModalComponent.vue'
+import DroneDeleteComponent from './DroneDeleteComponent.vue'
 
 defineProps({
     drones: {
@@ -83,6 +88,8 @@ const emit = defineEmits(['refresh', 'edit', 'delete', 'detail', 'create'])
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const editingDrone = ref(null)
+const showDeleteModal = ref(false)
+const droneToDelete = ref(null)
 
 const openEditModal = (drone) => {
     editingDrone.value = { ...drone }
@@ -98,6 +105,16 @@ const closeModal = () => {
 const handleSave = (droneData) => {
     if (showEditModal.value) emit('edit', editingDrone.value.id, droneData)
     else emit('create', droneData)
+    closeModal()
+}
+
+const handleDeleteDrone = (drone) => {
+    droneToDelete.value = drone
+    showDeleteModal.value = true
+}
+
+const confirmDelete = async (droneId) => {
+    emit('delete', droneId)
     closeModal()
 }
 </script>
