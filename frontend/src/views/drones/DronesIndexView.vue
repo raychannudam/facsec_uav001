@@ -59,12 +59,10 @@ const handleEditDrone = async (droneId, droneData) => {
 }
 
 const handleDeleteDrone = async (droneId) => {
-    if (confirm('Are you sure you want to delete this drone?')) {
-        try {
-            await droneStore.deleteDrone(droneId)
-        } catch (err) {
-            console.error('Failed to delete drone:', err)
-        }
+    try {
+        await droneStore.deleteDrone(droneId)
+    } catch (err) {
+        console.error('Failed to delete drone:', err)
     }
 }
 
