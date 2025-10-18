@@ -76,10 +76,6 @@ defineProps({
     drones: {
         type: Array,
         default: () => []
-    },
-    loading: {
-        type: Boolean,
-        default: false
     }
 })
 
