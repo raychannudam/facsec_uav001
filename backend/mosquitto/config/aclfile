@@ -1,21 +1,19 @@
-
-
-
-
-
-user office
-topic readwrite #
-
-user home
-topic readwrite #
-
-user 007
-topic readwrite #
-
-
 user string1
 topic readwrite #
 
 user test
 topic readwrite #
+
+user stringnew
+topic readwrite #
+
+user stringtest123
+topic readwrite #
+
+user nakclient
+topic readwrite #
+
+user nakclienttoo
+topic readwrite string123
+topic readwrite string111
 

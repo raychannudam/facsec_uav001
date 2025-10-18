@@ -1,22 +1,37 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from Models import MqttTopicModel, get_db
+from Models import MqttTopicModel, MqttClientModel, get_db, UserModel
 from Schemas.MqttTopic import MqttTopicCreateSchema, MqttTopicUpdateSchema, MqttTopicResponseSchema
 from Schemas.MqttClient import MqttClientResponseSchema
 from Schemas.User import UserResponseSchema
 from Schemas.Role import RoleResponseSchema
 from Services.MqttTopic import MqttTopicService
 from Security.jwt import get_current_user
-from Models import UserModel
 
 router = APIRouter()
 
+def is_admin(user: UserModel) -> bool:
+    """Check if the user has an admin role."""
+    return any(role.name.lower() == "admin" for role in user.roles)
+
 # Create MQTT Topic
 @router.post("/mqtt-topics", response_model=MqttTopicResponseSchema)
-def create_mqtt_topic(mqtt_topic: MqttTopicCreateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+def create_mqtt_topic(
+    mqtt_topic: MqttTopicCreateSchema,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    # Check if the MQTT client exists and belongs to the user (unless admin)
+    mqtt_client = db.query(MqttClientModel).filter(MqttClientModel.id == mqtt_topic.mqtt_client_id).first()
+    if not mqtt_client:
+        raise HTTPException(status_code=404, detail="MQTT Client not found")
+    if not is_admin(current_user) and mqtt_client.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to create topic for this MQTT client")
+
     new_mqtt_topic = MqttTopicService.create_mqtt_topic(mqtt_topic, db)
     if isinstance(new_mqtt_topic, dict) and "error" in new_mqtt_topic:
         raise HTTPException(status_code=400, detail=new_mqtt_topic["error"])
+    
     return MqttTopicResponseSchema(
         id=new_mqtt_topic.id,
         mqtt_client_id=new_mqtt_topic.mqtt_client_id,
@@ -61,8 +76,16 @@ def create_mqtt_topic(mqtt_topic: MqttTopicCreateSchema, db: Session = Depends(g
 
 # Get all MQTT Topics
 @router.get("/mqtt-topics", response_model=list[MqttTopicResponseSchema])
-def get_mqtt_topics(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    mqtt_topics = MqttTopicService.get_mqtt_topics(db)
+def get_mqtt_topics(
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    # Admins see all topics; regular users see only topics linked to their MQTT clients
+    if is_admin(current_user):
+        mqtt_topics = MqttTopicService.get_mqtt_topics(db)
+    else:
+        mqtt_topics = MqttTopicService.get_mqtt_topics_by_user(current_user.id, db)
+    
     return [
         MqttTopicResponseSchema(
             id=m.id,
@@ -109,10 +132,19 @@ def get_mqtt_topics(db: Session = Depends(get_db), current_user: UserModel = Dep
 
 # Get MQTT Topic by ID
 @router.get("/mqtt-topics/{mqtt_topic_id}", response_model=MqttTopicResponseSchema)
-def get_mqtt_topic(mqtt_topic_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+def get_mqtt_topic(
+    mqtt_topic_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
     mqtt_topic = MqttTopicService.get_mqtt_topic_by_id(mqtt_topic_id, db)
     if not mqtt_topic:
         raise HTTPException(status_code=404, detail="MQTT Topic not found")
+    
+    # Regular users can only access topics linked to their MQTT clients
+    if not is_admin(current_user) and mqtt_topic.mqtt_client.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this MQTT topic")
+    
     return MqttTopicResponseSchema(
         id=mqtt_topic.id,
         mqtt_client_id=mqtt_topic.mqtt_client_id,
@@ -157,11 +189,24 @@ def get_mqtt_topic(mqtt_topic_id: int, db: Session = Depends(get_db), current_us
 
 # Update MQTT Topic
 @router.put("/mqtt-topics/{mqtt_topic_id}", response_model=MqttTopicResponseSchema)
-def update_mqtt_topic(mqtt_topic_id: int, mqtt_topic_update: MqttTopicUpdateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    # Pass the schema object directly, not converted to dict
+def update_mqtt_topic(
+    mqtt_topic_id: int,
+    mqtt_topic_update: MqttTopicUpdateSchema,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    mqtt_topic = MqttTopicService.get_mqtt_topic_by_id(mqtt_topic_id, db)
+    if not mqtt_topic:
+        raise HTTPException(status_code=404, detail="MQTT Topic not found")
+    
+    # Regular users can only update topics linked to their MQTT clients
+    if not is_admin(current_user) and mqtt_topic.mqtt_client.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this MQTT topic")
+    
     mqtt_topic = MqttTopicService.update_mqtt_topic(mqtt_topic_id, mqtt_topic_update, db)
     if not mqtt_topic:
         raise HTTPException(status_code=404, detail="MQTT Topic not found")
+    
     return MqttTopicResponseSchema(
         id=mqtt_topic.id,
         mqtt_client_id=mqtt_topic.mqtt_client_id,
@@ -204,15 +249,22 @@ def update_mqtt_topic(mqtt_topic_id: int, mqtt_topic_update: MqttTopicUpdateSche
         )
     )
 
-
+# Delete MQTT Topic
 @router.delete("/mqtt-topics/{mqtt_topic_id}", response_model=MqttTopicResponseSchema)
-def delete_mqtt_topic(mqtt_topic_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    # Get the topic first
+def delete_mqtt_topic(
+    mqtt_topic_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
     mqtt_topic = MqttTopicService.get_mqtt_topic_by_id(mqtt_topic_id, db)
     if not mqtt_topic:
         raise HTTPException(status_code=404, detail="MQTT Topic not found")
     
-    # Build the response object BEFORE deleting (while still attached to session)
+    # Regular users can only delete topics linked to their MQTT clients
+    if not is_admin(current_user) and mqtt_topic.mqtt_client.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this MQTT topic")
+    
+    # Build the response object BEFORE deleting
     response_data = MqttTopicResponseSchema(
         id=mqtt_topic.id,
         mqtt_client_id=mqtt_topic.mqtt_client_id,
@@ -258,5 +310,4 @@ def delete_mqtt_topic(mqtt_topic_id: int, db: Session = Depends(get_db), current
     # Now delete the topic
     MqttTopicService.delete_mqtt_topic(mqtt_topic_id, db)
     
-    # Return the pre-built response
     return response_data
