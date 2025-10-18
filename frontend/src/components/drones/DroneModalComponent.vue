@@ -191,8 +191,8 @@ watch(() => props.drone, (newDrone) => {
         formData.value = {
             name: newDrone.name || '',
             type: newDrone.type || '',
-            mqtt_client_id: newDrone.mqtt_client_id || newDrone.mqtt_client?.id || '',
-            streaming_client_id: newDrone.streaming_client_id || newDrone.streaming_client?.id || '',
+            mqtt_client_id: newDrone.mqtt_client_id || newDrone.mqtt_client?.id,
+            streaming_client_id: newDrone.streaming_client_id || newDrone.streaming_client?.id,
             last_lat: newDrone.last_lat || 0,
             last_long: newDrone.last_long || 0,
             operation_data: newDrone.operation_data || {}
