@@ -28,7 +28,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useDroneStore } from '@/stores/droneStore'
+import { useDroneStore } from '@/stores/DroneStore'
 import DroneListComponent from '@/components/drones/DroneListComponent.vue'
 import DroneModalComponent from '@/components/drones/DroneModalComponent.vue'
 

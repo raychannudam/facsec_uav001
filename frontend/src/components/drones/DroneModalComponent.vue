@@ -104,7 +104,7 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import JsonEditorVue from "json-editor-vue"
 import 'vanilla-jsoneditor/themes/jse-theme-dark.css'
-import { useDroneStore } from '@/stores/droneStore'
+import { useDroneStore } from '@/stores/DroneStore'
 
 const props = defineProps({
     isOpen: {
