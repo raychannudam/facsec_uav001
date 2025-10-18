@@ -15,6 +15,8 @@ router = APIRouter()
 @router.post("/mqtt-topics", response_model=MqttTopicResponseSchema)
 def create_mqtt_topic(mqtt_topic: MqttTopicCreateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     new_mqtt_topic = MqttTopicService.create_mqtt_topic(mqtt_topic, db)
+    if isinstance(new_mqtt_topic, dict) and "error" in new_mqtt_topic:
+        raise HTTPException(status_code=400, detail=new_mqtt_topic["error"])
     return MqttTopicResponseSchema(
         id=new_mqtt_topic.id,
         mqtt_client_id=new_mqtt_topic.mqtt_client_id,
@@ -59,8 +61,8 @@ def create_mqtt_topic(mqtt_topic: MqttTopicCreateSchema, db: Session = Depends(g
 
 # Get all MQTT Topics
 @router.get("/mqtt-topics", response_model=list[MqttTopicResponseSchema])
-def get_mqtt_topics(mqtt_client_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    mqtt_topics = MqttTopicService.get_mqtt_topics(mqtt_client_id, db)
+def get_mqtt_topics(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    mqtt_topics = MqttTopicService.get_mqtt_topics(db)
     return [
         MqttTopicResponseSchema(
             id=m.id,
@@ -156,8 +158,8 @@ def get_mqtt_topic(mqtt_topic_id: int, db: Session = Depends(get_db), current_us
 # Update MQTT Topic
 @router.put("/mqtt-topics/{mqtt_topic_id}", response_model=MqttTopicResponseSchema)
 def update_mqtt_topic(mqtt_topic_id: int, mqtt_topic_update: MqttTopicUpdateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    update_data = {k: v for k, v in mqtt_topic_update.dict(exclude_unset=True).items()}
-    mqtt_topic = MqttTopicService.update_mqtt_topic(mqtt_topic_id, update_data, db)
+    # Pass the schema object directly, not converted to dict
+    mqtt_topic = MqttTopicService.update_mqtt_topic(mqtt_topic_id, mqtt_topic_update, db)
     if not mqtt_topic:
         raise HTTPException(status_code=404, detail="MQTT Topic not found")
     return MqttTopicResponseSchema(
@@ -202,13 +204,16 @@ def update_mqtt_topic(mqtt_topic_id: int, mqtt_topic_update: MqttTopicUpdateSche
         )
     )
 
-# Delete MQTT Topic
+
 @router.delete("/mqtt-topics/{mqtt_topic_id}", response_model=MqttTopicResponseSchema)
 def delete_mqtt_topic(mqtt_topic_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    mqtt_topic = MqttTopicService.delete_mqtt_topic(mqtt_topic_id, db)
+    # Get the topic first
+    mqtt_topic = MqttTopicService.get_mqtt_topic_by_id(mqtt_topic_id, db)
     if not mqtt_topic:
         raise HTTPException(status_code=404, detail="MQTT Topic not found")
-    return MqttTopicResponseSchema(
+    
+    # Build the response object BEFORE deleting (while still attached to session)
+    response_data = MqttTopicResponseSchema(
         id=mqtt_topic.id,
         mqtt_client_id=mqtt_topic.mqtt_client_id,
         name=mqtt_topic.name,
@@ -249,3 +254,9 @@ def delete_mqtt_topic(mqtt_topic_id: int, db: Session = Depends(get_db), current
             )
         )
     )
+    
+    # Now delete the topic
+    MqttTopicService.delete_mqtt_topic(mqtt_topic_id, db)
+    
+    # Return the pre-built response
+    return response_data

@@ -5,6 +5,9 @@ from Schemas.MqttTopic import MqttTopicCreateSchema, MqttTopicUpdateSchema
 class MqttTopicService:
     @staticmethod
     def create_mqtt_topic(mqtt_topic_data: MqttTopicCreateSchema, db: Session):
+        existing_topic_name = db.query(MqttTopicModel).filter(MqttTopicModel.name == mqtt_topic_data.name).first()
+        if existing_topic_name:
+            return {"error": "Topic name already exists"}
         mqtt_topic = MqttTopicModel(**mqtt_topic_data.dict())
         db.add(mqtt_topic)
         db.commit()
@@ -12,8 +15,9 @@ class MqttTopicService:
         return mqtt_topic
 
     @staticmethod
-    def get_mqtt_topics(mqtt_client_id, db: Session):
-        return db.query(MqttTopicModel).filter(MqttTopicModel.mqtt_client_id == mqtt_client_id).all()
+    def get_mqtt_topics(db: Session):
+        return db.query(MqttTopicModel).all()
+        
 
     @staticmethod
     def get_mqtt_topic_by_id(mqtt_topic_id: int, db: Session):
