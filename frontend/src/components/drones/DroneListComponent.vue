@@ -63,7 +63,7 @@
 
         <DroneDeleteComponent :is-open="showDeleteModal"
             :message="'Are you sure you want to delete this drone? This will permanently remove all associated data.'"
-            :item="droneToDelete" @close="showDeleteModal = false" @confirm="confirmDelete" />
+            :drone="droneToDelete" @close="showDeleteModal = false" @confirm="confirmDelete" />
     </div>
 </template>
 

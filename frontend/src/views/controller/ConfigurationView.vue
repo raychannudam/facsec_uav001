@@ -43,7 +43,7 @@
                 <p class="text-sm font-bold">Selected UAV</p>
                 <button id="selectDroneDropdownSearchButton" data-dropdown-toggle="selectDroneDropdownSearch"
                     data-dropdown-placement="bottom"
-                    class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center   dark:focus:ring-blue-800 border border-blue-600 shadow-blue-50"
+                    class="focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center   dark:focus:ring-blue-800 border border-blue-600 shadow-blue-50"
                     type="button">
                     <p v-if="!selectedDrone">Select a UAV</p>
                     <p v-else>{{ selectedDrone.name }}</p> <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true"
@@ -113,8 +113,7 @@
                         'offPayload': mqttTopic.offPayload,
                         'minPayload': mqttTopic.minPayload,
                         'maxPayload': mqttTopic.maxPayload
-                    }"
-                    :key="mqttTopic.selectedTopic"></TopicAssignComponent>
+                    }" :key="mqttTopic.selectedTopic"></TopicAssignComponent>
             </div>
 
         </div>
@@ -125,7 +124,7 @@ import { initFlowbite } from 'flowbite';
 import { useUavStore } from '@/stores/UavStore';
 import { useAppStore } from '@/stores/AppStore';
 import { useSettingStore } from '@/stores/SettingStore';
-import { useControllerStore } from '@/stores/Controller';
+import { useControllerStore } from '@/stores/ControllerStore';
 import TopicAssignComponent from '@/components/controller/TopicAssignComponent.vue';
 import StreamingUrlAssignComponent from '@/components/controller/StreamingUrlAssignComponent.vue';
 export default {
