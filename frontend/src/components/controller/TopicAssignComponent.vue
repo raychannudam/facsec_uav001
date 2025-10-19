@@ -121,10 +121,10 @@ export default {
             this.selectTopic = this.selected.selectedTopic
         }
         if (this.selected.onPayload != ""){
-            this.onPayload = this.selected.offPayload
+            this.onPayload = this.selected.onPayload
         }
         if (this.selected.offPayload != ""){
-            this.offPayload = this.selected.onPayload
+            this.offPayload = this.selected.offPayload
         }
         if(this.selected.minPayload != ""){
             this.minPayload = this.selected.minPayload

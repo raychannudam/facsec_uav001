@@ -37,7 +37,7 @@
 
         <hr class="border-0.5 border-gray-200">
         <div class="flex flex-col space-y-3 h-[50vh] overflow-scroll relative"
-            :class="{ 'pointer-events-none  opacity-50': !isEditing }">
+            :class="{ 'pointer-events-none opacity-70': !isEditing }">
             <!-- Select UAV -->
             <div class="flex flex-row space-x-3 items-center justify-start">
                 <p class="text-sm font-bold">Selected UAV</p>
@@ -189,7 +189,6 @@ export default {
             }
         },
         assignTopic(data) {
-            console.log(data)
             const mqttTopic = this.config.mqttTopics.find(item => item.id == data.id)
             if (mqttTopic) {
                 mqttTopic.selectedTopic = data.selectedTopic
@@ -212,9 +211,7 @@ export default {
             this.appStore.displayPageLoading(false)
             if (res.status == "success") {
                 this.myController = res.data[0]
-                if (
-                    Object.keys(this.myController.config['selectedDrone']).length != 0
-                ) {
+                if (Object.keys(this.myController.config['selectedDrone']).length != 0) {
                     this.selectedDrone = this.myController.config['selectedDrone']
                 }
                 if (this.myController.config['streamingUrls'].length > 0) {
@@ -224,6 +221,7 @@ export default {
                     this.config.mqttTopics = this.myController.config['mqttTopics']
                 }
             }
+            // console.log(this.config)
 
         },
         async updateController() {
@@ -237,11 +235,10 @@ export default {
                 let res = await this.controllerStore.updateController(this.myController.id, data);
                 this.appStore.displayPageLoading(false);
                 this.appStore.displayRightToast(res.status, res.message);
+                this.isEditing = false;
                 await this.getAllController();
+                this.$emit("onUpdate")
             }
-            this.isEditing = false;
-            await this.getAllController();
-            this.$emit("onUpdate")
         },
         async selectDrone() {
             let mqttTopicRes = await this.settingStore.getAllMqttTopicByMqttClientId(this.selectedDrone.mqtt_client_id)

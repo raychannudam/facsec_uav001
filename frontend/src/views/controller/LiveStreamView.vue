@@ -84,22 +84,22 @@ export default {
         let res = await this.controllerStore.getAllControllers();
         if (res.status == "success") {
             this.controller = res.data[0]
-        }
-        if (this.controller.config) {
             if (this.controller.config.streamingUrls.length > 0) {
-                if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream1").selectedUrl).length > 0) {
-                    this.streamingUrls.stream1 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream1").selectedUrl.name
-                }
-                if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream2").selectedUrl).length > 0) {
-                    this.streamingUrls.stream2 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream2").selectedUrl.name
-                }
-                if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream3").selectedUrl).length > 0) {
-                    this.streamingUrls.stream3 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream3").selectedUrl.name
-                }
-                if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream4").selectedUrl).length > 0) {
-                    this.streamingUrls.stream4 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream4").selectedUrl.name
-                }
+                if (this.controller.config.streamingUrls.length > 0) {
+                    if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream1").selectedUrl).length > 0) {
+                        this.streamingUrls.stream1 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream1").selectedUrl.name
+                    }
+                    if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream2").selectedUrl).length > 0) {
+                        this.streamingUrls.stream2 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream2").selectedUrl.name
+                    }
+                    if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream3").selectedUrl).length > 0) {
+                        this.streamingUrls.stream3 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream3").selectedUrl.name
+                    }
+                    if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream4").selectedUrl).length > 0) {
+                        this.streamingUrls.stream4 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream4").selectedUrl.name
+                    }
 
+                }
             }
         }
     }
