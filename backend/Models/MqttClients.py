@@ -12,6 +12,7 @@ class MqttClientModel(Base):
     description = Column(Text)
     username = Column(String, nullable=False)
     password = Column(String, nullable=False)
+    raw_password = Column(String, nullable=True)
     config = Column(JSON, nullable=False)
     status = Column(Boolean, nullable=False)
     validation_code = Column(String(6), nullable=True)
