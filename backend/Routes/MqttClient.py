@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from Models import MqttClientModel, get_db, UserModel
-from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema, MqttClientResponseSchema, MqttClientResetPasswordSchema
+from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema, MqttClientResponseSchema, MqttClientAllResponseSchema, MqttClientResetPasswordSchema
 from Schemas.User import UserResponseSchema
 from Schemas.Role import RoleResponseSchema
 from Services.MqttClient import MqttClientService
@@ -61,7 +61,7 @@ def create_mqtt_client(
     )
 
 # Get all MQTT Clients
-@router.get("/mqtt-clients", response_model=list[MqttClientResponseSchema])
+@router.get("/mqtt-clients", response_model=list[MqttClientAllResponseSchema])
 def get_mqtt_clients(
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
@@ -73,13 +73,12 @@ def get_mqtt_clients(
         mqtt_clients = MqttClientService.get_mqtt_clients_by_user(current_user.id, db)
     
     return [
-        MqttClientResponseSchema(
+        MqttClientAllResponseSchema(
             id=m.id,
             user_id=m.user_id,
             name=m.name,
             description=m.description,
             username=m.username,
-            password=m.password,
             config=m.config,
             status=m.status,
             created_at=str(m.created_at),
@@ -154,7 +153,7 @@ def get_mqtt_client(
     )
 
 # Update MQTT Client
-@router.put("/mqtt-clients/{mqtt_client_id}", response_model=MqttClientResponseSchema)
+@router.put("/mqtt-clients/{mqtt_client_id}")
 def update_mqtt_client(
     mqtt_client_id: int,
     mqtt_client_update: MqttClientUpdateSchema,
@@ -174,40 +173,10 @@ def update_mqtt_client(
     if not mqtt_client:
         raise HTTPException(status_code=404, detail="MQTT Client not found")
     
-    return MqttClientResponseSchema(
-        id=mqtt_client.id,
-        user_id=mqtt_client.user_id,
-        name=mqtt_client.name,
-        description=mqtt_client.description,
-        username=mqtt_client.username,
-        password=mqtt_client.password,
-        config=mqtt_client.config,
-        status=mqtt_client.status,
-        created_at=str(mqtt_client.created_at),
-        updated_at=str(mqtt_client.updated_at),
-        user=UserResponseSchema(
-            id=mqtt_client.user.id,
-            email=mqtt_client.user.email,
-            username=mqtt_client.user.username,
-            fullname=mqtt_client.user.fullname,
-            age=mqtt_client.user.age,
-            gender=mqtt_client.user.gender,
-            created_at=str(mqtt_client.user.created_at),
-            updated_at=str(mqtt_client.user.updated_at),
-            roles=[
-                RoleResponseSchema(
-                    id=role.id,
-                    name=role.name,
-                    description=role.description,
-                    created_at=str(role.created_at),
-                    updated_at=str(role.updated_at)
-                ) for role in mqtt_client.user.roles
-            ]
-        )
-    )
+    return {"message": "MQTT client updated successfully"}
 
 # Delete MQTT Client
-@router.delete("/mqtt-clients/{mqtt_client_id}", response_model=MqttClientResponseSchema)
+@router.delete("/mqtt-clients/{mqtt_client_id}")
 def delete_mqtt_client(
     mqtt_client_id: int,
     db: Session = Depends(get_db),
@@ -221,91 +190,23 @@ def delete_mqtt_client(
     if not is_admin(current_user) and mqtt_client.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this MQTT client")
     
-    # Build response BEFORE deletion
-    response = MqttClientResponseSchema(
-        id=mqtt_client.id,
-        user_id=mqtt_client.user_id,
-        name=mqtt_client.name,
-        description=mqtt_client.description,
-        username=mqtt_client.username,
-        password=mqtt_client.password,
-        config=mqtt_client.config,
-        status=mqtt_client.status,
-        created_at=str(mqtt_client.created_at),
-        updated_at=str(mqtt_client.updated_at),
-        user=UserResponseSchema(
-            id=mqtt_client.user.id,
-            email=mqtt_client.user.email,
-            username=mqtt_client.user.username,
-            fullname=mqtt_client.user.fullname,
-            age=mqtt_client.user.age,
-            gender=mqtt_client.user.gender,
-            created_at=str(mqtt_client.user.created_at),
-            updated_at=str(mqtt_client.user.updated_at),
-            roles=[
-                RoleResponseSchema(
-                    id=role.id,
-                    name=role.name,
-                    description=role.description,
-                    created_at=str(role.created_at),
-                    updated_at=str(role.updated_at)
-                ) for role in mqtt_client.user.roles
-            ]
-        )
-    )
-
-    # Now delete the client
+    # Delete the client
     MqttClientService.delete_mqtt_client(mqtt_client_id, db)
-    return response
+    return {"message": "MQTT client deleted successfully"}
+    
 
-# Reset MQTT Client Password
-@router.post("/mqtt-clients/{mqtt_client_id}/reset-password", response_model=MqttClientResponseSchema)
-def reset_mqtt_client_password(
-    mqtt_client_id: int,
-    password_data: MqttClientResetPasswordSchema,
-    db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user)
-):
-    mqtt_client = MqttClientService.get_mqtt_client_by_id(mqtt_client_id, db)
-    if not mqtt_client:
-        raise HTTPException(status_code=404, detail="MQTT Client not found")
-    
-    # Regular users can only reset passwords for their own clients
-    if not is_admin(current_user) and mqtt_client.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to reset password for this MQTT client")
-    
-    mqtt_client = MqttClientService.reset_mqtt_client_password(mqtt_client_id, password_data, db)
-    if not mqtt_client:
-        raise HTTPException(status_code=404, detail="MQTT Client not found")
-    
-    return MqttClientResponseSchema(
-        id=mqtt_client.id,
-        user_id=mqtt_client.user_id,
-        name=mqtt_client.name,
-        description=mqtt_client.description,
-        username=mqtt_client.username,
-        password=mqtt_client.password,
-        config=mqtt_client.config,
-        status=mqtt_client.status,
-        created_at=str(mqtt_client.created_at),
-        updated_at=str(mqtt_client.updated_at),
-        user=UserResponseSchema(
-            id=mqtt_client.user.id,
-            email=mqtt_client.user.email,
-            username=mqtt_client.user.username,
-            fullname=mqtt_client.user.fullname,
-            age=mqtt_client.user.age,
-            gender=mqtt_client.user.gender,
-            created_at=str(mqtt_client.user.created_at),
-            updated_at=str(mqtt_client.user.updated_at),
-            roles=[
-                RoleResponseSchema(
-                    id=role.id,
-                    name=role.name,
-                    description=role.description,
-                    created_at=str(role.created_at),
-                    updated_at=str(role.updated_at)
-                ) for role in mqtt_client.user.roles
-            ]
-        )
-    )
+@router.get("/mqtt-clients/{client_id}/request-validation-code")
+async def request_validation_code(client_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    result = await MqttClientService.request_validation_code(client_id, db)
+    if not result:
+        raise HTTPException(status_code=400, detail="Failed to send validation code")
+    return {"message": "Validation code sent to your email"}
+
+@router.put("/mqtt-clients/{client_id}/update-password")
+def update_mqtt_client_password(client_id: int, validation_code: str, new_password: str, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    result = MqttClientService.update_mqtt_client_password(client_id, validation_code, new_password, db)
+    if isinstance(result, dict) and "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    if not result:
+        raise HTTPException(status_code=404, detail="MQTT client not found or invalid validation code")  
+    return {"message": "Password updated successfully"}

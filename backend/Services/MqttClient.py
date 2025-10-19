@@ -1,15 +1,125 @@
 import os
+import random
+import string
 from sqlalchemy.orm import Session
 from Models import MqttClientModel
 from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema, MqttClientResetPasswordSchema
 import subprocess
 from fastapi import HTTPException
+from Services.Mail import MailService
+from passlib.context import CryptContext
 
 MOSQUITTO_CONFIG_DIR = "/app/mosquitto/config"  # inside container
 PWFILE_PATH = os.path.join(MOSQUITTO_CONFIG_DIR, "pwfile")
 ACLFILE_PATH = os.path.join(MOSQUITTO_CONFIG_DIR, "aclfile")
 
+# Password context for hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 class MqttClientService:
+    
+    @staticmethod
+    def _get_hashed_password_from_pwfile(username: str) -> str:
+        """Retrieve hashed password from pwfile for a given username"""
+        if not os.path.exists(PWFILE_PATH):
+            return None
+            
+        with open(PWFILE_PATH, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith(username + ":"):
+                    return line.split(":", 1)[1]
+        return None
+
+    @staticmethod
+    def _update_password_file(username: str, password: str):
+        """Update or create password entry in mosquitto password file"""
+        try:
+            subprocess.run([
+                "mosquitto_passwd", "-b", PWFILE_PATH,
+                username, password
+            ], check=True)
+        except subprocess.CalledProcessError as e:
+            raise HTTPException(status_code=500, detail=f"Failed to update password in Mosquitto: {str(e)}")
+
+    @staticmethod
+    def _remove_user_from_password_file(username: str):
+        """Remove user from mosquitto password file"""
+        if not os.path.exists(PWFILE_PATH):
+            return
+            
+        # Check if user exists in password file
+        user_exists = False
+        with open(PWFILE_PATH, "r") as f:
+            for line in f:
+                if line.startswith(username + ":"):
+                    user_exists = True
+                    break
+        
+        if user_exists:
+            try:
+                subprocess.run([
+                    "mosquitto_passwd", "-D", PWFILE_PATH, username
+                ], check=True)
+            except subprocess.CalledProcessError as e:
+                raise HTTPException(status_code=500, detail=f"Failed to remove user from password file: {str(e)}")
+
+    @staticmethod
+    def _update_acl_file(old_username: str, new_username: str):
+        """Update ACL file when username changes"""
+        if not os.path.exists(ACLFILE_PATH):
+            return
+            
+        with open(ACLFILE_PATH, "r") as f:
+            acl_lines = f.readlines()
+        
+        # Find and replace username in ACL file
+        updated_acl_lines = []
+        i = 0
+        while i < len(acl_lines):
+            line = acl_lines[i].strip()
+            if line.startswith(f"user {old_username}"):
+                # Replace the user line
+                updated_acl_lines.append(f"user {new_username}\n")
+                i += 1  # Move to next line (topic line)
+                # Keep the topic permissions as is
+                if i < len(acl_lines):
+                    updated_acl_lines.append(acl_lines[i])
+                i += 1  # Move to next line (empty line)
+                # Keep the empty line if exists
+                if i < len(acl_lines) and acl_lines[i].strip() == "":
+                    updated_acl_lines.append(acl_lines[i])
+                    i += 1
+            else:
+                updated_acl_lines.append(acl_lines[i])
+                i += 1
+        
+        # Write updated ACL content back to file
+        with open(ACLFILE_PATH, "w") as f:
+            f.writelines(updated_acl_lines)
+
+    @staticmethod
+    def _remove_user_from_acl_file(username: str):
+        """Remove user and their permissions from ACL file"""
+        if not os.path.exists(ACLFILE_PATH):
+            return
+            
+        with open(ACLFILE_PATH, "r") as f:
+            lines = f.readlines()
+        
+        with open(ACLFILE_PATH, "w") as f:
+            skip = False
+            for line in lines:
+                if line.strip() == f"user {username}":
+                    skip = True
+                    continue
+                if skip:
+                    if line.strip().startswith("topic"):
+                        continue
+                    else:
+                        skip = False
+                f.write(line)
+
     @staticmethod
     def create_mqtt_client(mqtt_client_data: MqttClientCreateSchema, db: Session):
         # Check if client name already exists
@@ -22,21 +132,11 @@ class MqttClientService:
         if existing_client_username:
             raise HTTPException(status_code=400, detail="Client username already exists")
 
-        # Add user to Mosquitto password file (Mosquitto handles hashing)
-        subprocess.run([
-            "mosquitto_passwd", "-b", PWFILE_PATH,
-            mqtt_client_data.username, mqtt_client_data.password
-        ], check=True)
+        # Add user to Mosquitto password file
+        MqttClientService._update_password_file(mqtt_client_data.username, mqtt_client_data.password)
 
         # Retrieve hashed password from pwfile
-        hashed_password = None
-        with open(PWFILE_PATH, "r") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith(mqtt_client_data.username + ":"):
-                    hashed_password = line.split(":", 1)[1]
-                    break
-
+        hashed_password = MqttClientService._get_hashed_password_from_pwfile(mqtt_client_data.username)
         if hashed_password is None:
             raise HTTPException(status_code=500, detail="Failed to retrieve hashed password from pwfile")
 
@@ -65,6 +165,7 @@ class MqttClientService:
             with open(ACLFILE_PATH, "a") as f:
                 f.write(f"user {mqtt_client.username}\n")
                 f.write(f"topic readwrite #\n\n")
+        
         return mqtt_client
 
     @staticmethod
@@ -112,35 +213,34 @@ class MqttClientService:
             new_username = update_data["username"]
             username_changed = True
 
-        # If username changed, update password file entry to copy password to new username
+        # If username changed, handle password file and ACL updates
         if username_changed:
-            # Read the current password for old username
-            old_hashed_password = None
-            with open(PWFILE_PATH, "r") as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith(old_username + ":"):
-                        old_hashed_password = line.split(":", 1)[1]
-                        break
+            # Get the current password hash for the old username
+            current_password_hash = MqttClientService._get_hashed_password_from_pwfile(old_username)
             
-            if old_hashed_password:
-                # Create new entry with new username and old password
-                subprocess.run([
-                    "mosquitto_passwd", "-b", PWFILE_PATH,
-                    new_username, "temp_password_placeholder"
-                ], check=True)
+            if current_password_hash:
+                # Remove old username from password file
+                MqttClientService._remove_user_from_password_file(old_username)
                 
-                # Replace the temp password with the actual hashed password
+                # Create new entry with new username and current password
+                # We need to use a temporary password first, then manually update the hash
+                temp_password = "temp_" + ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+                MqttClientService._update_password_file(new_username, temp_password)
+                
+                # Now replace the temp password entry with the actual hash
                 with open(PWFILE_PATH, "r") as f:
                     lines = f.readlines()
                 
                 with open(PWFILE_PATH, "w") as f:
                     for line in lines:
                         if line.startswith(new_username + ":"):
-                            # Replace the line with old hashed password
-                            f.write(f"{new_username}:{old_hashed_password}\n")
+                            # Replace the line with the old hashed password
+                            f.write(f"{new_username}:{current_password_hash}\n")
                         else:
                             f.write(line)
+                
+                # Update ACL file
+                MqttClientService._update_acl_file(old_username, new_username)
 
         # Update DB fields
         for key in ["name", "description", "username", "status", "config"]:
@@ -150,43 +250,6 @@ class MqttClientService:
         db.commit()
         db.refresh(mqtt_client)
 
-        # Handle ACL update if username changed
-        if username_changed:
-            # Read current ACL content
-            if os.path.exists(ACLFILE_PATH):
-                with open(ACLFILE_PATH, "r") as f:
-                    acl_lines = f.readlines()
-                
-                # Find and replace username in ACL file
-                updated_acl_lines = []
-                i = 0
-                while i < len(acl_lines):
-                    line = acl_lines[i].strip()
-                    if line.startswith(f"user {old_username}"):
-                        # Replace the user line
-                        updated_acl_lines.append(f"user {new_username}\n")
-                        i += 1  # Move to next line (topic line)
-                        # Keep the topic permissions as is
-                        if i < len(acl_lines):
-                            updated_acl_lines.append(acl_lines[i])
-                        i += 1  # Move to next line (empty line)
-                        # Keep the empty line if exists
-                        if i < len(acl_lines) and acl_lines[i].strip() == "":
-                            updated_acl_lines.append(acl_lines[i])
-                            i += 1
-                    else:
-                        updated_acl_lines.append(acl_lines[i])
-                        i += 1
-                
-                # Write updated ACL content back to file
-                with open(ACLFILE_PATH, "w") as f:
-                    f.writelines(updated_acl_lines)
-            
-            # Remove old username from password file
-            subprocess.run([
-                "mosquitto_passwd", "-D", PWFILE_PATH, old_username
-            ], check=True)
-
         return mqtt_client
 
     @staticmethod
@@ -195,35 +258,11 @@ class MqttClientService:
         if not mqtt_client:
             raise HTTPException(status_code=404, detail="MQTT client not found")
 
-        # Remove from pwfile only if user exists
-        user_exists = False
-        if os.path.exists(PWFILE_PATH):
-            with open(PWFILE_PATH, "r") as f:
-                for line in f:
-                    if line.startswith(mqtt_client.username + ":"):
-                        user_exists = True
-                        break
-        if user_exists:
-            subprocess.run([
-                "mosquitto_passwd", "-D", PWFILE_PATH, mqtt_client.username
-            ], check=True)
+        # Remove from password file
+        MqttClientService._remove_user_from_password_file(mqtt_client.username)
 
         # Remove from ACL
-        if os.path.exists(ACLFILE_PATH):
-            with open(ACLFILE_PATH, "r") as f:
-                lines = f.readlines()
-            with open(ACLFILE_PATH, "w") as f:
-                skip = False
-                for line in lines:
-                    if line.strip() == f"user {mqtt_client.username}":
-                        skip = True
-                        continue
-                    if skip:
-                        if line.strip().startswith("topic"):
-                            continue
-                        else:
-                            skip = False
-                    f.write(line)
+        MqttClientService._remove_user_from_acl_file(mqtt_client.username)
 
         # Delete from DB
         db.delete(mqtt_client)
@@ -231,35 +270,50 @@ class MqttClientService:
         return mqtt_client
 
     @staticmethod
-    def reset_mqtt_client_password(mqtt_client_id: int, password_data: MqttClientResetPasswordSchema, db: Session):
-        mqtt_client = db.query(MqttClientModel).filter(MqttClientModel.id == mqtt_client_id).first()
-        if not mqtt_client:
-            raise HTTPException(status_code=404, detail="MQTT client not found")
-
+    def update_mqtt_client_password(client_id: int, validation_code: str, new_password: str, db: Session):
+        client = db.query(MqttClientModel).filter(MqttClientModel.id == client_id).first()
+        if not client:
+            return None
+        
+        if client.validation_code != validation_code:
+            return None
+        
         # Update password in Mosquitto password file
-        try:
-            subprocess.run([
-                "mosquitto_passwd", "-b", PWFILE_PATH,
-                mqtt_client.username, password_data.password
-            ], check=True)
-        except subprocess.CalledProcessError as e:
-            raise HTTPException(status_code=500, detail=f"Failed to update password in Mosquitto: {str(e)}")
-
+        MqttClientService._update_password_file(client.username, new_password)
+        
         # Retrieve hashed password from pwfile
-        hashed_password = None
-        with open(PWFILE_PATH, "r") as f:
-            for line in f:
-                line = line.strip()
-                if line.startswith(mqtt_client.username + ":"):
-                    hashed_password = line.split(":", 1)[1]
-                    break
-
+        hashed_password = MqttClientService._get_hashed_password_from_pwfile(client.username)
         if hashed_password is None:
             raise HTTPException(status_code=500, detail="Failed to retrieve hashed password from pwfile")
-
+        
         # Update password in database
-        mqtt_client.password = hashed_password
+        client.password = hashed_password
+        
+        # Generate new validation code after password change
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        client.validation_code = code
+        
         db.commit()
-        db.refresh(mqtt_client)
+        db.refresh(client)
+        return client
 
-        return mqtt_client
+    @staticmethod
+    async def request_validation_code(client_id: int, db: Session):
+        client = db.query(MqttClientModel).filter(MqttClientModel.id == client_id).first()
+        
+        if not client:
+            return None
+        
+        email = client.user.email
+        
+        if not client.validation_code:
+            # Generate new validation code if not present
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+            client.validation_code = code
+            db.commit()
+            db.refresh(client)
+            
+        # Send email with the validation code
+        await MailService.send_email(email, client.validation_code, subject=f"MQTT Client: {client.name}, Validation Code")
+        
+        return True

@@ -14,6 +14,7 @@ class MqttClientModel(Base):
     password = Column(String, nullable=False)
     config = Column(JSON, nullable=False)
     status = Column(Boolean, nullable=False)
+    validation_code = Column(String(6), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
