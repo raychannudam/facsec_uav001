@@ -58,7 +58,7 @@
     </div>
 </template>
 <script>
-import { useControllerStore } from '@/stores/Controller';
+import { useControllerStore } from '@/stores/ControllerStore';
 export default {
     setup() {
         const controllerStore = useControllerStore();
