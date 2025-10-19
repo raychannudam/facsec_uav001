@@ -1,7 +1,7 @@
 services:
   pgdb_facsec:
     container_name: pgdb_facsec
-    image: postgres
+    image: postgres:18
     restart: always
     ports:
       - 5433:5432
