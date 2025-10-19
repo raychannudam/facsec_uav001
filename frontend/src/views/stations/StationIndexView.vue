@@ -87,11 +87,11 @@
             </div>
           </div>
         </div>
-        <div id="map" style="height: 50vh;" class="rounded-md z-30"></div>
+        <div id="map" style="height: 55vh;" class="rounded-md z-30"></div>
       </div>
     </div>
     <div>
-      {{ clickedStation }}
+       <StationDetailView :station-data="clickedStation"></StationDetailView>
     </div>
   </div>
 
@@ -99,6 +99,7 @@
 
 <script>
 import StationCreateFormComponent from '@/components/stations/StationCreateFormComponent.vue';
+import StationDetailView from './StationDetailView.vue';
 import { useAppStore } from '@/stores/AppStore';
 import { useStationStore } from '@/stores/StationStore';
 import L from 'leaflet';
@@ -126,7 +127,8 @@ export default {
     }
   },
   components: {
-    StationCreateFormComponent
+    StationCreateFormComponent,
+    StationDetailView
   },
   async mounted() {
     await this.getAllStations();
