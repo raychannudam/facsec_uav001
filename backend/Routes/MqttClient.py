@@ -35,6 +35,7 @@ def create_mqtt_client(
         description=new_mqtt_client.description,
         username=new_mqtt_client.username,
         password=new_mqtt_client.password,
+        raw_password=new_mqtt_client.raw_password,
         config=new_mqtt_client.config,
         status=new_mqtt_client.status,
         created_at=str(new_mqtt_client.created_at),
@@ -127,6 +128,7 @@ def get_mqtt_client(
         description=mqtt_client.description,
         username=mqtt_client.username,
         password=mqtt_client.password,
+        raw_password=mqtt_client.raw_password,
         config=mqtt_client.config,
         status=mqtt_client.status,
         created_at=str(mqtt_client.created_at),
@@ -197,13 +199,35 @@ def delete_mqtt_client(
 
 @router.get("/mqtt-clients/{client_id}/request-validation-code")
 async def request_validation_code(client_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    mqtt_client = MqttClientService.get_mqtt_client_by_id(client_id, db)
+    if not mqtt_client:
+        raise HTTPException(status_code=404, detail="MQTT Client not found")
+    
+    # Regular users can only request validation codes for their own clients
+    if not is_admin(current_user) and mqtt_client.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to request validation code for this MQTT client")
+    
     result = await MqttClientService.request_validation_code(client_id, db)
     if not result:
         raise HTTPException(status_code=400, detail="Failed to send validation code")
     return {"message": "Validation code sent to your email"}
 
 @router.put("/mqtt-clients/{client_id}/update-password")
-def update_mqtt_client_password(client_id: int, validation_code: str, new_password: str, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+def update_mqtt_client_password(
+    client_id: int, 
+    validation_code: str, 
+    new_password: str, 
+    db: Session = Depends(get_db), 
+    current_user: UserModel = Depends(get_current_user)
+):
+    mqtt_client = MqttClientService.get_mqtt_client_by_id(client_id, db)
+    if not mqtt_client:
+        raise HTTPException(status_code=404, detail="MQTT Client not found")
+    
+    # Regular users can only update passwords for their own clients
+    if not is_admin(current_user) and mqtt_client.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update password for this MQTT client")
+    
     result = MqttClientService.update_mqtt_client_password(client_id, validation_code, new_password, db)
     if isinstance(result, dict) and "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
