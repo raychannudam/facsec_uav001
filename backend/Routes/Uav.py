@@ -8,6 +8,7 @@ from Schemas.Station import StationResponseSchema
 from Schemas.User import UserResponseSchema
 from Schemas.Role import RoleResponseSchema
 from Services.Uav import UavService
+from Services.Controller import ControllerService
 from Security.jwt import get_current_user
 
 router = APIRouter()
@@ -529,6 +530,18 @@ def delete_uav(
             raise HTTPException(status_code=403, detail="Not authorized to delete this UAV (no streaming client assigned)")
         if uav.streaming_client.user_id != current_user.id:
             raise HTTPException(status_code=403, detail="Not authorized to delete this UAV")
+    
+    # --- Prevent deletion if used by any controller ---
+    controllers = ControllerService.get_controllers(db, current_user)
+    for controller in controllers:
+        config = getattr(controller, "config", {})
+        if not config:
+            continue
+        if config.get("selectedDrone").get("id") == uav_id:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot delete UAV {uav.name} because it is used in a controller."
+            )
     
     # Build response before deletion
     mqtt_client_response = None

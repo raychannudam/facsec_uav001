@@ -5,6 +5,7 @@ from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema, M
 from Schemas.User import UserResponseSchema
 from Schemas.Role import RoleResponseSchema
 from Services.MqttClient import MqttClientService
+from Services.Controller import ControllerService
 from Security.jwt import get_current_user
 
 router = APIRouter()
@@ -192,6 +193,22 @@ def delete_mqtt_client(
     if not is_admin(current_user) and mqtt_client.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this MQTT client")
     
+    # --- Prevent deletion if used by any controller ---
+    controllers = ControllerService.get_controllers(db, current_user)
+    for controller in controllers:
+        print("Heelo: ", controller)
+        config = getattr(controller, "config", {})
+        if not config:
+            continue
+        selected_drone = config.get("selectedDrone")
+        if selected_drone:
+            if selected_drone.get("mqtt_client_id") == mqtt_client_id:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Cannot delete MQTT client {mqtt_client.name} because it is used in drone {selected_drone.get('name')}."
+                )
+
+
     # Delete the client
     MqttClientService.delete_mqtt_client(mqtt_client_id, db)
     return {"message": "MQTT client deleted successfully"}
