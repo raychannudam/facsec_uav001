@@ -2,17 +2,18 @@
     <div class="flex flex-row space-x-3 items-center justify-start relative">
         <p class="text-sm">{{ name }}</p>
         <button :id="id + 'Button'" :data-dropdown-toggle="id" data-dropdown-placement="bottom"
-            class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center  flex-1  dark:focus:ring-blue-800 border border-blue-600 shadow-blue-50"
+            class="focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center  flex-1  dark:focus:ring-blue-800 border border-blue-600 shadow-blue-50"
             type="button">
             <p class="flex-1 start" v-if="!selectTopic">{{ dropDownDesc }}</p>
-            <p class="flex-1 start" v-else>{{ selectTopic.name }}</p> <svg class="w-2.5 h-2.5 ms-3"
-                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <p class="flex-1 start" v-else>{{ selectTopic.name }}</p> <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="m1 1 4 4 4-4" />
             </svg>
         </button>
         <!-- Dropdown menu -->
-        <div :id="id" class="z-10 hidden bg-white rounded-lg shadow-sm w-full dark:bg-gray-700">
+        <div :id="id"
+            class="z-50 hidden bg-white border border-gray-200 rounded-lg shadow-sm w-full dark:bg-gray-700 dark:border-gray-600">
             <div class="p-3">
                 <label :for="'search' + id" class="sr-only">Search</label>
                 <div class="relative">
@@ -37,40 +38,40 @@
                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                         <label :for="'checkbox-item-' + id + '-' + item.name"
                             class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">{{
-                            item.name }}</label>
+                                item.name }}</label>
                     </div>
                 </li>
             </ul>
         </div>
         <div class="relative" v-if="type != 'slider'">
-            <input type="text" :id="id+'on'" v-model="onPayload"
+            <input type="text" :id="id + 'on'" v-model="onPayload"
                 class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-24 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" " />
-            <label :for="id+'on'"
+            <label :for="id + 'on'"
                 class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">On
                 Payload</label>
         </div>
         <div class="relative" v-else>
-            <input type="text" :id="id+'min'" v-model="minPayload"
+            <input type="text" :id="id + 'min'" v-model="minPayload"
                 class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-24 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" " />
-            <label :for="id+'min'"
+            <label :for="id + 'min'"
                 class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Min
                 Payload</label>
         </div>
         <div class="relative" v-if="type != 'slider'">
-            <input type="text" :id="id+'off'" v-model="offPayload"
+            <input type="text" :id="id + 'off'" v-model="offPayload"
                 class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-24 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" " />
-            <label :for="id+'off'"
+            <label :for="id + 'off'"
                 class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Off
                 Payload</label>
         </div>
         <div class="relative" v-else>
-            <input type="text" :id="id+'max'" v-model="maxPayload"
+            <input type="text" :id="id + 'max'" v-model="maxPayload"
                 class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-24 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" " />
-            <label :for="id+'max'"
+            <label :for="id + 'max'"
                 class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Max
                 Payload</label>
         </div>
@@ -114,22 +115,22 @@ export default {
 
         }
     },
-    mounted(){
+    mounted() {
         initFlowbite();
         if (this.selected.selectedTopic &&
-            Object.keys(this.selected.selectedTopic).length != 0){
+            Object.keys(this.selected.selectedTopic).length != 0) {
             this.selectTopic = this.selected.selectedTopic
         }
-        if (this.selected.onPayload != ""){
+        if (this.selected.onPayload != "") {
             this.onPayload = this.selected.onPayload
         }
-        if (this.selected.offPayload != ""){
+        if (this.selected.offPayload != "") {
             this.offPayload = this.selected.offPayload
         }
-        if(this.selected.minPayload != ""){
+        if (this.selected.minPayload != "") {
             this.minPayload = this.selected.minPayload
         }
-        if(this.selected.maxPayload != ""){
+        if (this.selected.maxPayload != "") {
             this.maxPayload = this.selected.maxPayload
         }
     },
