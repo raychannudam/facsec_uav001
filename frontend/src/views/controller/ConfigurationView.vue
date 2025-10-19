@@ -124,7 +124,7 @@ import { initFlowbite } from 'flowbite';
 import { useUavStore } from '@/stores/UavStore';
 import { useAppStore } from '@/stores/AppStore';
 import { useSettingStore } from '@/stores/SettingStore';
-import { useControllerStore } from '@/stores/Controller';
+import { useControllerStore } from '@/stores/ControllerStore';
 import TopicAssignComponent from '@/components/controller/TopicAssignComponent.vue';
 import StreamingUrlAssignComponent from '@/components/controller/StreamingUrlAssignComponent.vue';
 export default {
