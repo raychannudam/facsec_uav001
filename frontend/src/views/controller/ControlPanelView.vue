@@ -51,5 +51,81 @@
             </div>
         </div>
         <hr class="border-0.5 border-gray-200">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+            <!-- Buttons Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+                <div class="flex items-center gap-2 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                    </svg>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">Buttons</h3>
+                </div>
+                <div class="space-y-2">
+                    <ControlButton v-for="button in controllerStore.buttons" :key="button.id" :button="button"
+                        @trigger="handleButtonClick" />
+                </div>
+            </div>
+
+            <!-- Switches Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+                <div class="flex items-center gap-2 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">Switches</h3>
+                </div>
+                <div class="space-y-2">
+                    <ControlSwitch v-for="switchItem in controllerStore.switches" :key="switchItem.id"
+                        :switchData="switchItem" @toggle="handleSwitchToggle" />
+                </div>
+            </div>
+
+            <!-- Sliders Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+                <div class="flex items-center gap-2 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                    </svg>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">Sliders</h3>
+                </div>
+                <div class="space-y-3">
+                    <ControlSlider v-for="slider in controllerStore.sliders" :key="slider.id" :slider="slider"
+                        @change="handleSliderChange" />
+                </div>
+            </div>
+        </div>
     </div>
 </template>
+
+<script setup>
+import { onMounted } from 'vue';
+import ControlButton from '@/components/controller/ControlButton.vue';
+import ControlSlider from '@/components/controller/ControlSlider.vue';
+import ControlSwitch from '@/components/controller/ControlSwitch.vue';
+import { useControllerStore } from '@/stores/ControllerStore';
+
+const controllerStore = useControllerStore();
+
+onMounted(async () => {
+    await controllerStore.getAllControllers();
+});
+
+const handleButtonClick = (data) => {
+    console.log('Button clicked:', data);
+};
+
+const handleSwitchToggle = (data) => {
+    console.log('Switch toggled:', data);
+};
+
+const handleSliderChange = (data) => {
+    console.log('Slider changed:', data);
+};
+</script>
