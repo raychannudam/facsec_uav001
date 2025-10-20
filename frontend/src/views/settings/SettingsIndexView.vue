@@ -71,8 +71,10 @@ export default {
     },
     async mounted() {
         initFlowbite();
+        this.appStore.displayPageLoading(true);
         await this.getAllMqttClients();
         await this.getAllStreamingClients();
+        this.appStore.displayPageLoading(false);
 
     },
     methods: {
@@ -86,19 +88,13 @@ export default {
             }
         },
         async getAllMqttClients() {
-            this.appStore.displayPageLoading(true)
             let res = await this.settingStore.getAllMqttClients();
-            this.appStore.displayPageLoading(false)
-            this.appStore.displayRightToast(res.status, res.message);
             if (res.status == "success") {
                 this.allMqttClients = res.data
             }
         },
         async getAllStreamingClients() {
-            this.appStore.displayPageLoading(true)
             let res = await this.settingStore.getAllStreamingClients();
-            this.appStore.displayPageLoading(false)
-            this.appStore.displayRightToast(res.status, res.message);
             if (res.status == "success") {
                 this.allStreamingClients = res.data
             }

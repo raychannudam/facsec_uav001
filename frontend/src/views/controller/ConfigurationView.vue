@@ -167,10 +167,10 @@ export default {
                     { id: 'swt2', type: 'switch', name: "Switch 02", onPayload: "1", offPayload: "0", selectedTopic: {} },
                     { id: 'swt3', type: 'switch', name: "Switch 03", onPayload: "1", offPayload: "0", selectedTopic: {} },
                     { id: 'swt4', type: 'switch', name: "Switch 04", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'sld1', type: 'slider', name: "Slider 01", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
-                    { id: 'sld2', type: 'slider', name: "Slider 02", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
-                    { id: 'sld3', type: 'slider', name: "Slider 03", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
-                    { id: 'sld4', type: 'slider', name: "Slider 04", maxPayload: "100", minPayload: "1000", selectedTopic: {} },
+                    { id: 'sld1', type: 'slider', name: "Slider 01", maxPayload: "1000", minPayload: "100", selectedTopic: {} },
+                    { id: 'sld2', type: 'slider', name: "Slider 02", maxPayload: "1000", minPayload: "100", selectedTopic: {} },
+                    { id: 'sld3', type: 'slider', name: "Slider 03", maxPayload: "1000", minPayload: "100", selectedTopic: {} },
+                    { id: 'sld4', type: 'slider', name: "Slider 04", maxPayload: "1000", minPayload: "100", selectedTopic: {} },
                 ],
             }
         }
