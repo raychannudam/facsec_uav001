@@ -2,6 +2,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from Models import StreamingUrlModel, StreamingClientModel
 from Schemas.StreamingUrl import StreamingUrlCreateSchema, StreamingUrlUpdateSchema
+from Services.Controller import ControllerService
+from Models.Users import UserModel
+from Models.Controller import ControllerModel
+from fastapi import HTTPException
 
 class StreamingUrlService:
     
@@ -81,10 +85,23 @@ class StreamingUrlService:
             return {"error": "Streaming URL name already exists for this streaming client"}
 
     @staticmethod
-    def delete_streaming_url(url_id: int, db: Session):
+    def delete_streaming_url(url_id: int, db: Session, current_user: UserModel):
         url = db.query(StreamingUrlModel).filter(StreamingUrlModel.id == url_id).first()
         if not url:
             return None
+        controllers: list[ControllerModel] = ControllerService.get_controllers(db=db, current_user=current_user)
+        controller_config = controllers[0].config if len(controllers) > 0 else None
+        if controller_config:
+            if len(controller_config['streamingUrls']) > 0:
+                found_topic = next(
+                    (
+                        item for item in controller_config['streamingUrls']
+                        if 'selectedUrl' in item and item['selectedUrl'] and item['selectedUrl'].get('id') == url_id
+                    ),
+                    None
+                )
+                if found_topic:
+                    raise HTTPException(status_code=403, detail="This streaming URL is existed in controller")
         db.delete(url)
         db.commit()
         return url

@@ -31,52 +31,7 @@ def create_streaming_url(
     if isinstance(result, dict) and "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
     
-    streaming_client = result.streaming_client
-    user = streaming_client.user
-    roles = [
-        RoleResponseSchema(
-            id=role.id,
-            name=role.name,
-            description=role.description,
-            created_at=str(role.created_at),
-            updated_at=str(role.updated_at)
-        ) for role in user.roles
-    ]
-    
-    return StreamingUrlResponseSchema(
-        id=result.id,
-        streaming_client_id=result.streaming_client_id,
-        name=result.name,
-        description=result.description,
-        config=result.config,
-        status=result.status,
-        created_at=str(result.created_at),
-        updated_at=str(result.updated_at),
-        streaming_client=StreamingClientResponseSchema(
-            id=streaming_client.id,
-            user_id=streaming_client.user_id,
-            name=streaming_client.name,
-            description=streaming_client.description,
-            username=streaming_client.username,
-            password=streaming_client.password,
-            config=streaming_client.config,
-            status=streaming_client.status,
-            validation_code=streaming_client.validation_code,
-            created_at=str(streaming_client.created_at),
-            updated_at=str(streaming_client.updated_at),
-            user=UserResponseSchema(
-                id=user.id,
-                email=user.email,
-                username=user.username,
-                fullname=user.fullname,
-                age=user.age,
-                gender=user.gender,
-                created_at=str(user.created_at),
-                updated_at=str(user.updated_at),
-                roles=roles
-            )
-        )
-    )
+    return result
 
 @router.get("/streaming-urls/{streaming_client_id}", response_model=list[StreamingUrlResponseSchema])
 def get_streaming_urls(
@@ -92,50 +47,7 @@ def get_streaming_urls(
         raise HTTPException(status_code=403, detail="Not authorized to access streaming URLs for this streaming client")
     
     urls = StreamingUrlService.get_streaming_urls(streaming_client_id, db)
-    return [
-        StreamingUrlResponseSchema(
-            id=u.id,
-            streaming_client_id=u.streaming_client_id,
-            name=u.name,
-            description=u.description,
-            config=u.config,
-            status=u.status,
-            created_at=str(u.created_at),
-            updated_at=str(u.updated_at),
-            streaming_client=StreamingClientResponseSchema(
-                id=u.streaming_client.id,
-                user_id=u.streaming_client.user_id,
-                name=u.streaming_client.name,
-                description=u.streaming_client.description,
-                username=u.streaming_client.username,
-                password=u.streaming_client.password,
-                config=u.streaming_client.config,
-                status=u.streaming_client.status,
-                validation_code=u.streaming_client.validation_code,
-                created_at=str(u.streaming_client.created_at),
-                updated_at=str(u.streaming_client.updated_at),
-                user=UserResponseSchema(
-                    id=u.streaming_client.user.id,
-                    email=u.streaming_client.user.email,
-                    username=u.streaming_client.user.username,
-                    fullname=u.streaming_client.user.fullname,
-                    age=u.streaming_client.user.age,
-                    gender=u.streaming_client.user.gender,
-                    created_at=str(u.streaming_client.user.created_at),
-                    updated_at=str(u.streaming_client.user.updated_at),
-                    roles=[
-                        RoleResponseSchema(
-                            id=role.id,
-                            name=role.name,
-                            description=role.description,
-                            created_at=str(role.created_at),
-                            updated_at=str(role.updated_at)
-                        ) for role in u.streaming_client.user.roles
-                    ]
-                )
-            )
-        ) for u in urls
-    ]
+    return urls
 
 @router.get("/streaming-urls/single/{url_id}", response_model=StreamingUrlResponseSchema)
 def get_streaming_url(
@@ -152,51 +64,7 @@ def get_streaming_url(
     if not is_admin(current_user) and streaming_client.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to access this streaming URL")
     
-    user = streaming_client.user
-    roles = [
-        RoleResponseSchema(
-            id=role.id,
-            name=role.name,
-            description=role.description,
-            created_at=str(role.created_at),
-            updated_at=str(role.updated_at)
-        ) for role in user.roles
-    ]
-    
-    return StreamingUrlResponseSchema(
-        id=url.id,
-        streaming_client_id=url.streaming_client_id,
-        name=url.name,
-        description=url.description,
-        config=url.config,
-        status=url.status,
-        created_at=str(url.created_at),
-        updated_at=str(url.updated_at),
-        streaming_client=StreamingClientResponseSchema(
-            id=streaming_client.id,
-            user_id=streaming_client.user_id,
-            name=streaming_client.name,
-            description=streaming_client.description,
-            username=streaming_client.username,
-            password=streaming_client.password,
-            config=streaming_client.config,
-            status=streaming_client.status,
-            validation_code=streaming_client.validation_code,
-            created_at=str(streaming_client.created_at),
-            updated_at=str(streaming_client.updated_at),
-            user=UserResponseSchema(
-                id=user.id,
-                email=user.email,
-                username=user.username,
-                fullname=user.fullname,
-                age=user.age,
-                gender=user.gender,
-                created_at=str(user.created_at),
-                updated_at=str(user.updated_at),
-                roles=roles
-            )
-        )
-    )
+    return url
 
 @router.put("/streaming-urls/{url_id}", response_model=StreamingUrlResponseSchema)
 def update_streaming_url(
@@ -231,52 +99,7 @@ def update_streaming_url(
     if not url:
         raise HTTPException(status_code=404, detail="Streaming URL not found")
     
-    streaming_client = url.streaming_client
-    user = streaming_client.user
-    roles = [
-        RoleResponseSchema(
-            id=role.id,
-            name=role.name,
-            description=role.description,
-            created_at=str(role.created_at),
-            updated_at=str(role.updated_at)
-        ) for role in user.roles
-    ]
-    
-    return StreamingUrlResponseSchema(
-        id=url.id,
-        streaming_client_id=url.streaming_client_id,
-        name=url.name,
-        description=url.description,
-        config=url.config,
-        status=url.status,
-        created_at=str(url.created_at),
-        updated_at=str(url.updated_at),
-        streaming_client=StreamingClientResponseSchema(
-            id=streaming_client.id,
-            user_id=streaming_client.user_id,
-            name=streaming_client.name,
-            description=streaming_client.description,
-            username=streaming_client.username,
-            password=streaming_client.password,
-            config=streaming_client.config,
-            status=streaming_client.status,
-            validation_code=streaming_client.validation_code,
-            created_at=str(streaming_client.created_at),
-            updated_at=str(streaming_client.updated_at),
-            user=UserResponseSchema(
-                id=user.id,
-                email=user.email,
-                username=user.username,
-                fullname=user.fullname,
-                age=user.age,
-                gender=user.gender,
-                created_at=str(user.created_at),
-                updated_at=str(user.updated_at),
-                roles=roles
-            )
-        )
-    )
+    return url
 
 @router.delete("/streaming-urls/{url_id}", response_model=StreamingUrlResponseSchema)
 def delete_streaming_url(
@@ -293,53 +116,6 @@ def delete_streaming_url(
     if not is_admin(current_user) and streaming_client.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to delete this streaming URL")
     
-    # Build response before deletion
-    user = streaming_client.user
-    roles = [
-        RoleResponseSchema(
-            id=role.id,
-            name=role.name,
-            description=role.description,
-            created_at=str(role.created_at),
-            updated_at=str(role.updated_at)
-        ) for role in user.roles
-    ]
-    
-    response = StreamingUrlResponseSchema(
-        id=url.id,
-        streaming_client_id=url.streaming_client_id,
-        name=url.name,
-        description=url.description,
-        config=url.config,
-        status=url.status,
-        created_at=str(url.created_at),
-        updated_at=str(url.updated_at),
-        streaming_client=StreamingClientResponseSchema(
-            id=streaming_client.id,
-            user_id=streaming_client.user_id,
-            name=streaming_client.name,
-            description=streaming_client.description,
-            username=streaming_client.username,
-            password=streaming_client.password,
-            config=streaming_client.config,
-            status=streaming_client.status,
-            validation_code=streaming_client.validation_code,
-            created_at=str(streaming_client.created_at),
-            updated_at=str(streaming_client.updated_at),
-            user=UserResponseSchema(
-                id=user.id,
-                email=user.email,
-                username=user.username,
-                fullname=user.fullname,
-                age=user.age,
-                gender=user.gender,
-                created_at=str(user.created_at),
-                updated_at=str(user.updated_at),
-                roles=roles
-            )
-        )
-    )
-    
     # Now delete the URL
-    StreamingUrlService.delete_streaming_url(url_id, db)
-    return response
+    StreamingUrlService.delete_streaming_url(url_id, db, current_user)
+    return url
