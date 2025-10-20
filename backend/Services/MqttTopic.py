@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from Models import MqttTopicModel, UserModel, MqttClientModel
 from Schemas.MqttTopic import MqttTopicCreateSchema, MqttTopicUpdateSchema
 from fastapi import HTTPException
+from Services import Controller
 import os
 
 MOSQUITTO_CONFIG_DIR = "/app/mosquitto/config"  # inside container
