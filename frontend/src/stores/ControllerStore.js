@@ -30,7 +30,11 @@ export const useControllerStore = defineStore("controller", () => {
         let message = "";
         let data = undefined;
         try {
-            const response = await api.get("/api/v1/controllers");
+            const response = await api.get("/api/v1/controllers", {
+                headers:{
+                    "Content-Type": "application/json"
+                }
+            });
             controllers.value = response.data;
             data = response.data;
             if (response.data.length > 0 && !selectedController.value) {
