@@ -11,12 +11,12 @@ router = APIRouter(
     tags=["controllers"]
 )
 
-@router.post("/", response_model=ControllerResponseSchema)
+@router.post("", response_model=ControllerResponseSchema)
 def create_controller(controller: ControllerCreateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     created = ControllerService.create_controller(controller, db, current_user)
     return created
 
-@router.get("/", response_model=List[ControllerResponseSchema])
+@router.get("", response_model=List[ControllerResponseSchema])
 def get_controllers(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     return ControllerService.get_controllers(db, current_user)
 
