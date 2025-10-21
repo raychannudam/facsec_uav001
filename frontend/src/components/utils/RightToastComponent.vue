@@ -1,9 +1,9 @@
 <template>
     <div v-if="appStore.isDisplayRightToast" id="toast-bottom-right"
-        class="fixed z-50 flex items-center justify-end w-full max-w-xl p-4 space-x-4 text-gray-50 divide-x rtl:divide-x-reverse rounded-lg right-5 bottom-5 dark:text-gray-400"
+        class="fixed z-50 flex items-center justify-end w-full max-w-4xl p-4 space-x-4 text-gray-50 divide-x rtl:divide-x-reverse rounded-lg right-5 bottom-5 dark:text-gray-400"
         role="alert">
         <div v-if="status == 'success'" id="toast-success"
-            class="flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800"
+            class="flex items-center w-full max-w-md p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800"
             role="alert">
             <div
                 class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-green-500 bg-green-100 rounded-lg dark:bg-green-800 dark:text-green-200">
@@ -27,7 +27,7 @@
             </button>
         </div>
         <div v-if="status == 'fail'" id="toast-danger"
-            class="flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800"
+            class="flex items-center w-full max-w-md p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800"
             role="alert">
             <div
                 class="inline-flex items-center justify-center shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
@@ -75,7 +75,7 @@
             </button>
         </div>
         <div v-if="status == 'info'" id="toast-simple"
-            class="flex items-center w-full max-w-xs p-4 space-x-4 rtl:space-x-reverse text-gray-500 bg-white divide-x rtl:divide-x-reverse divide-gray-200 rounded-lg shadow-sm dark:text-gray-400 dark:divide-gray-700 dark:bg-gray-800"
+            class="flex items-center w-full max-w-md p-4 space-x-4 rtl:space-x-reverse text-gray-500 bg-white divide-x rtl:divide-x-reverse divide-gray-200 rounded-lg shadow-sm dark:text-gray-400 dark:divide-gray-700 dark:bg-gray-800"
             role="alert">
             <svg class="w-6 h-6 text-blue-600 dark:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                 width="24" height="24" fill="none" viewBox="0 0 24 24">

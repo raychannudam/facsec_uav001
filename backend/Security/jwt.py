@@ -198,32 +198,43 @@ def mediamtx_login(login_req: StreamingLoginSchema, db: Session = Depends(get_db
         )
     
     # Check if the user has access to the requested path
-    streaming_url = db.query(StreamingUrlModel).filter(StreamingUrlModel.streaming_client_id == streaming_client.id, StreamingUrlModel.status == True).first()
-    if not streaming_url:
+    streaming_urls = db.query(StreamingUrlModel).filter(
+    StreamingUrlModel.streaming_client_id == streaming_client.id,
+    StreamingUrlModel.status == True
+    ).all()
+
+    # Check if there are any active streaming URLs
+    if not streaming_urls:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No active streaming URLs found for this client",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    if path != streaming_url.name:
+
+    # Loop through streaming URLs to find a match
+    streaming_url = next((url for url in streaming_urls if url.name == path), None)
+    if not streaming_url:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Access to the {path} path is forbidden",
+            detail=f"Access to the '{path}' path is forbidden",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    if protocol not in streaming_url.config["protocols"]:
+
+    # Check allowed protocols
+    if protocol not in streaming_url.config.get("protocols", []):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Protocol '{protocol}' is not allowed for this path",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    if action not in streaming_client.config["actions"]:
+
+    # Check allowed actions
+    if action not in streaming_client.config.get("actions", []):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Action '{action}' is not permitted",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     return {"status": "success"}
 
