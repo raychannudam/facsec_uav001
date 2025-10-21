@@ -198,7 +198,6 @@ export default {
             }
         },
         assignStreamingUrl(data) {
-            // console.log(data)
             const streamingUrl = this.config.streamingUrls.find(item => item.id == data.id)
             if (streamingUrl) {
                 streamingUrl.selectedUrl = data.selectedUrl
@@ -220,8 +219,6 @@ export default {
                     this.config.mqttTopics = this.myController.config['mqttTopics']
                 }
             }
-            // console.log(this.config)
-
         },
         async updateController() {
             if (this.isEditing == true) {

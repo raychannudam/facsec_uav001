@@ -60,7 +60,9 @@ class MqttTopicService:
         return mqtt_topic
 
     @staticmethod
-    def get_mqtt_topics(db: Session):
+    def get_mqtt_topics(db: Session, mqtt_client_id: int = None):
+        if mqtt_client_id is not None:
+            return db.query(MqttTopicModel).filter(MqttTopicModel.mqtt_client_id == mqtt_client_id).all()
         return db.query(MqttTopicModel).all()
 
     @staticmethod

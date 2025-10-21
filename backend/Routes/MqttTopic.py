@@ -80,14 +80,16 @@ def create_mqtt_topic(
 # Get all MQTT Topics
 @router.get("/mqtt-topics", response_model=list[MqttTopicResponseSchema])
 def get_mqtt_topics(
+    mqtt_client_id: int = None,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_user)
 ):
     # Admins see all topics; regular users see only topics linked to their MQTT clients
     if is_admin(current_user):
-        mqtt_topics = MqttTopicService.get_mqtt_topics(db)
+        mqtt_topics = MqttTopicService.get_mqtt_topics(db=db)
     else:
-        mqtt_topics = MqttTopicService.get_mqtt_topics_by_user(current_user.id, db)
+        # mqtt_topics = MqttTopicService.get_mqtt_topics_by_user(current_user.id, db)
+        mqtt_topics = MqttTopicService.get_mqtt_topics(db=db, mqtt_client_id=mqtt_client_id)
     return mqtt_topics
 
 # Get MQTT Topic by ID

@@ -117,8 +117,7 @@ export default {
     },
     mounted() {
         initFlowbite();
-        if (this.selected.selectedTopic &&
-            Object.keys(this.selected.selectedTopic).length != 0) {
+        if (this.selected.selectedTopic && Object.keys(this.selected.selectedTopic).length != 0) {
             this.selectTopic = this.selected.selectedTopic
         }
         if (this.selected.onPayload != "") {
