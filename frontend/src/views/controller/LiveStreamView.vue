@@ -1,4 +1,4 @@
-<!-- <template>
+<template>
     <div class="flex flex-col space-y-3">
         <div class="text-2xl font-bold flex items-center space-x-3">
             <span class="text-2xl material-symbols-outlined">
@@ -104,9 +104,9 @@ export default {
         }
     }
 }
-</script> -->
+</script>
 
-<template>
+<!-- <template>
   <div class="flex flex-col space-y-3">
     <div class="text-2xl font-bold flex items-center space-x-3">
       <span class="text-2xl material-symbols-outlined">camera_video</span>
@@ -238,4 +238,4 @@ export default {
     }
   },
 };
-</script>
+</script> -->

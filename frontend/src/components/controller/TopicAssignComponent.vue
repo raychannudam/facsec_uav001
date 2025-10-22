@@ -31,9 +31,20 @@
             </div>
             <ul class="h-48 px-3 pb-3 overflow-y-auto text-sm text-gray-700 dark:text-gray-200"
                 :aria-labelledby="id + 'Button'">
+                <li class="w-full">
+                    <div class="flex items-center rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+                        <input :id="'checkbox-item-' + id + '- default'" type="radio" :value="{}" v-model="selectTopic"
+                            class="hidden">
+                        <label :for="'checkbox-item-' + id + '- default'"
+                            class=" inline-flex items-center justify-center space-x-3 w-full py-2 text-sm font-medium text-gray-900 dark:text-gray-300 text-center cursor-pointer rounded-md bg-blue-500"><span
+                                class="material-symbols-outlined text-base">
+                                refresh
+                            </span>Reset</label>
+                    </div>
+                </li>
                 <li v-for="item in data">
                     <div class="flex items-center ps-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                        <input :id="'checkbox-item-' + id + '-' + item.name" type="radio" :value=item
+                        <input :id="'checkbox-item-' + id + '-' + item.name" type="radio" :value="item"
                             v-model="selectTopic"
                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                         <label :for="'checkbox-item-' + id + '-' + item.name"
