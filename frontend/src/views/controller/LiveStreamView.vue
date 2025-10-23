@@ -1,10 +1,26 @@
 <template>
   <div class="flex flex-col space-y-3">
-    <div class="text-2xl font-bold flex items-center space-x-3">
-      <span class="text-2xl material-symbols-outlined">
-        camera_video
-      </span>
-      <p>Live Streams</p>
+    <div class="flex flex-row space-x-3 items-center">
+      <div class="text-2xl font-bold flex items-center space-x-3">
+        <span class="text-2xl material-symbols-outlined">
+          camera_video
+        </span>
+        <p>Live Streams</p>
+      </div>
+      <button @click="startStream" :disabled="isStarted == true"
+        class="flex flex-row space-x-2 text-sm py-1 items-center px-4 hover:bg-blue-500 rounded-full border-blue-500 border focus:ring-blue-800 focus:ring-4">
+        <span class="material-symbols-outlined text-sm">
+          play_arrow
+        </span>
+        <p>Start Now</p>
+      </button>
+      <button @click="restartStream"
+        class="flex flex-row space-x-2 text-sm py-1 items-center px-4 hover:bg-red-500 rounded-full border-red-500 border focus:ring-red-800 focus:ring-4">
+        <span class="material-symbols-outlined text-sm">
+          restart_alt
+        </span>
+        <p>Restart</p>
+      </button>
     </div>
     <p class="text-gray-600 dark:text-gray-400">Get real-time live stream video from the cameras on the
       drone.</p>
@@ -73,18 +89,21 @@ export default {
         stream4: undefined
       },
       controller: undefined,
-
+      username: '',
+      password: '',
+      isStarted: false
     }
   },
   async mounted() {
-    let username = ""
-    let password = ""
     let res = await this.controllerStore.getAllControllers();
     if (res.status == "success") {
       this.controller = res.data[0]
-      if (this.controller.config.streamingUrls.length > 0) {
-        console.log(this.controller.config.streamingUrls)
-        // Refactored: Check if any stream (1-4) has a selectedUrl with keys
+      // Do not initialize streams here anymore
+    }
+  },
+  methods: {
+    async startStream() {
+      if (!this.isStarted) {
         const hasSelectedUrl = ["stream1", "stream2", "stream3", "stream4"].some(
           id => {
             const stream = this.controller.config.streamingUrls.find(item => item.id == id);
@@ -92,25 +111,29 @@ export default {
           }
         );
         if (hasSelectedUrl) {
-          username = prompt("Streaming client username:", "username");
-          password = prompt("Streaming client password", "password");
+          this.username = prompt("Streaming client username:", "username");
+          if (this.username == null) return;
+          this.password = prompt("Streaming client password", "password");
+          if (this.password == null) return;
         }
+        ["stream1", "stream2", "stream3", "stream4"].forEach(id => {
+          const stream = this.controller.config.streamingUrls.find(item => item.id == id);
+          if (stream && stream.selectedUrl && Object.keys(stream.selectedUrl).length > 0) {
+            this.streamingUrls[id] = this.streamingBaseUrl + "/" + stream.selectedUrl.name + `?username=${this.username}&password=${this.password}`;
+          }
+        });
+        this.isStarted = true
 
-        if (this.controller.config.streamingUrls.length > 0) {
-          if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream1").selectedUrl).length > 0) {
-            this.streamingUrls.stream1 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream1").selectedUrl.name + `?username=${username}&password=${password}`
+      }
+    },
+    restartStream() {
+      if (this.isStarted) {
+        ["stream1", "stream2", "stream3", "stream4"].forEach(id => {
+          const stream = this.controller.config.streamingUrls.find(item => item.id == id);
+          if (stream && stream.selectedUrl && Object.keys(stream.selectedUrl).length > 0) {
+            this.streamingUrls[id] = this.streamingBaseUrl + "/" + stream.selectedUrl.name + `?username=${this.username}&password=${this.password}`;
           }
-          if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream2").selectedUrl).length > 0) {
-            this.streamingUrls.stream2 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream2").selectedUrl.name + `?username=${username}&password=${password}`
-          }
-          if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream3").selectedUrl).length > 0) {
-            this.streamingUrls.stream3 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream3").selectedUrl.name + `?username=${username}&password=${password}`
-          }
-          if (Object.keys(this.controller.config.streamingUrls.find(item => item.id == "stream4").selectedUrl).length > 0) {
-            this.streamingUrls.stream4 = this.streamingBaseUrl + "/" + this.controller.config.streamingUrls.find(item => item.id == "stream4").selectedUrl.name + `?username=${username}&password=${password}`
-          }
-
-        }
+        });
       }
     }
   }
