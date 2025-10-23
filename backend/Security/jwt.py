@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from Schemas.StreamingClient import StreamingLoginSchema
 from fastapi import Form, Request
 from enum import Enum
+from urllib.parse import parse_qs
 
 load_dotenv()
 
@@ -178,7 +179,11 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
 
 @router.post("/streaming-login")
 def mediamtx_login(login_req: StreamingLoginSchema, db: Session = Depends(get_db)):
-    streaming_client = authenticate_user(login_req.user, login_req.password, db, source=AUTH_SOURCE.MEDIAMTX)
+    # streaming_client = authenticate_user(login_req.user, login_req.password, db, source=AUTH_SOURCE.MEDIAMTX)
+    query = parse_qs(login_req.query)
+    username = query['username'][0]
+    password = query['password'][0]
+    streaming_client = authenticate_user(username, password, db, source=AUTH_SOURCE.MEDIAMTX)
     action = login_req.action if login_req.action else ""
     path = login_req.path if login_req.path else ""
     action = login_req.action if login_req.action else ""
