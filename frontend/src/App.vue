@@ -48,6 +48,7 @@ export default {
     }
   },
   async mounted() {
+    document.title = "DRSYS"
     initFlowbite();
     window.addEventListener('resize', this.updateWindowDimensions);
   },

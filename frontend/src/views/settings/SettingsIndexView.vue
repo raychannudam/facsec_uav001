@@ -70,6 +70,7 @@ export default {
         };
     },
     async mounted() {
+        document.title = "Settings | DRSYS"
         initFlowbite();
         this.appStore.displayPageLoading(true);
         await this.getAllMqttClients();

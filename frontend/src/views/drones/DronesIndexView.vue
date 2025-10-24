@@ -35,6 +35,7 @@ const droneStore = useDroneStore()
 const showCreateModal = ref(false)
 
 onMounted(async () => {
+    document.title = "All Drones | DRSYS"
     await droneStore.fetchDrones()
     await droneStore.fetchMqttClients()
     await droneStore.fetchStreamingClients()

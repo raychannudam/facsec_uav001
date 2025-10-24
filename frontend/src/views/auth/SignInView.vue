@@ -67,7 +67,8 @@ export default {
         }
     },
     mounted() {
-        initFlowbite()
+        document.title = "Sign in | " + document.title
+        initFlowbite();
     },
     methods: {
         async sigin(){

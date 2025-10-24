@@ -24,6 +24,7 @@ export default {
         ControlPanelView
     },
     mounted(){
+        document.title = "Controller | DRSYS";
         initFlowbite();
     },
     data(){

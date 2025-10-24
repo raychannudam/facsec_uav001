@@ -2,7 +2,7 @@ import mqtt from "mqtt";
 
 // Change this to your MQTT broker URL
 // For example: 'mqtt://localhost:1883' or 'wss://broker.hivemq.com:8884/mqtt'
-const brokerUrl = 'wss://mqtt-broker.aitips.digital';
+const brokerUrl = 'mqtt://localhost:8884';
 
 // Optional username/password if needed
 const options = {
@@ -15,7 +15,7 @@ const options = {
 // Connect to broker
 const client = mqtt.connect(brokerUrl, options);
 
-let topic = "drsys/test1/1"
+let topic = "drsys/test/2"
 
 client.on('connect', () => {
   console.log('✅ Connected to MQTT broker');

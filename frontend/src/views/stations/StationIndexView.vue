@@ -131,6 +131,7 @@ export default {
     StationDetailView
   },
   async mounted() {
+    document.title = "All Stations | DRSYS"
     await this.getAllStations();
     this.initMap();
   },
