@@ -131,7 +131,7 @@ export default {
           }
         );
         if (hasSelectedUrl) {
-          this.username = prompt("Streaming client username:", "username");
+          this.username = prompt("Streaming client username", "username");
           if (this.username == null) return;
           this.password = prompt("Streaming client password", "password");
           if (this.password == null) return;
@@ -147,14 +147,8 @@ export default {
       }
     },
     restartStream() {
-      if (this.isStarted) {
-        ["stream1", "stream2", "stream3", "stream4"].forEach(id => {
-          const stream = this.controller.config.streamingUrls.find(item => item.id == id);
-          if (stream && stream.selectedUrl && Object.keys(stream.selectedUrl).length > 0) {
-            this.streamingUrls[id] = this.streamingBaseUrl + "/" + stream.selectedUrl.name + `?username=${this.username}&password=${this.password}`;
-          }
-        });
-      }
+      this.isStarted = false
+      this.startStream();
     },
     simulateDroneFlight() {
       // Example coordinates from Wat Phnom to Royal Palace, Phnom Penh
@@ -230,7 +224,6 @@ export default {
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19
           }).addTo(map);
-          L.marker([lat, lng], { icon: droneIcon }).addTo(map)
           this.leafletMap = map;
           this.simulateDroneFlight();
         }, () => {

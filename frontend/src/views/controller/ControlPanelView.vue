@@ -109,12 +109,18 @@ import { onMounted } from 'vue';
 import ControlButton from '@/components/controller/ControlButton.vue';
 import ControlSlider from '@/components/controller/ControlSlider.vue';
 import ControlSwitch from '@/components/controller/ControlSwitch.vue';
+import { useMqttClientStore } from '@/stores/MqttClientStore';
 import { useControllerStore } from '@/stores/ControllerStore';
+import { data } from 'autoprefixer';
 
 const controllerStore = useControllerStore();
+const mqttClientStore = useMqttClientStore();
+
 
 onMounted(async () => {
     await controllerStore.getAllControllers();
+    let mqttClientBroker = restartBorker()
+
 });
 
 const handleButtonClick = (data) => {
@@ -128,4 +134,8 @@ const handleSwitchToggle = (data) => {
 const handleSliderChange = (data) => {
     console.log('Slider changed:', data);
 };
+const restartBorker = () => {
+    let mqttClientBroker = mqttClientStore.initializeMqttClient("test", "test")
+    return mqttClientBroker
+}
 </script>
