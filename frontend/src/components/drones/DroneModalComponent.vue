@@ -101,7 +101,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import JsonEditorVue from "json-editor-vue"
 import 'vanilla-jsoneditor/themes/jse-theme-dark.css'
 import { useDroneStore } from '@/stores/DroneStore'
@@ -121,16 +121,18 @@ const props = defineProps({
     }
 })
 
-const mqttClients = ref([])
-const streamingClients = ref([])
-
 const emit = defineEmits(['close', 'save'])
 const droneStore = useDroneStore()
 
-// Lock body scroll when modal opens
-watch(() => props.isOpen, (isOpen) => {
+const mqttClients = computed(() => droneStore.mqttClients)
+const streamingClients = computed(() => droneStore.streamingClients)
+
+watch(() => props.isOpen, async (isOpen) => {
     if (isOpen) {
-        // Save current scroll position
+        await Promise.all([
+            droneStore.fetchMqttClients(),
+            droneStore.fetchStreamingClients()
+        ])
         const scrollY = window.scrollY
         document.body.style.position = 'fixed'
         document.body.style.top = `-${scrollY}px`
@@ -144,11 +146,6 @@ watch(() => props.isOpen, (isOpen) => {
         window.scrollTo(0, parseInt(scrollY || '0') * -1)
     }
 }, { immediate: true })
-
-onMounted(() => {
-    mqttClients.value = droneStore.mqttClients
-    streamingClients.value = droneStore.streamingClients
-})
 
 onBeforeUnmount(() => {
     // Cleanup on unmount

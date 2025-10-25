@@ -1,40 +1,52 @@
 <template>
-    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-        <span class="font-medium text-gray-700">{{ switchData.name }}</span>
-        <button @click="toggle" :class="[
-            'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2',
-            isOn ? 'bg-green-600' : 'bg-gray-300'
+    <div class="flex flex-col items-center p-3 rounded-lg select-none cursor-pointer h-full transition-colors"
+        :class="isOn ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'" @click="toggle">
+        <!-- Name with hand-click icon, top-left -->
+        <div class="flex items-center gap-1 w-full mb-3"
+            :class="isOn ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+            <span class="material-symbols-outlined text-base">touch_app</span>
+            <span class="font-medium">{{ switchData.name }}</span>
+        </div>
+
+        <!-- Smaller Toggle Switch, centered -->
+        <div :class="[
+            'relative inline-flex h-10 w-20 items-center rounded-full transition-all duration-300 ease-in-out shadow-lg',
+            isOn ? 'bg-green-600 dark:bg-green-500' : 'bg-red-600 dark:bg-red-500'
         ]">
             <span :class="[
-                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-                isOn ? 'translate-x-6' : 'translate-x-1'
+                'inline-block h-8 w-8 transform rounded-full bg-white transition-transform duration-300 ease-in-out shadow-md',
+                isOn ? 'translate-x-[2.75rem]' : 'translate-x-1'
             ]" />
-        </button>
+        </div>
+
+        <!-- Status Text, centered -->
+        <div class="mt-2 text-xs font-semibold"
+            :class="isOn ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+            {{ isOn ? 'ON' : 'OFF' }}
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref, defineProps, defineEmits } from 'vue'
 
 const props = defineProps({
     switchData: {
         type: Object,
         required: true
     }
-});
+})
 
-const emit = defineEmits(['toggle']);
-
-const isOn = ref(false);
+const emit = defineEmits(['toggle'])
+const isOn = ref(false)
 
 const toggle = () => {
-    isOn.value = !isOn.value;
-    const payload = isOn.value ? props.switchData.onPayload : props.switchData.offPayload;
+    isOn.value = !isOn.value
+    const payload = isOn.value ? props.switchData.onPayload : props.switchData.offPayload
     emit('toggle', {
         id: props.switchData.id,
         name: props.switchData.name,
-        state: isOn.value ? 'ON' : 'OFF',
         payload: payload
-    });
-};
+    })
+}
 </script>
