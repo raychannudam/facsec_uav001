@@ -1,6 +1,5 @@
 <template>
     <div class="flex flex-col space-y-3">
-
         <div class="flex flex-row space-x-3 w-full items-end justify-between">
             <div class="text-2xl flex flex-col items-start space-y-3">
                 <div class="flex font-bold flex-row space-x-3 items-center">
@@ -52,9 +51,10 @@
         </div>
         <hr class="border-0.5 border-gray-200">
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-            <!-- Buttons Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+        <!-- New Grid Layout: 4 columns with equal height rows -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
+            <!-- Buttons Section - 25% width (1 column) -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col">
                 <div class="flex items-center gap-2 mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
@@ -63,14 +63,14 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Buttons</h3>
                 </div>
-                <div class="space-y-2">
+                <div class="space-y-2 flex-1 flex flex-col">
                     <ControlButton v-for="button in controllerStore.buttons" :key="button.id" :button="button"
-                        @trigger="handleButtonClick" />
+                        @trigger="handleButtonClick" class="flex-1" />
                 </div>
             </div>
 
-            <!-- Switches Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+            <!-- Switches Section - 25% width (1 column) -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col">
                 <div class="flex items-center gap-2 mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
@@ -79,14 +79,14 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Switches</h3>
                 </div>
-                <div class="space-y-2">
+                <div class="space-y-2 flex-1 flex flex-col">
                     <ControlSwitch v-for="switchItem in controllerStore.switches" :key="switchItem.id"
-                        :switchData="switchItem" @toggle="handleSwitchToggle" />
+                        :switchData="switchItem" @toggle="handleSwitchToggle" class="flex-1" />
                 </div>
             </div>
 
-            <!-- Sliders Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
+            <!-- Sliders Section - 50% width (2 columns) -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 lg:col-span-2 flex flex-col">
                 <div class="flex items-center gap-2 mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
@@ -95,9 +95,9 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Sliders</h3>
                 </div>
-                <div class="space-y-3">
+                <div class="space-y-2 flex-1 flex flex-col">
                     <ControlSlider v-for="slider in controllerStore.sliders" :key="slider.id" :slider="slider"
-                        @change="handleSliderChange" />
+                        @change="handleSliderChange" class="flex-1" />
                 </div>
             </div>
         </div>
