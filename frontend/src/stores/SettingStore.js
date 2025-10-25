@@ -230,7 +230,7 @@ export const useSettingStore = defineStore("setting", {
     async crateStreamingUrl(data){
       let status = ""
       let message = ""
-      data['config'] = {"protocols":["rstp", "webrtc"]}
+      data['config'] = {"protocols":["rtsp", "webrtc"]}
       data['status'] = true
       await api.post("/api/v1/streaming-urls", data).then((res) => {
           status = "success";
