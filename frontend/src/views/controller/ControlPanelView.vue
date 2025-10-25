@@ -114,12 +114,12 @@ import { useControllerStore } from '@/stores/ControllerStore';
 import { data } from 'autoprefixer';
 
 const controllerStore = useControllerStore();
-const mqttClientStore = useMqttClientStore();
+// const mqttClientStore = useMqttClientStore();
 
 
 onMounted(async () => {
     await controllerStore.getAllControllers();
-    let mqttClientBroker = restartBorker()
+    // let mqttClientBroker = restartBorker()
 
 });
 
@@ -134,8 +134,8 @@ const handleSwitchToggle = (data) => {
 const handleSliderChange = (data) => {
     console.log('Slider changed:', data);
 };
-const restartBorker = () => {
-    let mqttClientBroker = mqttClientStore.initializeMqttClient("test", "test")
-    return mqttClientBroker
-}
+// const restartBorker = () => {
+//     let mqttClientBroker = mqttClientStore.initializeMqttClient("test", "test")
+//     return mqttClientBroker
+// }
 </script>
