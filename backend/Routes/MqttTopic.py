@@ -50,7 +50,7 @@ def create_mqtt_topic(
             description=new_mqtt_topic.mqtt_client.description,
             username=new_mqtt_topic.mqtt_client.username,
             password=new_mqtt_topic.mqtt_client.password,
-            raw_password=result.mqtt_client.raw_password,
+            raw_password=new_mqtt_topic.mqtt_client.raw_password,
             config=new_mqtt_topic.mqtt_client.config,
             status=new_mqtt_topic.mqtt_client.status,
             created_at=str(new_mqtt_topic.mqtt_client.created_at),
@@ -110,7 +110,7 @@ def get_mqtt_topic(
     return mqtt_topic
 
 # Update MQTT Topic
-@router.put("/mqtt-topics/{mqtt_topic_id}", response_model=MqttTopicResponseSchema)
+@router.put("/mqtt-topics/{mqtt_topic_id}")
 def update_mqtt_topic(
     mqtt_topic_id: int,
     mqtt_topic_update: MqttTopicUpdateSchema,
@@ -129,10 +129,10 @@ def update_mqtt_topic(
     if not mqtt_topic:
         raise HTTPException(status_code=404, detail="MQTT Topic not found")
     
-    return mqtt_topic
+    return {"message": "MQTT topic updated successfully"}
 
 # Delete MQTT Topic
-@router.delete("/mqtt-topics/{mqtt_topic_id}", response_model=MqttTopicResponseSchema)
+@router.delete("/mqtt-topics/{mqtt_topic_id}")
 def delete_mqtt_topic(
     mqtt_topic_id: int,
     db: Session = Depends(get_db),
@@ -166,4 +166,4 @@ def delete_mqtt_topic(
     # Now delete the topic
     MqttTopicService.delete_mqtt_topic(mqtt_topic_id, db)
     
-    return response_data
+    return {"message": "MQTT topic deleted successfully"}

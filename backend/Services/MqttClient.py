@@ -184,7 +184,6 @@ class MqttClientService:
         if f"user {mqtt_client.username}" not in acl_content:
             with open(ACLFILE_PATH, "a") as f:
                 f.write(f"user {mqtt_client.username}\n")
-                f.write(f"topic readwrite #\n\n")
         
         return mqtt_client
 

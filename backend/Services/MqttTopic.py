@@ -29,9 +29,6 @@ class MqttTopicService:
                 for topic in topics:
                     # Use static access type (readwrite) since the model doesn't have access attribute
                     acl_content += f"topic readwrite {topic.name}\n"
-            else:
-                # Default topic access if no specific topics are defined
-                acl_content += "topic readwrite #\n"
             
             acl_content += "\n"
 
