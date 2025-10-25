@@ -109,7 +109,7 @@ import { onMounted } from 'vue';
 import ControlButton from '@/components/controller/ControlButton.vue';
 import ControlSlider from '@/components/controller/ControlSlider.vue';
 import ControlSwitch from '@/components/controller/ControlSwitch.vue';
-import { useMqttClientStore } from '@/stores/MqttClientStore';
+// import { useMqttClientStore } from '@/stores/MqttClientStore';
 import { useControllerStore } from '@/stores/ControllerStore';
 import { data } from 'autoprefixer';
 
