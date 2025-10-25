@@ -1,35 +1,55 @@
 <template>
-    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-        <span class="font-medium text-gray-700">{{ button.name }}</span>
-        <button
-            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm hover:shadow-md active:scale-95 transform"
-            @click="handleClick">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Trigger
-        </button>
+    <div class="flex flex-col items-center p-3 rounded-lg cursor-pointer transition-all duration-200 select-none h-full shadow-sm"
+        :class="isActive
+            ? 'bg-blue-200 dark:bg-blue-800/40 text-blue-700 dark:text-blue-300 scale-95 shadow-inner'
+            : 'bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/20 hover:shadow-md'"
+        @click="handleClick">
+        <!-- Title with extra icon, top-left -->
+        <div class="flex items-center gap-1 mb-3 w-full justify-start">
+            <span class="material-symbols-outlined text-base">touch_app</span>
+            <span class="font-medium">{{ button.name }}</span>
+        </div>
+
+        <!-- Power Icon - centered -->
+        <span class="material-symbols-outlined text-5xl transition-transform" :class="isActive ? 'scale-90' : ''">
+            power_settings_new
+        </span>
+
+        <!-- Status indicator - centered -->
+        <div class="mt-2 text-xs font-semibold">
+            {{ isActive ? 'ACTIVE' : 'READY' }}
+        </div>
     </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { ref, defineProps, defineEmits } from 'vue'
 
 const props = defineProps({
     button: {
         type: Object,
         required: true
     }
-});
+})
 
-const emit = defineEmits(['trigger']);
+const emit = defineEmits(['trigger'])
+const isActive = ref(false)
 
 const handleClick = () => {
     emit('trigger', {
         id: props.button.id,
         name: props.button.name,
         payload: props.button.onPayload
-    });
-};
+    })
+    isActive.value = true
+
+    setTimeout(() => {
+        emit('trigger', {
+            id: props.button.id,
+            name: props.button.name,
+            payload: props.button.offPayload
+        })
+        isActive.value = false
+    }, 1000)
+}
 </script>
