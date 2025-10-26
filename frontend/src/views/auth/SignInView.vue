@@ -83,15 +83,8 @@ const signin = async () => {
 
         if (res.status === "success") {
             await authStore.getProfile();
-            try {
-                if (route.redirectedFrom) {
-                    router.push(route.redirectedFrom.name);
-                } else {
-                    router.push({ name: "controller" });
-                }
-            } catch (err) {
-                router.push({ name: "controller" });
-            }
+            if (route.query.redirect) router.push(route.query.redirect);
+            else router.push({ name: "controller" });
         }
     }, 1000);
 };

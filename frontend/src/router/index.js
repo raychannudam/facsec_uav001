@@ -66,7 +66,7 @@ router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem("access_token"); 
 
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: 'sign-in' });
+    next({ name: 'sign-in', query: { redirect: to.fullPath } });
   } else if (to.name === 'sign-in' && isAuthenticated) {
     next({ name: 'controller' }); 
   } else {
