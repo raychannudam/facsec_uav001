@@ -6,10 +6,8 @@ const brokerUrl = 'mqtt://localhost:8884';
 
 // Optional username/password if needed
 const options = {
-  clientId: 'mqtt_test_' + Math.random().toString(16).substring(2, 8),
   username: 'test1', // add if required
   password: 'test1', // add if required
-  connectTimeout: 5000,
 };
 
 // Connect to broker
