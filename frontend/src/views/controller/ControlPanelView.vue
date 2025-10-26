@@ -51,7 +51,7 @@
         </div>
         <hr class="border-0.5 border-gray-200">
 
-        <!-- New Grid Layout: 4 columns with equal height rows -->
+        <!-- New Grid Layout: 4 columns -->
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
             <!-- Buttons Section - 25% width (1 column) -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col">
@@ -63,9 +63,9 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Buttons</h3>
                 </div>
-                <div class="space-y-2 flex-1 flex flex-col">
+                <div class="space-y-2">
                     <ControlButton v-for="button in controllerStore.buttons" :key="button.id" :button="button"
-                        @trigger="handleButtonClick" class="flex-1" />
+                        @trigger="handleButtonClick" />
                 </div>
             </div>
 
@@ -79,9 +79,9 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Switches</h3>
                 </div>
-                <div class="space-y-2 flex-1 flex flex-col">
+                <div class="space-y-2">
                     <ControlSwitch v-for="switchItem in controllerStore.switches" :key="switchItem.id"
-                        :switchData="switchItem" @toggle="handleSwitchToggle" class="flex-1" />
+                        :switchData="switchItem" @toggle="handleSwitchToggle" />
                 </div>
             </div>
 
@@ -95,9 +95,9 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Sliders</h3>
                 </div>
-                <div class="space-y-2 flex-1 flex flex-col">
+                <div class="space-y-2">
                     <ControlSlider v-for="slider in controllerStore.sliders" :key="slider.id" :slider="slider"
-                        @change="handleSliderChange" class="flex-1" />
+                        @change="handleSliderChange" />
                 </div>
             </div>
         </div>

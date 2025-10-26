@@ -1,26 +1,26 @@
-<template>
-    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg flex flex-col justify-center h-full transition-colors">
+<template name="ControlSlider">
+    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg flex flex-col justify-center h-32 transition-colors">
         <!-- Title with hand icon -->
-        <div class="flex items-center justify-between mb-3 -mt-1">
+        <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-1">
                 <span class="material-symbols-outlined text-sm text-purple-800 dark:text-purple-300">touch_app</span>
-                <span class="font-medium text-purple-800 dark:text-purple-300">{{ slider.name }}</span>
+                <span class="font-medium text-sm text-purple-800 dark:text-purple-300">{{ slider.name }}</span>
             </div>
 
             <!-- Current value -->
             <span
-                class="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm font-semibold px-3 py-1 rounded-full">
+                class="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs font-semibold px-2 py-1 rounded-full">
                 {{ value }}
             </span>
         </div>
 
         <!-- Slider -->
         <input type="range" :min="minValue" :max="maxValue" v-model="value"
-            class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
+            class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer slider mb-2"
             @input="handleChange" :aria-valuemin="minValue" :aria-valuemax="maxValue" :aria-valuenow="value" />
 
         <!-- Min/Max labels -->
-        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
+        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
             <span>{{ minValue }}</span>
             <span>{{ maxValue }}</span>
         </div>

@@ -1,22 +1,23 @@
-<template>
-    <div class="flex flex-col items-center p-3 rounded-lg cursor-pointer transition-all duration-200 select-none h-full shadow-sm"
+<template name="ControlButton">
+    <div class="flex flex-col items-center p-3 rounded-lg cursor-pointer transition-all duration-200 select-none h-32 shadow-sm"
         :class="isActive
             ? 'bg-blue-200 dark:bg-blue-800/40 text-blue-700 dark:text-blue-300 scale-95 shadow-inner'
             : 'bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/20 hover:shadow-md'"
         @click="handleClick">
         <!-- Title with extra icon, top-left -->
-        <div class="flex items-center gap-1 mb-3 w-full justify-start">
+        <div class="flex items-center gap-1 mb-2 w-full justify-start">
             <span class="material-symbols-outlined text-base">touch_app</span>
-            <span class="font-medium">{{ button.name }}</span>
+            <span class="font-medium text-sm">{{ button.name }}</span>
         </div>
 
         <!-- Power Icon - centered -->
-        <span class="material-symbols-outlined text-5xl transition-transform" :class="isActive ? 'scale-90' : ''">
+        <span class="material-symbols-outlined text-4xl transition-transform flex-1 flex items-center justify-center"
+            :class="isActive ? 'scale-90' : ''">
             power_settings_new
         </span>
 
         <!-- Status indicator - centered -->
-        <div class="mt-2 text-xs font-semibold">
+        <div class="text-xs font-semibold">
             {{ isActive ? 'ACTIVE' : 'READY' }}
         </div>
     </div>
