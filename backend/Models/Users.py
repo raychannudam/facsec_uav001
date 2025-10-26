@@ -13,6 +13,7 @@ class UserModel(Base):
     fullname = Column(String)
     age = Column(Integer)
     gender = Column(String)
+    validation_code = Column(String, nullable=True)  # Added for password reset
     created_by = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
