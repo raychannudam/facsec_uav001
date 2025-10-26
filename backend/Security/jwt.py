@@ -161,7 +161,7 @@ async def refresh_access_token(refresh_token: str, db: Session = Depends(get_db)
     except InvalidTokenError:
         raise credentials_exception
 
-    user = get_user(username=username, db=db)
+    user = get_user(username=username, db=db, source=AUTH_SOURCE.SYSTEM)
     if user is None:
         raise credentials_exception
 

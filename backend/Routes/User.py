@@ -136,3 +136,20 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserM
         gender=user.gender,
         roles=roles
     )
+
+# Add forgot password routes
+@router.post("/users/request-validation-code")
+async def request_password_reset(email: str, db: Session = Depends(get_db)):
+    """Request password reset by sending validation code to email"""
+    result = await UserService.request_password_reset(email, db)
+    if isinstance(result, dict) and "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return {"message": "Validation code sent to your email"}
+
+@router.post("/users/reset-password")
+def reset_password(email: str, validation_code: str, new_password: str, db: Session = Depends(get_db)):
+    """Reset password using validation code"""
+    result = UserService.reset_password(email, validation_code, new_password, db)
+    if isinstance(result, dict) and "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return {"message": "Password reset successfully"}

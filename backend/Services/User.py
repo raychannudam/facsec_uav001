@@ -5,6 +5,9 @@ from passlib.context import CryptContext
 from Services.Controller import ControllerService
 from Schemas.Controller import ControllerCreateSchema
 from uuid import uuid4
+import random
+import string
+from Services.Mail import MailService
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -106,3 +109,41 @@ class UserService:
         db.delete(user)
         db.commit()
         return user
+    
+    
+    @staticmethod
+    async def request_password_reset(email: str, db: Session):
+        """Request password reset by sending validation code to email"""
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+        if not user:
+            return {"error": "User with this email not found"}
+        
+        # Generate validation code
+        validation_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        user.validation_code = validation_code
+        db.commit()
+        db.refresh(user)
+        
+        # Send email with validation code
+        await MailService.send_email(email, user.validation_code, subject=f"Username: {user.username}, Validation Code")
+        
+        return {"message": "Validation code sent to your email"}
+    
+    @staticmethod
+    def reset_password(email: str, validation_code: str, new_password: str, db: Session):
+        """Reset password using validation code"""
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+        if not user:
+            return {"error": "User with this email not found"}
+        
+        # Check if validation code matches
+        if user.validation_code != validation_code:
+            return {"error": "Invalid validation code"}
+        
+        # Update password and clear validation code
+        user.password = pwd_context.hash(new_password)
+        user.validation_code = None
+        db.commit()
+        db.refresh(user)
+        
+        return {"message": "Password reset successfully"}
