@@ -109,32 +109,34 @@ import { onMounted } from 'vue';
 import ControlButton from '@/components/controller/ControlButton.vue';
 import ControlSlider from '@/components/controller/ControlSlider.vue';
 import ControlSwitch from '@/components/controller/ControlSwitch.vue';
-// import { useMqttClientStore } from '@/stores/MqttClientStore';
 import { useControllerStore } from '@/stores/ControllerStore';
+import { useMqttClient } from '@/composables/useMqttClient';
 
 const controllerStore = useControllerStore();
-// const mqttClientStore = useMqttClientStore();
-
+const { publish, isConnected } = useMqttClient();
 
 onMounted(async () => {
     await controllerStore.getAllControllers();
-    // let mqttClientBroker = restartBorker()
-
 });
 
 const handleButtonClick = (data) => {
-    console.log('Button clicked:', data);
+    const button = controllerStore.buttons.find(b => b.id === data.id);
+    if (button?.selectedTopic?.name) {
+        publish(button.selectedTopic.name, String(data.payload));
+    }
 };
 
 const handleSwitchToggle = (data) => {
-    console.log('Switch toggled:', data);
+    const switchItem = controllerStore.switches.find(s => s.id === data.id);
+    if (switchItem?.selectedTopic?.name) {
+        publish(switchItem.selectedTopic.name, String(data.payload));
+    }
 };
 
 const handleSliderChange = (data) => {
-    console.log('Slider changed:', data);
+    const slider = controllerStore.sliders.find(s => s.id === data.id);
+    if (slider?.selectedTopic?.name) {
+        publish(slider.selectedTopic.name, String(data.value));
+    }
 };
-// const restartBorker = () => {
-//     let mqttClientBroker = mqttClientStore.initializeMqttClient("test", "test")
-//     return mqttClientBroker
-// }
 </script>
