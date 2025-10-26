@@ -9,19 +9,28 @@ export const useControllerStore = defineStore("controller", () => {
     const controllers = ref([]);
     const selectedController = ref(null);
 
+    const hasSelectedTopic = (item) =>
+        item.selectedTopic && Object.keys(item.selectedTopic).length > 0;
+
     const buttons = computed(() => {
         if (!selectedController.value?.config?.mqttTopics) return [];
-        return selectedController.value.config.mqttTopics.filter(item => item.type === 'button');
+        return selectedController.value.config.mqttTopics.filter(
+            (item) => item.type === "button" && hasSelectedTopic(item)
+        );
     });
 
     const switches = computed(() => {
         if (!selectedController.value?.config?.mqttTopics) return [];
-        return selectedController.value.config.mqttTopics.filter(item => item.type === 'switch');
+        return selectedController.value.config.mqttTopics.filter(
+            (item) => item.type === "switch" && hasSelectedTopic(item)
+        );
     });
 
     const sliders = computed(() => {
         if (!selectedController.value?.config?.mqttTopics) return [];
-        return selectedController.value.config.mqttTopics.filter(item => item.type === 'slider');
+        return selectedController.value.config.mqttTopics.filter(
+            (item) => item.type === "slider" && hasSelectedTopic(item)
+        );
     });
 
     const getAllControllers = async () => {
@@ -37,7 +46,7 @@ export const useControllerStore = defineStore("controller", () => {
                 selectedController.value = response.data[0];
             }
             status = "success";
-            message = "Successfully get all controllers!";
+            message = "Successfully got all controllers!";
         } catch (err) {
             status = "fail";
             message = err.response?.data?.detail || "Failed to get all controllers!";
@@ -46,11 +55,7 @@ export const useControllerStore = defineStore("controller", () => {
             appStore.displayPageLoading(false);
             appStore.displayRightToast(status, message);
         }
-        return {
-            status: status,
-            message: message,
-            data: data
-        };
+        return { status, message, data };
     };
 
     const updateController = async (id, data) => {
@@ -59,7 +64,7 @@ export const useControllerStore = defineStore("controller", () => {
         let message = "";
         try {
             await api.put(`/api/v1/controllers/${id}`, data);
-            const index = controllers.value.findIndex(c => c.id === id);
+            const index = controllers.value.findIndex((c) => c.id === id);
             if (index !== -1) {
                 controllers.value[index] = { ...controllers.value[index], ...data };
             }
@@ -67,7 +72,7 @@ export const useControllerStore = defineStore("controller", () => {
                 selectedController.value = { ...selectedController.value, ...data };
             }
             status = "success";
-            message = "Successfully update your controller!";
+            message = "Successfully updated your controller!";
         } catch (err) {
             status = "fail";
             message = err.response?.data?.detail || "Failed to update your controller!";
@@ -76,10 +81,7 @@ export const useControllerStore = defineStore("controller", () => {
             appStore.displayPageLoading(false);
             appStore.displayRightToast(status, message);
         }
-        return {
-            status: status,
-            message: message
-        };
+        return { status, message };
     };
 
     const selectController = (controller) => {
@@ -90,12 +92,12 @@ export const useControllerStore = defineStore("controller", () => {
         // State
         controllers,
         selectedController,
-        
+
         // Computed
         buttons,
         switches,
         sliders,
-        
+
         // Actions
         getAllControllers,
         updateController,
