@@ -51,7 +51,7 @@
         </div>
         <hr class="border-0.5 border-gray-200">
 
-        <!-- New Grid Layout: 4 columns with equal height rows -->
+        <!-- New Grid Layout: 4 columns -->
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
             <!-- Buttons Section - 25% width (1 column) -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col">
@@ -63,9 +63,9 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Buttons</h3>
                 </div>
-                <div class="space-y-2 flex-1 flex flex-col">
+                <div class="space-y-2">
                     <ControlButton v-for="button in controllerStore.buttons" :key="button.id" :button="button"
-                        @trigger="handleButtonClick" class="flex-1" />
+                        @trigger="handleButtonClick" />
                 </div>
             </div>
 
@@ -79,9 +79,9 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Switches</h3>
                 </div>
-                <div class="space-y-2 flex-1 flex flex-col">
+                <div class="space-y-2">
                     <ControlSwitch v-for="switchItem in controllerStore.switches" :key="switchItem.id"
-                        :switchData="switchItem" @toggle="handleSwitchToggle" class="flex-1" />
+                        :switchData="switchItem" @toggle="handleSwitchToggle" />
                 </div>
             </div>
 
@@ -95,9 +95,9 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Sliders</h3>
                 </div>
-                <div class="space-y-2 flex-1 flex flex-col">
+                <div class="space-y-2">
                     <ControlSlider v-for="slider in controllerStore.sliders" :key="slider.id" :slider="slider"
-                        @change="handleSliderChange" class="flex-1" />
+                        @change="handleSliderChange" />
                 </div>
             </div>
         </div>
@@ -109,33 +109,34 @@ import { onMounted } from 'vue';
 import ControlButton from '@/components/controller/ControlButton.vue';
 import ControlSlider from '@/components/controller/ControlSlider.vue';
 import ControlSwitch from '@/components/controller/ControlSwitch.vue';
-// import { useMqttClientStore } from '@/stores/MqttClientStore';
 import { useControllerStore } from '@/stores/ControllerStore';
-import { data } from 'autoprefixer';
+import { useMqttClient } from '@/composables/useMqttClient';
 
 const controllerStore = useControllerStore();
-// const mqttClientStore = useMqttClientStore();
-
+const { publish, isConnected } = useMqttClient();
 
 onMounted(async () => {
     await controllerStore.getAllControllers();
-    // let mqttClientBroker = restartBorker()
-
 });
 
 const handleButtonClick = (data) => {
-    console.log('Button clicked:', data);
+    const button = controllerStore.buttons.find(b => b.id === data.id);
+    if (button?.selectedTopic?.name) {
+        publish(button.selectedTopic.name, String(data.payload));
+    }
 };
 
 const handleSwitchToggle = (data) => {
-    console.log('Switch toggled:', data);
+    const switchItem = controllerStore.switches.find(s => s.id === data.id);
+    if (switchItem?.selectedTopic?.name) {
+        publish(switchItem.selectedTopic.name, String(data.payload));
+    }
 };
 
 const handleSliderChange = (data) => {
-    console.log('Slider changed:', data);
+    const slider = controllerStore.sliders.find(s => s.id === data.id);
+    if (slider?.selectedTopic?.name) {
+        publish(slider.selectedTopic.name, String(data.value));
+    }
 };
-// const restartBorker = () => {
-//     let mqttClientBroker = mqttClientStore.initializeMqttClient("test", "test")
-//     return mqttClientBroker
-// }
 </script>
