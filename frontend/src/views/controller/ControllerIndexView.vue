@@ -1,41 +1,61 @@
 <template>
     <div class="w-full grid grid-cols-12 gap-3">
         <div class="col-span-8">
-            <LiveStreamView :key="triggerConfigUpdate"></LiveStreamView>
+            <LiveStreamView :key="triggerConfigUpdate" />
         </div>
+
         <div class="col-span-4">
-            <ConfigurationView @onUpdate="updateConfig"></ConfigurationView>
+            <ConfigurationView @onUpdate="updateConfig" />
         </div>
+
         <div class="col-span-12">
-            <ControlPanelView></ControlPanelView>
+            <ControlPanelView />
         </div>
     </div>
 </template>
-<script>
+
+<script setup>
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { initFlowbite } from 'flowbite';
 import ConfigurationView from './ConfigurationView.vue';
 import ControlPanelView from './ControlPanelView.vue';
 import LiveStreamView from './LiveStreamView.vue';
-import { initFlowbite } from 'flowbite';
+import { useControllerStore } from '@/stores/ControllerStore';
+import { useMqttClient } from '@/composables/useMqttClient';
 
-export default {
-    components:{
-        LiveStreamView,
-        ConfigurationView,
-        ControlPanelView
-    },
-    mounted(){
-        document.title = "Controller | DRSYS";
-        initFlowbite();
-    },
-    data(){
-        return{
-            triggerConfigUpdate: 0
+const controllerStore = useControllerStore();
+const triggerConfigUpdate = ref(0);
+const { connect, disconnect } = useMqttClient();
+
+onMounted(() => {
+    document.title = 'Controller | DRSYS';
+    initFlowbite();
+});
+
+// Watch for selectedController changes and connect to MQTT when available
+watch(
+    () => controllerStore.selectedController,
+    (controller) => {
+        if (controller?.config?.selectedDrone?.mqtt_client) {
+            const mqttConfig = controller.config.selectedDrone.mqtt_client;
+
+            const brokerUrl = 'mqtt://localhost:8884';
+            const options = {
+                username: mqttConfig.username,
+                password: mqttConfig.raw_password,
+            };
+
+            connect(brokerUrl, options);
         }
     },
-    methods:{
-        updateConfig(){
-            this.triggerConfigUpdate = this.triggerConfigUpdate + 1
-        }
-    }
-}
+    { immediate: true, deep: true }
+);
+
+onBeforeUnmount(() => {
+    disconnect();
+});
+
+const updateConfig = () => {
+    triggerConfigUpdate.value++;
+};
 </script>
