@@ -4,6 +4,8 @@ from Schemas.MqttTopic import MqttTopicCreateSchema, MqttTopicUpdateSchema
 from fastapi import HTTPException
 from Services import Controller
 import os
+import signal
+import subprocess
 
 MOSQUITTO_CONFIG_DIR = "/app/mosquitto/config"  # inside container
 ACLFILE_PATH = os.path.join(MOSQUITTO_CONFIG_DIR, "aclfile")
@@ -35,6 +37,9 @@ class MqttTopicService:
         # Write the complete ACL content
         with open(ACLFILE_PATH, "w") as f:
             f.write(acl_content)
+            
+        pid = int(subprocess.check_output(["pidof", "mosquitto"]).decode().strip())
+        os.kill(pid, signal.SIGHUP)
 
     @staticmethod
     def create_mqtt_topic(mqtt_topic_data: MqttTopicCreateSchema, db: Session):

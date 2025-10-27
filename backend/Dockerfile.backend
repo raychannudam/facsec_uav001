@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Update and install Python, pip, and Mosquitto
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
-    apt-get install -y python3 python3-pip && \
+    apt-get install -y python3 python3-pip python3-venv && \
     apt-add-repository ppa:mosquitto-dev/mosquitto-ppa && \
     apt-get update && \
     apt-get install -y mosquitto mosquitto-clients && \
@@ -20,7 +20,9 @@ WORKDIR /app
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
 
-RUN pip install --break-system-packages --timeout 120 -r requirements.txt
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir --timeout 120 -r requirements.txt
 
 
 # Copy FastAPI code
@@ -28,10 +30,6 @@ COPY . .
 
 # Expose ports # 8000 for api service, 9001 & 8883 for mqtt broker
 EXPOSE 8000 9001 8883
-
-# Copy a script to start both Mosquitto and FastAPI
-# COPY start.sh /start.sh
-# RUN chmod +x /start.sh
 
 # Run the script
 CMD ["./start.sh"]
