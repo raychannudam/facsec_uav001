@@ -2,18 +2,18 @@ import mqtt from "mqtt";
 
 // Change this to your MQTT broker URL
 // For example: 'mqtt://localhost:1883' or 'wss://broker.hivemq.com:8884/mqtt'
-const brokerUrl = 'mqtt://localhost:8884';
+const brokerUrl = 'ws://localhost:9002';
 
 // Optional username/password if needed
 const options = {
-  username: 'test1', // add if required
-  password: 'test1', // add if required
+  username: 'test', // add if required
+  password: 'test', // add if required
 };
 
 // Connect to broker
 const client = mqtt.connect(brokerUrl, options);
 
-let topic = "drsys/test/2"
+let topic = "drsys/test/1"
 
 client.on('connect', () => {
   console.log('✅ Connected to MQTT broker');
@@ -37,7 +37,7 @@ client.on('close', () => {
   console.log('🔌 Disconnected from MQTT broker');
 });
 
-setInterval(()=>{
-  client.publish(`${topic}`, 'Hello MQTT!');
-  console.log("Published")
-},1000)
+// setInterval(()=>{
+//   client.publish(`${topic}`, 'Hello MQTT!');
+//   console.log("Published")
+// },1000)

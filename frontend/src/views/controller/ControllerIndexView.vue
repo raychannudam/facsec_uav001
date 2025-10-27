@@ -39,12 +39,11 @@ watch(
         if (controller?.config?.selectedDrone?.mqtt_client) {
             const mqttConfig = controller.config.selectedDrone.mqtt_client;
 
-            const brokerUrl = 'mqtt://localhost:8884';
+            const brokerUrl = process.env.VUE_APP_MQTT_BROKER;
             const options = {
                 username: mqttConfig.username,
                 password: mqttConfig.raw_password,
             };
-
             connect(brokerUrl, options);
         }
     },

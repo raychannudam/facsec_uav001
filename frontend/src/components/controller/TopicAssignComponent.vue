@@ -36,7 +36,7 @@
                         <input :id="'checkbox-item-' + id + '- default'" type="radio" :value="{}" v-model="selectTopic"
                             class="hidden">
                         <label :for="'checkbox-item-' + id + '- default'"
-                            class=" inline-flex items-center justify-center space-x-3 w-full py-2 text-sm font-medium text-gray-900 dark:text-gray-300 text-center cursor-pointer rounded-md bg-blue-500"><span
+                            class="inline-flex items-center justify-center space-x-3 w-full py-2 text-sm font-medium text-gray-300 text-center cursor-pointer rounded-md bg-blue-500"><span
                                 class="material-symbols-outlined text-base">
                                 refresh
                             </span>Reset</label>

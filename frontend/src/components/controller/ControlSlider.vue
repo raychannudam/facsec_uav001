@@ -1,5 +1,5 @@
 <template name="ControlSlider">
-    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg flex flex-col justify-center h-32 transition-colors">
+    <div class="p-3 bg-gray-50 dark:bg-purple-500/10 rounded-lg flex flex-col justify-center h-32 transition-colors">
         <!-- Title with hand icon -->
         <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-1">
