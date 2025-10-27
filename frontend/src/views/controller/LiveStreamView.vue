@@ -37,7 +37,7 @@
         <iframe v-else :src="streamingUrls.stream1" scrolling="no" class="w-full h-full"></iframe>
         <!-- Leaflet map floating at bottom-left -->
         <div id="drone-fly-map"
-          style="position:absolute; left:10px; bottom:16px; width:30%; height:30%; z-index:20; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          style="position:absolute; left:10px; bottom:16px; width:25%; height:20%; z-index:20; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
         </div>
       </div>
       <div class="col-span-4 h-[50vh]">
@@ -150,60 +150,60 @@ export default {
       this.isStarted = false
       this.startStream();
     },
-    simulateDroneFlight() {
-      // Example coordinates from Wat Phnom to Royal Palace, Phnom Penh
-      const path = [
-        [11.575278, 104.921111], // Wat Phnom
-        [11.573000, 104.922500],
-        [11.570500, 104.924000],
-        [11.567500, 104.926000],
-        [11.564500, 104.927500],
-        [11.562000, 104.929000],
-        [11.559444, 104.931944], // Royal Palace
-      ];
-      if (!this.leafletMap) return;
-      let idx = 0;
-      const droneIcon = L.icon({
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/4056/4056808.png',
-        iconSize: [26, 26],
-      });
-      if (this.droneMarker) {
-        this.leafletMap.removeLayer(this.droneMarker);
-      }
-      this.droneMarker = L.marker(path[0], { icon: droneIcon }).addTo(this.leafletMap);
-      this.leafletMap.setView(path[0], 17, { animate: true });
-      // Animate between points with interpolation for smoothness
-      let current = path[0];
-      let nextIdx = 1;
-      const stepDuration = 1200; // ms
-      const stepsPerSegment = 50; // more steps = smoother
-      const animateToNext = () => {
-        if (nextIdx >= path.length) return;
-        const start = current;
-        const end = path[nextIdx];
-        let step = 0;
-        const moveStep = () => {
-          if (step > stepsPerSegment) {
-            current = end;
-            this.droneMarker.setLatLng(current);
-            this.leafletMap.setView(current, 17, { animate: true });
-            nextIdx++;
-            animateToNext();
-            return;
-          }
-          // Linear interpolation
-          const lat = start[0] + (end[0] - start[0]) * (step / stepsPerSegment);
-          const lng = start[1] + (end[1] - start[1]) * (step / stepsPerSegment);
-          const pos = [lat, lng];
-          this.droneMarker.setLatLng(pos);
-          this.leafletMap.setView(pos, 17, { animate: true, pan: { animate: true, duration: stepDuration / 1000 } });
-          step++;
-          setTimeout(moveStep, stepDuration);
-        };
-        moveStep();
-      };
-      animateToNext();
-    },
+    // simulateDroneFlight() {
+    //   // Example coordinates from Wat Phnom to Royal Palace, Phnom Penh
+    //   const path = [
+    //     [11.575278, 104.921111], // Wat Phnom
+    //     [11.573000, 104.922500],
+    //     [11.570500, 104.924000],
+    //     [11.567500, 104.926000],
+    //     [11.564500, 104.927500],
+    //     [11.562000, 104.929000],
+    //     [11.559444, 104.931944], // Royal Palace
+    //   ];
+    //   if (!this.leafletMap) return;
+    //   let idx = 0;
+    //   const droneIcon = L.icon({
+    //     iconUrl: 'https://cdn-icons-png.flaticon.com/512/4056/4056808.png',
+    //     iconSize: [26, 26],
+    //   });
+    //   if (this.droneMarker) {
+    //     this.leafletMap.removeLayer(this.droneMarker);
+    //   }
+    //   this.droneMarker = L.marker(path[0], { icon: droneIcon }).addTo(this.leafletMap);
+    //   this.leafletMap.setView(path[0], 17, { animate: true });
+    //   // Animate between points with interpolation for smoothness
+    //   let current = path[0];
+    //   let nextIdx = 1;
+    //   const stepDuration = 1200; // ms
+    //   const stepsPerSegment = 50; // more steps = smoother
+    //   const animateToNext = () => {
+    //     if (nextIdx >= path.length) return;
+    //     const start = current;
+    //     const end = path[nextIdx];
+    //     let step = 0;
+    //     const moveStep = () => {
+    //       if (step > stepsPerSegment) {
+    //         current = end;
+    //         this.droneMarker.setLatLng(current);
+    //         this.leafletMap.setView(current, 17, { animate: true });
+    //         nextIdx++;
+    //         animateToNext();
+    //         return;
+    //       }
+    //       // Linear interpolation
+    //       const lat = start[0] + (end[0] - start[0]) * (step / stepsPerSegment);
+    //       const lng = start[1] + (end[1] - start[1]) * (step / stepsPerSegment);
+    //       const pos = [lat, lng];
+    //       this.droneMarker.setLatLng(pos);
+    //       this.leafletMap.setView(pos, 17, { animate: true, pan: { animate: true, duration: stepDuration / 1000 } });
+    //       step++;
+    //       setTimeout(moveStep, stepDuration);
+    //     };
+    //     moveStep();
+    //   };
+    //   animateToNext();
+    // },
     initLeafletMap() {
       if (this.leafletMap) return;
       // Use the custom currentUserIcon for the marker
@@ -225,7 +225,7 @@ export default {
             maxZoom: 19
           }).addTo(map);
           this.leafletMap = map;
-          this.simulateDroneFlight();
+          // this.simulateDroneFlight();
         }, () => {
           // Fallback to Phnom Penh if geolocation fails
           const map = L.map('leaflet-map', {
@@ -235,24 +235,24 @@ export default {
             attributionControl: false
           });
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
+            maxZoom: 18
           }).addTo(map);
           this.leafletMap = map;
-          this.simulateDroneFlight();
+          // this.simulateDroneFlight();
         });
       } else {
         // Fallback if geolocation not supported
         const map = L.map('leaflet-map', {
           center: [11.5564, 104.9282], // Phnom Penh
-          zoom: 13,
+          zoom: 18,
           zoomControl: false,
           attributionControl: false
         });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19
+          maxZoom: 18
         }).addTo(map);
         this.leafletMap = map;
-        this.simulateDroneFlight();
+        // this.simulateDroneFlight();
       }
     }
   }
