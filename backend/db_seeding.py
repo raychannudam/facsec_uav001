@@ -55,10 +55,10 @@ def seed_db(db: Session):
     # --- Seed Default Controllers ---
     default_controllers = [
         {
-            "name": "Admin Default Controller",
+            "name": "Admin Controller 1",
             "description": "Default controller for the admin account",
             "config": {
-                "selectedDrone": None,
+                "selectedDrone": {},
                 "streamingUrls": [],
                 "mqttTopics": [],
                 "sliders": [],
@@ -68,10 +68,10 @@ def seed_db(db: Session):
             "user": user_objs[0]
         },
         {
-            "name": "User Default Controller",
+            "name": "User Controller 1",
             "description": "Default controller for the regular user",
             "config": {
-                "selectedDrone": None,
+                "selectedDrone": {},
                 "streamingUrls": [],
                 "mqttTopics": [],
                 "sliders": [],
@@ -101,14 +101,28 @@ def seed_db(db: Session):
             db.commit()
             db.refresh(controller)
 
-    # --- Seed Default MQTT Client ---
+    # --- Seed Default MQTT Clients ---
     mqtt_clients = [
         {
             "user_id": user_objs[0].id,
-            "name": "Admin MQTT Client",
+            "name": "Admin MQTT Client 1",
             "description": "Default MQTT client for admin user",
             "username": "admin",
             "password": "adminpass",
+            "config": {
+                "broker": "localhost",
+                "port": 1883,
+                "qos": 1,
+                "keepalive": 60
+            },
+            "status": True
+        },
+        {
+            "user_id": user_objs[1].id,
+            "name": "User MQTT Client 1",
+            "description": "Default MQTT client for regular user",
+            "username": "user",
+            "password": "userpass",
             "config": {
                 "broker": "localhost",
                 "port": 1883,
@@ -125,11 +139,11 @@ def seed_db(db: Session):
             mqtt_client_schema = MqttClientCreateSchema(**mqtt_data)
             MqttClientService.create_mqtt_client(mqtt_client_schema, db)
 
-    # --- Seed Default Streaming Client ---
+    # --- Seed Default Streaming Clients ---
     streaming_clients = [
         {
             "user_id": user_objs[0].id,
-            "name": "Admin Streaming Client",
+            "name": "Admin Streaming Client 1",
             "description": "Default streaming client for admin user",
             "username": "admin",
             "password": "adminpass",
@@ -140,6 +154,20 @@ def seed_db(db: Session):
                 "fps": 30
             },
             "status": True
+        },
+        {
+            "user_id": user_objs[1].id,
+            "name": "User Streaming Client 1",
+            "description": "Default streaming client for regular user",
+            "username": "user",
+            "password": "userpass",
+            "config": {
+                "protocol": "rtsp",
+                "port": 8554,
+                "quality": "medium",
+                "fps": 25
+            },
+            "status": True
         }
     ]
     
@@ -147,9 +175,12 @@ def seed_db(db: Session):
         existing_streaming = StreamingClientService.get_streaming_clients_by_user(streaming_data["user_id"], db)
         if not any(client.username == streaming_data["username"] for client in existing_streaming):
             streaming_client_schema = StreamingClientCreateSchema(**streaming_data)
-            StreamingClientService.create_streaming_client(streaming_client_schema, db, user_objs[0])
+            # Pass the correct user object for each streaming client
+            user_obj = next((user for user in user_objs if user.id == streaming_data["user_id"]), None)
+            if user_obj:
+                StreamingClientService.create_streaming_client(streaming_client_schema, db, user_obj)
 
-    print("✅ Database seeded successfully with users, roles, controllers, and admin clients.")
+    print("✅ Database seeded successfully with users, roles, controllers, and clients for both admin and user.")
 
 
 if __name__ == "__main__":
