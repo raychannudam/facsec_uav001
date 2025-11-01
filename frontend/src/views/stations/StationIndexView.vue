@@ -14,7 +14,8 @@
           class="absolute z-40 text-xs bg-black/80 w-full h-full rounded-md flex items-center justify-center"
           v-if="isCreatingStation">
           <StationCreateFormComponent @onClose="stationCreateFormClosed" @onStationCreate="stationCreateFormSubmited"
-            :lat="clickedLatLong.lat" :long="clickedLatLong.lng"></StationCreateFormComponent>
+            :lat="clickedLatLong.lat" :long="clickedLatLong.lng">
+          </StationCreateFormComponent>
         </div>
         <button @click="moveToMyLocation"
           class="absolute dark:bg-black/70 bg-white/70 bottom-0 left-0 m-10 flex flex-col z-40 space-y-3 p-3 text-sm items-start rounded-full">
@@ -49,7 +50,7 @@
             </form>
             <div class="absolute top-9 w-full p-3 rounded-md bg-white/80 text-gray-700 flex flex-col space-y-1"
               v-if="foundStationsByQuery.length > 0">
-              <button v-for="data in foundStationsByQuery"
+              <button v-for="data in foundStationsByQuery" :key="data.id"
                 class="border-b border-gray-900 text-xs text-start p-2 hover:bg-gray-900 hover:text-white text-gray-700 rounded-md"
                 @click="selectStation(data)">
                 {{ data.name }}
@@ -65,13 +66,11 @@
             </div>
             <div>
               <p class="text-xs">All <span class="block text-xl font-bold"><span
-                    v-if="allStations.length < 10">0</span>{{
-                      allStations.length }}</span></p>
+                    v-if="allStations.length < 10">0</span>{{ allStations.length }}</span></p>
             </div>
             <div>
               <p class="text-xs">Active<span class="block text-xl font-bold"><span
-                    v-if="allStations.length < 10">0</span>{{
-                      allStations.length }}</span></p>
+                    v-if="allStations.length < 10">0</span>{{ allStations.length }}</span></p>
             </div>
             <div class="flex items-center space-x-1 text-sm col-span-2 border-b">
               <span class="material-symbols-outlined text-sm">
@@ -91,158 +90,151 @@
       </div>
     </div>
     <div>
-       <StationDetailView :station-data="clickedStation"></StationDetailView>
+      <StationDetailView :station-data="clickedStation"></StationDetailView>
     </div>
   </div>
-
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
 import StationCreateFormComponent from '@/components/stations/StationCreateFormComponent.vue';
 import StationDetailView from './StationDetailView.vue';
 import { useAppStore } from '@/stores/AppStore';
 import { useStationStore } from '@/stores/StationStore';
 import L from 'leaflet';
-export default {
-  setup() {
-    const appStore = useAppStore();
-    const stationStore = useStationStore();
-    const currentUserIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/17419/17419361.png ',
-      iconSize: [32, 32],
-      // iconAnchor: [22, 94],
-      // popupAnchor: [-3, -76],
-    });
-    const stationIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/1188/1188034.png ',
-      iconSize: [35, 35],
-      // iconAnchor: [22, 94],
-      // popupAnchor: [-3, -76],
-    });
-    return {
-      appStore,
-      stationStore,
-      currentUserIcon,
-      stationIcon
-    }
-  },
-  components: {
-    StationCreateFormComponent,
-    StationDetailView
-  },
-  async mounted() {
-    document.title = "All Stations | DRSYS"
-    await this.getAllStations();
-    this.initMap();
-  },
-  data() {
-    return {
-      allStations: [],
-      isCreatingStation: false,
-      clickedLatLong: "",
-      map: undefined,
-      searchStationQuery: "",
-      foundStationsByQuery: [],
-      selectedStation: undefined,
-      clickedStation: undefined,
-    }
-  },
-  methods: {
-    initMap(lat = undefined, lng = undefined) {
-      if (this.map) return;
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          if (lat == undefined || lng == undefined) {
-            this.map = L.map('map').setView([position.coords.latitude, position.coords.longitude], 16);
-          } else {
-            this.map = L.map('map').setView([lat, lng], 16);
-          }
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          }).addTo(this.map);
-          L.marker([position.coords.latitude, position.coords.longitude], {
-            icon: this.currentUserIcon
-          }).addTo(this.map)
 
-          if (this.allStations.length > 0) {
-            this.allStations.forEach(station => {
-              L.marker([station.lat, station.long], {
-                icon: this.stationIcon
-              }).addTo(this.map).on("click", e => {
-                this.clickedStation = station
-              })
-            })
-          }
+// Stores
+const appStore = useAppStore();
+const stationStore = useStationStore();
 
-          this.map.on("click", (e) => {
-            this.isCreatingStation = true;
-            this.clickedLatLong = e.latlng;
-          })
+// Reactive state
+const allStations = ref([]);
+const isCreatingStation = ref(false);
+const clickedLatLong = ref("");
+const map = ref(undefined);
+const searchStationQuery = ref("");
+const foundStationsByQuery = ref([]);
+const selectedStation = ref(undefined);
+const clickedStation = ref(undefined);
+
+// Icon definitions
+const currentUserIcon = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/17419/17419361.png',
+  iconSize: [32, 32],
+});
+
+const stationIcon = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/1188/1188034.png',
+  iconSize: [35, 35],
+});
+
+// Methods
+const initMap = (lat = undefined, lng = undefined) => {
+  if (map.value) return;
+
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const mapCenter = (lat !== undefined && lng !== undefined)
+        ? [lat, lng]
+        : [position.coords.latitude, position.coords.longitude];
+
+      map.value = L.map('map').setView(mapCenter, 16);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map.value);
+
+      L.marker([position.coords.latitude, position.coords.longitude], {
+        icon: currentUserIcon
+      }).addTo(map.value);
+
+      if (allStations.value.length > 0) {
+        allStations.value.forEach(station => {
+          L.marker([station.lat, station.long], {
+            icon: stationIcon
+          }).addTo(map.value).on("click", () => {
+            clickedStation.value = station;
+          });
         });
       }
-    },
-    async getAllStations() {
-      this.appStore.displayPageLoading(true);
-      let res = await this.stationStore.getAllStations();
-      this.appStore.displayPageLoading(false);
-      this.appStore.displayRightToast(res.status, res.message);
-      this.allStations = res.data
-      if (res.status == "success") {
-        this.allStations = res.data
-      }
-    },
-    async searchStation() {
-      if (this.searchStationQuery != "") {
-        let res = await this.stationStore.getAllStations(this.searchStationQuery);
-        if (res.status == "success") {
-          this.foundStationsByQuery = res.data;
-        } else {
-          this.foundStationsByQuery = [];
-        }
-      } else {
-        this.foundStationsByQuery = [];
-      }
-    },
-    async selectStation(stationData) {
-      this.selectedStation = stationData
-      this.map.flyTo([stationData.lat, stationData.long], 16, {
+
+      map.value.on("click", (e) => {
+        isCreatingStation.value = true;
+        clickedLatLong.value = e.latlng;
+      });
+    });
+  }
+};
+
+const getAllStations = async () => {
+  appStore.displayPageLoading(true);
+  const res = await stationStore.getAllStations();
+  appStore.displayPageLoading(false);
+  appStore.displayRightToast(res.status, res.message);
+
+  if (res.status === "success") {
+    allStations.value = res.data;
+  }
+};
+
+const searchStation = async () => {
+  if (searchStationQuery.value !== "") {
+    const res = await stationStore.getAllStations(searchStationQuery.value);
+    foundStationsByQuery.value = res.status === "success" ? res.data : [];
+  } else {
+    foundStationsByQuery.value = [];
+  }
+};
+
+const selectStation = async (stationData) => {
+  selectedStation.value = stationData;
+  map.value.flyTo([stationData.lat, stationData.long], 16, {
+    animate: true,
+    duration: 0.5
+  });
+  foundStationsByQuery.value = [];
+  searchStationQuery.value = "";
+};
+
+const stationCreateFormClosed = () => {
+  isCreatingStation.value = false;
+};
+
+const stationCreateFormSubmited = async () => {
+  isCreatingStation.value = false;
+  await getAllStations();
+
+  if (map.value && clickedLatLong.value) {
+    const newStation = allStations.value && allStations.value.length > 0
+      ? allStations.value[allStations.value.length - 1]
+      : null;
+
+    L.marker([
+      clickedLatLong.value.lat,
+      clickedLatLong.value.lng
+    ], {
+      icon: stationIcon
+    }).addTo(map.value).on("click", () => {
+      clickedStation.value = newStation;
+    });
+  }
+};
+
+const moveToMyLocation = () => {
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      map.value.flyTo([position.coords.latitude, position.coords.longitude], 16, {
         animate: true,
         duration: 0.5
-      })
-      this.foundStationsByQuery = ""
-      this.searchStationQuery = ""
-    },
-    async stationCreateFormClosed() {
-      this.isCreatingStation = false
-    },
-    async stationCreateFormSubmited() {
-      this.isCreatingStation = false
-      await this.getAllStations();
-      if (this.map && this.clickedLatLong) {
-        let newStation = this.allStations && this.allStations.length > 0
-          ? this.allStations[this.allStations.length - 1]
-          : null;
-        L.marker([
-          this.clickedLatLong.lat,
-          this.clickedLatLong.lng
-        ], {
-          icon: this.stationIcon
-        }).addTo(this.map).on("click", () => {
-          this.clickedStation = newStation;
-        });
-      }
-    },
-    moveToMyLocation() {
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          this.map.flyTo([position.coords.latitude, position.coords.longitude], 16, {
-            animate: true,
-            duration: 0.5
-          })
-        })
-      }
-    }
-  },
-}
+      });
+    });
+  }
+};
 
+// Lifecycle
+onMounted(async () => {
+  document.title = "All Stations | DRSYS";
+  await getAllStations();
+  initMap();
+});
 </script>
