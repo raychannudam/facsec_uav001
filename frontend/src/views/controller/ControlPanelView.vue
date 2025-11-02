@@ -110,10 +110,10 @@ import ControlButton from '@/components/controller/ControlButton.vue';
 import ControlSlider from '@/components/controller/ControlSlider.vue';
 import ControlSwitch from '@/components/controller/ControlSwitch.vue';
 import { useControllerStore } from '@/stores/ControllerStore';
-import { useMqttClient } from '@/composables/useMqttClient';
+import { useMqttStore } from '@/stores/MqttStore';
 
 const controllerStore = useControllerStore();
-const { publish, isConnected } = useMqttClient();
+const { publish, isConnected } = useMqttStore();
 
 onMounted(async () => {
     await controllerStore.getAllControllers();
