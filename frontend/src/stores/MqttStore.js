@@ -1,10 +1,13 @@
+import { defineStore } from "pinia";
 import { ref } from "vue";
 import mqtt from "mqtt";
 
-const mqttClient = ref(null);
-const isConnected = ref(false);
+export const useMqttStore = defineStore("mqtt", () => {
+  // State
+  const mqttClient = ref(null);
+  const isConnected = ref(false);
 
-export function useMqttClient() {
+  // Actions
   const connect = (brokerUrl, options) => {
     if (mqttClient.value) mqttClient.value.end();
 
@@ -75,4 +78,4 @@ export function useMqttClient() {
     publish,
     disconnect,
   };
-}
+});
