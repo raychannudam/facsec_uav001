@@ -27,4 +27,5 @@ from Models.StreamingClients import StreamingClientModel  # Import Streaming Cli
 from Models.StreamingUrls import StreamingUrlModel  # Import Streaming URL model to ensure it's registered with Base
 from Models.Uavs import UavModel  # Import UAV model to ensure it's registered with Base
 from Models.Stations import StationModel  # Import Station model to ensure it's registered with Base
+from Models.Chat import ChatSessionModel, ChatMessageModel
 from Models.Controller import ControllerModel
