@@ -21,11 +21,11 @@ import ConfigurationView from './ConfigurationView.vue';
 import ControlPanelView from './ControlPanelView.vue';
 import LiveStreamView from './LiveStreamView.vue';
 import { useControllerStore } from '@/stores/ControllerStore';
-import { useMqttClient } from '@/composables/useMqttClient';
+import { useMqttStore } from '@/stores/MqttStore';
 
 const controllerStore = useControllerStore();
 const triggerConfigUpdate = ref(0);
-const { connect, disconnect } = useMqttClient();
+const { connect, disconnect } = useMqttStore();
 
 onMounted(() => {
     document.title = 'Controller | DRSYS';
