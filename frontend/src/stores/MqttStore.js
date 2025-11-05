@@ -6,6 +6,7 @@ export const useMqttStore = defineStore("mqtt", () => {
   // State
   const mqttClient = ref(null);
   const isConnected = ref(false);
+  const topicCallbacks = ref({});
 
   // Actions
   const connect = (brokerUrl, options) => {
@@ -27,6 +28,19 @@ export const useMqttStore = defineStore("mqtt", () => {
       console.log("🔌 MQTT Connection closed");
       isConnected.value = false;
     });
+
+    // Setup message listener ONCE when connecting
+    mqttClient.value.on("message", (receivedTopic, message) => {
+      console.log(`📥 Message received on topic: ${receivedTopic}`);
+
+      // Find and call the callback for this topic
+      const callback = topicCallbacks.value[receivedTopic];
+      if (callback) {
+        callback(message);
+      } else {
+        console.warn(`⚠️ No callback registered for topic: ${receivedTopic}`);
+      }
+    });
   };
 
   const subscribe = (topic, callback) => {
@@ -35,19 +49,18 @@ export const useMqttStore = defineStore("mqtt", () => {
       return;
     }
 
-    // Subscribe to the topic
+    // Store the callback FIRST
+    topicCallbacks.value[topic] = callback;
+    console.log(`💾 Callback stored for topic: ${topic}`);
+
+    // Then subscribe to the topic
     mqttClient.value.subscribe(topic, (err) => {
       if (!err) {
         console.log(`📡 Subscribed to topic: ${topic}`);
       } else {
         console.error(`❌ Failed to subscribe to ${topic}:`, err);
-      }
-    });
-
-    // Listen for messages on this topic
-    mqttClient.value.on("message", (receivedTopic, message) => {
-      if (receivedTopic === topic && callback) {
-        callback(message);
+        // Remove callback if subscription failed
+        delete topicCallbacks.value[topic];
       }
     });
   };
@@ -66,6 +79,7 @@ export const useMqttStore = defineStore("mqtt", () => {
       mqttClient.value.end();
       mqttClient.value = null;
       isConnected.value = false;
+      topicCallbacks.value = {};
       console.log("👋 MQTT client disconnected");
     }
   };
