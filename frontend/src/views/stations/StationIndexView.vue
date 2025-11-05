@@ -2,14 +2,14 @@
   <div class="flex flex-col space-y-3">
     <div class="flex flex-col space-y-3">
       <div class="text-2xl font-bold flex items-center space-x-3">
-        <span class="text-2xl material-symbols-outlined">
-          warehouse
-        </span>
+        <span class="text-2xl material-symbols-outlined">warehouse</span>
         <p>Drone Stations</p>
       </div>
       <p class="text-gray-600 dark:text-gray-400">Manage your drone stations on the map directly.</p>
       <hr class="border-0.5 border-gray-200">
+
       <div class="relative">
+        <!-- Station Create Form Overlay -->
         <div @click.self="stationCreateFormClosed"
           class="absolute z-40 text-xs bg-black/80 w-full h-full rounded-md flex items-center justify-center"
           v-if="isCreatingStation">
@@ -17,22 +17,23 @@
             :lat="clickedLatLong.lat" :long="clickedLatLong.lng">
           </StationCreateFormComponent>
         </div>
+
+        <!-- My Location Button -->
         <button @click="moveToMyLocation"
           class="absolute dark:bg-black/70 bg-white/70 bottom-0 left-0 m-10 flex flex-col z-40 space-y-3 p-3 text-sm items-start rounded-full">
-          <span class="material-symbols-outlined">
-            my_location
-          </span>
+          <span class="material-symbols-outlined">my_location</span>
         </button>
+
+        <!-- Stats Panel -->
         <div
           class="absolute dark:bg-black/70 bg-white/70 right-0 m-10 flex flex-col z-40 space-y-3 p-3 text-sm items-start rounded-md">
+          <!-- Search Station -->
           <div class="relative flex flex-col space-y-3">
             <form class="flex items-center max-w-sm mx-auto" @submit.prevent="searchStation">
               <label for="searchStationQuery" class="sr-only">Search</label>
               <div class="relative w-full">
                 <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                  <span class="material-symbols-outlined text-sm">
-                    warehouse
-                  </span>
+                  <span class="material-symbols-outlined text-sm">warehouse</span>
                 </div>
                 <input type="text" id="searchStationQuery" v-model="searchStationQuery" @input="searchStation"
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
@@ -48,6 +49,8 @@
                 <span class="sr-only">Search</span>
               </button>
             </form>
+
+            <!-- Search Results Dropdown -->
             <div class="absolute top-9 w-full p-3 rounded-md bg-white/80 text-gray-700 flex flex-col space-y-1"
               v-if="foundStationsByQuery.length > 0">
               <button v-for="data in foundStationsByQuery" :key="data.id"
@@ -57,38 +60,49 @@
               </button>
             </div>
           </div>
-          <div class="w-full grid grid-cols-2  gap-3">
+
+          <!-- Statistics Grid -->
+          <div class="w-full grid grid-cols-2 gap-3">
+            <!-- Stations Stats -->
             <div class="flex items-center space-x-1 text-sm col-span-2 border-b">
-              <span class="material-symbols-outlined text-sm">
-                warehouse
-              </span>
+              <span class="material-symbols-outlined text-sm">warehouse</span>
               <p>Stations</p>
             </div>
             <div>
-              <p class="text-xs">All <span class="block text-xl font-bold"><span
-                    v-if="allStations.length < 10">0</span>{{ allStations.length }}</span></p>
+              <p class="text-xs">All <span class="block text-xl font-bold">
+                  <span v-if="allStations.length < 10">0</span>{{ allStations.length }}
+                </span></p>
             </div>
             <div>
-              <p class="text-xs">Active<span class="block text-xl font-bold"><span
-                    v-if="allStations.length < 10">0</span>{{ allStations.length }}</span></p>
+              <p class="text-xs">Active<span class="block text-xl font-bold">
+                  <span v-if="allStations.length < 10">0</span>{{ allStations.length }}
+                </span></p>
             </div>
+
+            <!-- Drones Stats -->
             <div class="flex items-center space-x-1 text-sm col-span-2 border-b">
-              <span class="material-symbols-outlined text-sm">
-                drone
-              </span>
+              <span class="material-symbols-outlined text-sm">drone</span>
               <p>Drones</p>
             </div>
             <div>
-              <p class="text-xs">All <span class="block text-xl font-bold">00</span></p>
+              <p class="text-xs">All <span class="block text-xl font-bold">
+                  {{ activeDrones.length.toString().padStart(2, '0') }}
+                </span></p>
             </div>
             <div>
-              <p class="text-xs">Active<span class="block text-xl font-bold">00</span></p>
+              <p class="text-xs">Active<span class="block text-xl font-bold">
+                  {{ activeDrones.length.toString().padStart(2, '0') }}
+                </span></p>
             </div>
           </div>
         </div>
+
+        <!-- The Map -->
         <div id="map" style="height: 55vh;" class="rounded-md z-30"></div>
       </div>
     </div>
+
+    <!-- Station Detail View -->
     <div>
       <StationDetailView :station-data="clickedStation"></StationDetailView>
     </div>
@@ -96,28 +110,33 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import StationCreateFormComponent from '@/components/stations/StationCreateFormComponent.vue';
 import StationDetailView from './StationDetailView.vue';
 import { useAppStore } from '@/stores/AppStore';
 import { useStationStore } from '@/stores/StationStore';
+import { useMqttStore } from '@/stores/MqttStore';
 import L from 'leaflet';
 
-// Stores
 const appStore = useAppStore();
 const stationStore = useStationStore();
-
-// Reactive state
+const mqttStore = useMqttStore();
 const allStations = ref([]);
 const isCreatingStation = ref(false);
 const clickedLatLong = ref("");
-const map = ref(undefined);
 const searchStationQuery = ref("");
 const foundStationsByQuery = ref([]);
 const selectedStation = ref(undefined);
 const clickedStation = ref(undefined);
 
-// Icon definitions
+// Map
+const map = ref(undefined);
+
+// Drone Tracking
+const droneMarkers = ref({});
+const activeDrones = ref([]);
+
+// LEAFLET ICONS
 const currentUserIcon = L.icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/17419/17419361.png',
   iconSize: [32, 32],
@@ -128,7 +147,94 @@ const stationIcon = L.icon({
   iconSize: [35, 35],
 });
 
-// Methods
+const droneIcon = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2906/2906192.png',
+  iconSize: [40, 40],
+});
+
+// MQTT FUNCTIONS
+const setupMQTT = () => {
+  console.log('🔌 Connecting to MQTT broker...');
+  mqttStore.connect('ws://localhost:9002', {
+    username: '007',
+    password: '007',
+  });
+};
+
+// Watch for MQTT connection - subscribe when connected
+watch(() => mqttStore.isConnected, (isConnected) => {
+  if (isConnected) {
+    console.log('🎉 MQTT Connected! Now subscribing to drone updates...');
+    subscribeToDroneUpdates();
+  }
+});
+
+const subscribeToDroneUpdates = () => {
+  const topic = 'drsys/007/goku';
+  console.log(`🎯 Subscribing to topic: ${topic}`);
+
+  mqttStore.subscribe(topic, (message) => {
+    try {
+      const locationData = JSON.parse(message.toString());
+      console.log('📥 Drone location received:', locationData);
+      updateDronePosition(locationData);
+    } catch (error) {
+      console.error('Error parsing drone location:', error);
+    }
+  });
+};
+
+const updateDronePosition = (locationData) => {
+  if (!map.value) return;
+
+  console.log("🚁 Updating drone position:", locationData);
+  const { lat, lng, droneId } = locationData;
+
+  // Update existing marker or create new one
+  if (droneMarkers.value[droneId]) {
+    console.log(`♻️ Updating existing drone: ${droneId}`);
+    // Move existing marker
+    droneMarkers.value[droneId].setLatLng([lat, lng]);
+    droneMarkers.value[droneId].setPopupContent(createDronePopup(locationData));
+    // Update drone info in activeDrones array
+    const drone = activeDrones.value.find(d => d.id === droneId);
+    if (drone) {
+      drone.lat = lat;
+      drone.lng = lng;
+      drone.lastUpdate = new Date();
+    }
+  } else {
+    console.log(`✨ Creating new drone marker: ${droneId}`);
+    // Create new drone marker
+    const marker = L.marker([lat, lng], { icon: droneIcon })
+      .addTo(map.value)
+      .bindPopup(createDronePopup(locationData));
+
+    droneMarkers.value[droneId] = marker;
+
+    // Add to active drones list
+    activeDrones.value.push({
+      id: droneId,
+      lat,
+      lng,
+      lastUpdate: new Date()
+    });
+  }
+};
+
+const createDronePopup = (data) => {
+  return `
+    <div class="text-sm">
+      <strong>🚁 ${data.droneId}</strong><br>
+      <strong>Lat:</strong> ${data.lat.toFixed(6)}<br>
+      <strong>Lng:</strong> ${data.lng.toFixed(6)}<br>
+      ${data.altitude ? `<strong>Altitude:</strong> ${data.altitude}m<br>` : ''}
+      ${data.battery ? `<strong>Battery:</strong> ${data.battery}%` : ''}
+    </div>
+  `;
+};
+
+// MAP FUNCTIONS
 const initMap = (lat = undefined, lng = undefined) => {
   if (map.value) return;
 
@@ -138,34 +244,58 @@ const initMap = (lat = undefined, lng = undefined) => {
         ? [lat, lng]
         : [position.coords.latitude, position.coords.longitude];
 
+      // Create map
       map.value = L.map('map').setView(mapCenter, 16);
 
+      // Add tile layer
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(map.value);
 
+      // Add current user marker
       L.marker([position.coords.latitude, position.coords.longitude], {
         icon: currentUserIcon
       }).addTo(map.value);
 
-      if (allStations.value.length > 0) {
-        allStations.value.forEach(station => {
-          L.marker([station.lat, station.long], {
-            icon: stationIcon
-          }).addTo(map.value).on("click", () => {
-            clickedStation.value = station;
-          });
-        });
-      }
+      // Add station markers
+      addStationsToMap();
 
+      // Handle map clicks for creating new stations
       map.value.on("click", (e) => {
         isCreatingStation.value = true;
         clickedLatLong.value = e.latlng;
+      });
+
+      // Setup MQTT connection
+      setupMQTT();
+    });
+  }
+};
+
+const addStationsToMap = () => {
+  if (allStations.value.length > 0) {
+    allStations.value.forEach(station => {
+      L.marker([station.lat, station.long], {
+        icon: stationIcon
+      }).addTo(map.value).on("click", () => {
+        clickedStation.value = station;
       });
     });
   }
 };
 
+const moveToMyLocation = () => {
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      map.value.flyTo([position.coords.latitude, position.coords.longitude], 16, {
+        animate: true,
+        duration: 0.5
+      });
+    });
+  }
+};
+
+// STATION FUNCTIONS
 const getAllStations = async () => {
   appStore.displayPageLoading(true);
   const res = await stationStore.getAllStations();
@@ -186,7 +316,7 @@ const searchStation = async () => {
   }
 };
 
-const selectStation = async (stationData) => {
+const selectStation = (stationData) => {
   selectedStation.value = stationData;
   map.value.flyTo([stationData.lat, stationData.long], 16, {
     animate: true,
@@ -204,37 +334,27 @@ const stationCreateFormSubmited = async () => {
   isCreatingStation.value = false;
   await getAllStations();
 
-  if (map.value && clickedLatLong.value) {
-    const newStation = allStations.value && allStations.value.length > 0
-      ? allStations.value[allStations.value.length - 1]
-      : null;
+  if (map.value) {
+    const newStation = allStations.value[allStations.value.length - 1];
 
-    L.marker([
-      clickedLatLong.value.lat,
-      clickedLatLong.value.lng
-    ], {
-      icon: stationIcon
-    }).addTo(map.value).on("click", () => {
-      clickedStation.value = newStation;
-    });
-  }
-};
-
-const moveToMyLocation = () => {
-  if ("geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition((position) => {
-      map.value.flyTo([position.coords.latitude, position.coords.longitude], 16, {
-        animate: true,
-        duration: 0.5
+    if (newStation) {
+      L.marker([newStation.lat, newStation.long], {
+        icon: stationIcon
+      }).addTo(map.value).on("click", () => {
+        clickedStation.value = newStation;
       });
-    });
+    }
   }
 };
 
-// Lifecycle
+// LIFECYCLE HOOKS
 onMounted(async () => {
   document.title = "All Stations | DRSYS";
   await getAllStations();
   initMap();
+});
+
+onUnmounted(() => {
+  mqttStore.disconnect();
 });
 </script>
