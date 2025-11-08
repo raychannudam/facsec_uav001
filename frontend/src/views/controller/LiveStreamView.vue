@@ -35,11 +35,21 @@
           <p class="animate-pulse">CAM 01</p>
         </div>
         <iframe v-else :src="streamingUrls.stream1" scrolling="no" class="w-full h-full"></iframe>
+
         <!-- Leaflet map floating at bottom-left -->
         <div id="drone-fly-map"
           style="position:absolute; left:10px; bottom:16px; width:25%; height:20%; z-index:20; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
         </div>
+
+        <!-- Drone info overlay -->
+        <div v-if="droneLocation"
+          style="position:absolute; left:10px; top:16px; z-index:20; background:rgba(0,0,0,0.7); padding:8px 12px; border-radius:8px; color:white; font-size:12px;">
+          <div><strong>🚁 {{ droneLocation.droneId }}</strong></div>
+          <div v-if="droneLocation.altitude">Alt: {{ droneLocation.altitude }}m</div>
+          <div v-if="droneLocation.battery">Battery: {{ droneLocation.battery }}%</div>
+        </div>
       </div>
+
       <div class="col-span-4 h-[50vh]">
         <div class="grid grid-rows-3 gap-3 w-full h-full">
           <div class="bg-gray-500 rounded-md flex items-center justify-center space-x-3 overflow-clip w-full h-full">
@@ -56,7 +66,7 @@
               <span class="material-symbols-outlined animate-pulse">
                 videocam
               </span>
-              <p class="animate-pulse">CAM 03 {{ streamingUrls.stream3 }}</p>
+              <p class="animate-pulse">CAM 03</p>
             </div>
             <iframe v-else :src="streamingUrls.stream3" scrolling="yes" class="w-full h-full"></iframe>
           </div>
@@ -74,187 +84,174 @@
     </div>
   </div>
 </template>
-<script>
+
+<script setup>
+import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useControllerStore } from '@/stores/ControllerStore';
 import L from 'leaflet';
-export default {
-  setup() {
-    const controllerStore = useControllerStore();
-    const streamingBaseUrl = process.env.VUE_APP_STREAMING_URL
-    const currentUserIcon = L.icon({
-      iconUrl: 'https://cdn-icons-png.flaticon.com/512/17419/17419361.png ',
-      iconSize: [32, 32],
-      // iconAnchor: [22, 94],
-      // popupAnchor: [-3, -76],
-    });
-    return {
-      controllerStore,
-      streamingBaseUrl
-    }
-  },
-  data() {
-    return {
-      streamingUrls: {
-        stream1: undefined,
-        stream2: undefined,
-        stream3: undefined,
-        stream4: undefined
-      },
-      controller: undefined,
-      username: '',
-      password: '',
-      isStarted: false,
-      leafletMap: null,
-      droneMarker: null
-    }
-  },
-  async mounted() {
-    let res = await this.controllerStore.getAllControllers();
-    if (res.status == "success") {
-      this.controller = res.data[0]
-      // Do not initialize streams here anymore
-    }
-    // Initialize Leaflet map after DOM is ready
-    this.$nextTick(() => {
-      if (!this.leafletMap) {
-        this.initLeafletMap();
-      }
-    });
-  },
-  methods: {
-    async startStream() {
-      if (!this.isStarted) {
-        const hasSelectedUrl = ["stream1", "stream2", "stream3", "stream4"].some(
-          id => {
-            const stream = this.controller.config.streamingUrls.find(item => item.id == id);
-            return stream && stream.selectedUrl && Object.keys(stream.selectedUrl).length > 0;
-          }
-        );
-        if (hasSelectedUrl) {
-          this.username = prompt("Streaming client username", "username");
-          if (this.username == null) return;
-          this.password = prompt("Streaming client password", "password");
-          if (this.password == null) return;
-        }
-        ["stream1", "stream2", "stream3", "stream4"].forEach(id => {
-          const stream = this.controller.config.streamingUrls.find(item => item.id == id);
-          if (stream && stream.selectedUrl && Object.keys(stream.selectedUrl).length > 0) {
-            this.streamingUrls[id] = this.streamingBaseUrl + "/" + stream.selectedUrl.name + `?username=${this.username}&password=${this.password}`;
-          }
-        });
-        this.isStarted = true
 
-      }
-    },
-    restartStream() {
-      this.isStarted = false
-      this.startStream();
-    },
-    // simulateDroneFlight() {
-    //   // Example coordinates from Wat Phnom to Royal Palace, Phnom Penh
-    //   const path = [
-    //     [11.575278, 104.921111], // Wat Phnom
-    //     [11.573000, 104.922500],
-    //     [11.570500, 104.924000],
-    //     [11.567500, 104.926000],
-    //     [11.564500, 104.927500],
-    //     [11.562000, 104.929000],
-    //     [11.559444, 104.931944], // Royal Palace
-    //   ];
-    //   if (!this.leafletMap) return;
-    //   let idx = 0;
-    //   const droneIcon = L.icon({
-    //     iconUrl: 'https://cdn-icons-png.flaticon.com/512/4056/4056808.png',
-    //     iconSize: [26, 26],
-    //   });
-    //   if (this.droneMarker) {
-    //     this.leafletMap.removeLayer(this.droneMarker);
-    //   }
-    //   this.droneMarker = L.marker(path[0], { icon: droneIcon }).addTo(this.leafletMap);
-    //   this.leafletMap.setView(path[0], 17, { animate: true });
-    //   // Animate between points with interpolation for smoothness
-    //   let current = path[0];
-    //   let nextIdx = 1;
-    //   const stepDuration = 1200; // ms
-    //   const stepsPerSegment = 50; // more steps = smoother
-    //   const animateToNext = () => {
-    //     if (nextIdx >= path.length) return;
-    //     const start = current;
-    //     const end = path[nextIdx];
-    //     let step = 0;
-    //     const moveStep = () => {
-    //       if (step > stepsPerSegment) {
-    //         current = end;
-    //         this.droneMarker.setLatLng(current);
-    //         this.leafletMap.setView(current, 17, { animate: true });
-    //         nextIdx++;
-    //         animateToNext();
-    //         return;
-    //       }
-    //       // Linear interpolation
-    //       const lat = start[0] + (end[0] - start[0]) * (step / stepsPerSegment);
-    //       const lng = start[1] + (end[1] - start[1]) * (step / stepsPerSegment);
-    //       const pos = [lat, lng];
-    //       this.droneMarker.setLatLng(pos);
-    //       this.leafletMap.setView(pos, 17, { animate: true, pan: { animate: true, duration: stepDuration / 1000 } });
-    //       step++;
-    //       setTimeout(moveStep, stepDuration);
-    //     };
-    //     moveStep();
-    //   };
-    //   animateToNext();
-    // },
-    initLeafletMap() {
-      if (this.leafletMap) return;
-      // Use the custom currentUserIcon for the marker
-      const droneIcon = L.icon({
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/4056/4056808.png ',
-        iconSize: [26, 26],
-      });
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          const map = L.map('drone-fly-map', {
-            center: [lat, lng],
-            zoom: 17,
-            zoomControl: false,
-            attributionControl: false
-          });
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
-          }).addTo(map);
-          this.leafletMap = map;
-          // this.simulateDroneFlight();
-        }, () => {
-          // Fallback to Phnom Penh if geolocation fails
-          const map = L.map('leaflet-map', {
-            center: [11.5564, 104.9282], // Phnom Penh
-            zoom: 13,
-            zoomControl: false,
-            attributionControl: false
-          });
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18
-          }).addTo(map);
-          this.leafletMap = map;
-          // this.simulateDroneFlight();
-        });
-      } else {
-        // Fallback if geolocation not supported
-        const map = L.map('leaflet-map', {
-          center: [11.5564, 104.9282], // Phnom Penh
-          zoom: 18,
-          zoomControl: false,
-          attributionControl: false
-        });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 18
-        }).addTo(map);
-        this.leafletMap = map;
-        // this.simulateDroneFlight();
-      }
-    }
+// Props
+const props = defineProps({
+  droneLocation: {
+    type: Object,
+    default: null
   }
-}
+});
+
+const controllerStore = useControllerStore();
+const streamingBaseUrl = process.env.VUE_APP_STREAMING_URL;
+
+const streamingUrls = ref({
+  stream1: undefined,
+  stream2: undefined,
+  stream3: undefined,
+  stream4: undefined
+});
+
+const controller = ref(undefined);
+const username = ref('');
+const password = ref('');
+const isStarted = ref(false);
+const leafletMap = ref(null);
+const droneMarker = ref(null);
+
+// Drone icons
+const droneIcon = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2906/2906192.png',
+  iconSize: [40, 40],
+});
+
+// Watch for drone location updates from parent
+watch(() => props.droneLocation, (newLocation) => {
+  if (newLocation && leafletMap.value) {
+    updateDroneOnMap(newLocation);
+  }
+}, { deep: true });
+
+const updateDroneOnMap = (locationData) => {
+  if (!leafletMap.value) return;
+
+  const { lat, lng } = locationData;
+
+  if (droneMarker.value) {
+    // Update existing marker
+    droneMarker.value.setLatLng([lat, lng]);
+
+    // Smoothly pan map to follow drone
+    leafletMap.value.setView([lat, lng], leafletMap.value.getZoom(), {
+      animate: true,
+      pan: { animate: true, duration: 0.5 }
+    });
+  } else {
+    // Create new marker
+    droneMarker.value = L.marker([lat, lng], { icon: droneIcon })
+      .addTo(leafletMap.value);
+
+    // Center map on drone
+    leafletMap.value.setView([lat, lng], 17);
+  }
+};
+
+const initLeafletMap = () => {
+  if (leafletMap.value) return;
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(position => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      const map = L.map('drone-fly-map', {
+        center: [lat, lng],
+        zoom: 17,
+        zoomControl: false,
+        attributionControl: false
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+      }).addTo(map);
+
+      leafletMap.value = map;
+
+      // If drone location already exists, show it
+      if (props.droneLocation) {
+        updateDroneOnMap(props.droneLocation);
+      }
+    }, () => {
+      // Fallback to Phnom Penh
+      initFallbackMap();
+    });
+  } else {
+    initFallbackMap();
+  }
+};
+
+const initFallbackMap = () => {
+  const map = L.map('drone-fly-map', {
+    center: [11.5564, 104.9282], // Phnom Penh
+    zoom: 13,
+    zoomControl: false,
+    attributionControl: false
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(map);
+
+  leafletMap.value = map;
+
+  if (props.droneLocation) {
+    updateDroneOnMap(props.droneLocation);
+  }
+};
+
+const startStream = async () => {
+  if (!isStarted.value) {
+    const hasSelectedUrl = ["stream1", "stream2", "stream3", "stream4"].some(
+      id => {
+        const stream = controller.value.config.streamingUrls.find(item => item.id == id);
+        return stream && stream.selectedUrl && Object.keys(stream.selectedUrl).length > 0;
+      }
+    );
+
+    if (hasSelectedUrl) {
+      username.value = prompt("Streaming client username", "username");
+      if (username.value == null) return;
+      password.value = prompt("Streaming client password", "password");
+      if (password.value == null) return;
+    }
+
+    ["stream1", "stream2", "stream3", "stream4"].forEach(id => {
+      const stream = controller.value.config.streamingUrls.find(item => item.id == id);
+      if (stream && stream.selectedUrl && Object.keys(stream.selectedUrl).length > 0) {
+        streamingUrls.value[id] = streamingBaseUrl + "/" + stream.selectedUrl.name + `?username=${username.value}&password=${password.value}`;
+      }
+    });
+
+    isStarted.value = true;
+  }
+};
+
+const restartStream = () => {
+  isStarted.value = false;
+  startStream();
+};
+
+onMounted(async () => {
+  let res = await controllerStore.getAllControllers();
+  if (res.status == "success") {
+    controller.value = res.data[0];
+  }
+
+  // Initialize map after DOM is ready
+  await nextTick();
+  initLeafletMap();
+});
+
+onBeforeUnmount(() => {
+  if (leafletMap.value) {
+    leafletMap.value.remove();
+    leafletMap.value = null;
+  }
+});
 </script>
