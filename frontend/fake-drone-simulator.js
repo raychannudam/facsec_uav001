@@ -3,12 +3,12 @@ import mqtt from "mqtt";
 // MQTT Broker configuration
 const brokerUrl = "ws://localhost:9002";
 const options = {
-  username: "007",
-  password: "007",
+  username: "test",
+  password: "test",
 };
 
 const client = mqtt.connect(brokerUrl, options);
-const topic = "drsys/007/goku";
+const topic = "drsys/test/gps_latlng";
 
 // Starting location (Phnom Penh, Cambodia)
 let currentLat = 11.5564;
