@@ -1,8 +1,8 @@
-"""add raw_password column to mqtt_clients
+"""Merge all heads into one unified branch
 
-Revision ID: cf24949fce62
-Revises: fdf9fc25977e
-Create Date: 2025-10-19 05:51:31.917934
+Revision ID: d6c8d00f9e06
+Revises: 4b212724d225, 6e2a8c7f0573, cf24949fce62
+Create Date: 2025-11-08 03:39:28.181924
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cf24949fce62'
-down_revision: Union[str, Sequence[str], None] = 'fdf9fc25977e'
+revision: str = 'd6c8d00f9e06'
+down_revision: Union[str, Sequence[str], None] = ('4b212724d225', '6e2a8c7f0573', 'cf24949fce62')
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
