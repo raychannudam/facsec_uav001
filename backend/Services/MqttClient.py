@@ -4,10 +4,12 @@ import string
 from sqlalchemy.orm import Session
 from Models import MqttClientModel
 from Schemas.MqttClient import MqttClientCreateSchema, MqttClientUpdateSchema, MqttClientResetPasswordSchema
+from Schemas.MqttTopic import MqttTopicCreateSchema
 import subprocess
 from fastapi import HTTPException
 from Services.Mail import MailService
 from passlib.context import CryptContext
+from Services.MqttTopic import MqttTopicService
 
 MOSQUITTO_CONFIG_DIR = "/app/mosquitto/config"  # inside container
 PWFILE_PATH = os.path.join(MOSQUITTO_CONFIG_DIR, "pwfile")
@@ -184,6 +186,29 @@ class MqttClientService:
         if f"user {mqtt_client.username}" not in acl_content:
             with open(ACLFILE_PATH, "a") as f:
                 f.write(f"user {mqtt_client.username}\n")
+                
+                
+        # create default topics for the client
+        try:
+            default_topics = [
+                {'name': 'altitude', 'topic': f'drsys/{mqtt_client.username}/altitude'},
+                {'name': 'battery', 'topic': f'drsys/{mqtt_client.username}/battery'},
+                {'name': 'gps_latlng', 'topic': f'drsys/{mqtt_client.username}/gps_latlng'},
+                {'name': 'speed', 'topic': f'drsys/{mqtt_client.username}/speed'},
+            ]
+            for topic in default_topics:
+                MqttTopicService.create_mqtt_topic(
+                    MqttTopicCreateSchema(
+                        mqtt_client_id=mqtt_client.id,
+                        name=topic['topic'],
+                        description=topic['description'] if 'description' in topic else "",
+                        config={},
+                        status=True
+                    ),
+                    db
+                )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Failed to create default topics: {str(e)}")
         
         return mqtt_client
 

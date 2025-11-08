@@ -45,7 +45,12 @@ class UserService:
             controller_config = {
                 'selectedDrone': {},
                 'streamingUrls': [],
-                'mqttTopics': [],
+                'mqttTopics': [
+                    {'id': 'altitude', 'type': 'altitude', 'name': "Altitude", 'selectedTopic': {}},
+                    {'id': 'battery', 'type': 'battery', 'name': "Battery Level", 'selectedTopic': {}},
+                    {'id': 'gps_latlng', 'type': 'gps', 'name': "GPS Latitude/Longitude", 'selectedTopic': {}},
+                    {'id': 'speed', 'type': 'speed', 'name': "Speed", 'selectedTopic': {}},
+                ],
             }
             
             controller_data = ControllerCreateSchema(

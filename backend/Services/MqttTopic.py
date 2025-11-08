@@ -63,9 +63,15 @@ class MqttTopicService:
 
     @staticmethod
     def get_mqtt_topics(db: Session, mqtt_client_id: int = None):
+        mqtt_topics = []
+        mqtt_client = db.query(MqttClientModel).filter(MqttClientModel.id == mqtt_client_id).first()
         if mqtt_client_id is not None:
-            return db.query(MqttTopicModel).filter(MqttTopicModel.mqtt_client_id == mqtt_client_id).all()
-        return db.query(MqttTopicModel).all()
+            for topic in db.query(MqttTopicModel).filter(MqttTopicModel.mqtt_client_id == mqtt_client_id).all():
+                if topic.name == f"drsys/{mqtt_client.username}/altitude" or topic.name == f"drsys/{mqtt_client.username}/battery" or topic.name == f"drsys/{mqtt_client.username}/gps_latlng" or topic.name == f"drsys/{mqtt_client.username}/speed":
+                    continue
+                mqtt_topics.append(topic)
+        return mqtt_topics
+        
 
     @staticmethod
     def get_mqtt_topics_by_user(user_id: int, db: Session):
