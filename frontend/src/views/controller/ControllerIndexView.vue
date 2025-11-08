@@ -1,7 +1,7 @@
 <template>
     <div class="w-full grid grid-cols-12 gap-3">
         <div class="col-span-8">
-            <LiveStreamView :key="triggerConfigUpdate" />
+            <LiveStreamView :key="triggerConfigUpdate" :drone-location="currentDroneLocation" />
         </div>
 
         <div class="col-span-4">
@@ -24,8 +24,9 @@ import { useControllerStore } from '@/stores/ControllerStore';
 import { useMqttStore } from '@/stores/MqttStore';
 
 const controllerStore = useControllerStore();
+const mqttStore = useMqttStore();
 const triggerConfigUpdate = ref(0);
-const { connect, disconnect } = useMqttStore();
+const currentDroneLocation = ref(null);
 
 onMounted(() => {
     document.title = 'Controller | DRSYS';
@@ -38,20 +39,47 @@ watch(
     (controller) => {
         if (controller?.config?.selectedDrone?.mqtt_client) {
             const mqttConfig = controller.config.selectedDrone.mqtt_client;
-
             const brokerUrl = process.env.VUE_APP_MQTT_BROKER;
             const options = {
                 username: mqttConfig.username,
                 password: mqttConfig.raw_password,
             };
-            connect(brokerUrl, options);
+            console.log('🔌 Connecting to MQTT broker for drone tracking...');
+            mqttStore.connect(brokerUrl, options);
         }
     },
     { immediate: true, deep: true }
 );
 
+watch(() => mqttStore.isConnected, (isConnected) => {
+    if (isConnected) {
+        const topic = controllerStore.selectedController?.config?.default?.mqttTopics[2].name;
+        console.log("topic", topic)
+        console.log(`🎯 Subscribing to drone location topic: ${topic}`);
+
+        mqttStore.subscribe(topic, (message) => {
+            try {
+                const locationData = JSON.parse(message.toString());
+                console.log('📥 Drone location received:', locationData);
+
+                // Update current drone location
+                currentDroneLocation.value = {
+                    droneId: locationData.droneId,
+                    lat: locationData.lat,
+                    lng: locationData.lng,
+                    altitude: locationData.altitude,
+                    battery: locationData.battery,
+                    timestamp: new Date()
+                };
+            } catch (error) {
+                console.error('❌ Error parsing drone location:', error);
+            }
+        });
+    }
+});
+
 onBeforeUnmount(() => {
-    disconnect();
+    mqttStore.disconnect();
 });
 
 const updateConfig = () => {
