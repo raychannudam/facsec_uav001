@@ -402,10 +402,18 @@ webrtcAdditionalHosts: [webrtc.aitips.digital]
 # STUN servers allows to obtain and share the public IP of the server.
 # rnTURN/TURNS servers forces all traffic through them.
 webrtcICEServers2:
-  - url: stun:relay1.expressturn.com:3478
-  - url: turn:relay1.expressturn.com:3480
-    username: '000000002073697194'
-    password: doldbBJrR9j3JU9X+We8royRrvQ=
+  - url: stun:stun.cloudflare.com:3478
+    username: "g006e2daee24b33434313dd2c766754d6e463f6ea64baaa8a23a3e2160e76078"
+    password: "be80c7cecbdc128cef0216c3c8926e4314878b0856a44727bfda70de5459f135"
+  - url: turn:turn.cloudflare.com:3478?transport=udp
+    username: "g006e2daee24b33434313dd2c766754d6e463f6ea64baaa8a23a3e2160e76078"
+    password: "be80c7cecbdc128cef0216c3c8926e4314878b0856a44727bfda70de5459f135"
+  - url: turn:turn.cloudflare.com:3478?transport=tcp
+    username: "g006e2daee24b33434313dd2c766754d6e463f6ea64baaa8a23a3e2160e76078"
+    password: "be80c7cecbdc128cef0216c3c8926e4314878b0856a44727bfda70de5459f135"
+  - url: turns:turn.cloudflare.com:5349?transport=tcp
+    username: "g006e2daee24b33434313dd2c766754d6e463f6ea64baaa8a23a3e2160e76078"
+    password: "be80c7cecbdc128cef0216c3c8926e4314878b0856a44727bfda70de5459f135"
   # if user is "AUTH_SECRET", then authentication is secret based.
   # the secret must be inserted into the password field.
   # username: ''
