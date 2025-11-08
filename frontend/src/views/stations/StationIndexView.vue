@@ -78,22 +78,6 @@
                   <span v-if="allStations.length < 10">0</span>{{ allStations.length }}
                 </span></p>
             </div>
-
-            <!-- Drones Stats -->
-            <div class="flex items-center space-x-1 text-sm col-span-2 border-b">
-              <span class="material-symbols-outlined text-sm">drone</span>
-              <p>Drones</p>
-            </div>
-            <div>
-              <p class="text-xs">All <span class="block text-xl font-bold">
-                  {{ activeDrones.length.toString().padStart(2, '0') }}
-                </span></p>
-            </div>
-            <div>
-              <p class="text-xs">Active<span class="block text-xl font-bold">
-                  {{ activeDrones.length.toString().padStart(2, '0') }}
-                </span></p>
-            </div>
           </div>
         </div>
 
@@ -110,17 +94,15 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import StationCreateFormComponent from '@/components/stations/StationCreateFormComponent.vue';
 import StationDetailView from './StationDetailView.vue';
 import { useAppStore } from '@/stores/AppStore';
 import { useStationStore } from '@/stores/StationStore';
-import { useMqttStore } from '@/stores/MqttStore';
-import L from 'leaflet';
 
 const appStore = useAppStore();
 const stationStore = useStationStore();
-const mqttStore = useMqttStore();
+
 const allStations = ref([]);
 const isCreatingStation = ref(false);
 const clickedLatLong = ref("");
@@ -132,10 +114,6 @@ const clickedStation = ref(undefined);
 // Map
 const map = ref(undefined);
 
-// Drone Tracking
-const droneMarkers = ref({});
-const activeDrones = ref([]);
-
 // LEAFLET ICONS
 const currentUserIcon = L.icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/17419/17419361.png',
@@ -146,93 +124,6 @@ const stationIcon = L.icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/1188/1188034.png',
   iconSize: [35, 35],
 });
-
-const droneIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2906/2906192.png',
-  iconSize: [40, 40],
-});
-
-// MQTT FUNCTIONS
-const setupMQTT = () => {
-  console.log('🔌 Connecting to MQTT broker...');
-  mqttStore.connect('ws://localhost:9002', {
-    username: '007',
-    password: '007',
-  });
-};
-
-// Watch for MQTT connection - subscribe when connected
-watch(() => mqttStore.isConnected, (isConnected) => {
-  if (isConnected) {
-    console.log('🎉 MQTT Connected! Now subscribing to drone updates...');
-    subscribeToDroneUpdates();
-  }
-});
-
-const subscribeToDroneUpdates = () => {
-  const topic = 'drsys/007/goku';
-  console.log(`🎯 Subscribing to topic: ${topic}`);
-
-  mqttStore.subscribe(topic, (message) => {
-    try {
-      const locationData = JSON.parse(message.toString());
-      console.log('📥 Drone location received:', locationData);
-      updateDronePosition(locationData);
-    } catch (error) {
-      console.error('Error parsing drone location:', error);
-    }
-  });
-};
-
-const updateDronePosition = (locationData) => {
-  if (!map.value) return;
-
-  console.log("🚁 Updating drone position:", locationData);
-  const { lat, lng, droneId } = locationData;
-
-  // Update existing marker or create new one
-  if (droneMarkers.value[droneId]) {
-    console.log(`♻️ Updating existing drone: ${droneId}`);
-    // Move existing marker
-    droneMarkers.value[droneId].setLatLng([lat, lng]);
-    droneMarkers.value[droneId].setPopupContent(createDronePopup(locationData));
-    // Update drone info in activeDrones array
-    const drone = activeDrones.value.find(d => d.id === droneId);
-    if (drone) {
-      drone.lat = lat;
-      drone.lng = lng;
-      drone.lastUpdate = new Date();
-    }
-  } else {
-    console.log(`✨ Creating new drone marker: ${droneId}`);
-    // Create new drone marker
-    const marker = L.marker([lat, lng], { icon: droneIcon })
-      .addTo(map.value)
-      .bindPopup(createDronePopup(locationData));
-
-    droneMarkers.value[droneId] = marker;
-
-    // Add to active drones list
-    activeDrones.value.push({
-      id: droneId,
-      lat,
-      lng,
-      lastUpdate: new Date()
-    });
-  }
-};
-
-const createDronePopup = (data) => {
-  return `
-    <div class="text-sm">
-      <strong>🚁 ${data.droneId}</strong><br>
-      <strong>Lat:</strong> ${data.lat.toFixed(6)}<br>
-      <strong>Lng:</strong> ${data.lng.toFixed(6)}<br>
-      ${data.altitude ? `<strong>Altitude:</strong> ${data.altitude}m<br>` : ''}
-      ${data.battery ? `<strong>Battery:</strong> ${data.battery}%` : ''}
-    </div>
-  `;
-};
 
 // MAP FUNCTIONS
 const initMap = (lat = undefined, lng = undefined) => {
@@ -265,9 +156,6 @@ const initMap = (lat = undefined, lng = undefined) => {
         isCreatingStation.value = true;
         clickedLatLong.value = e.latlng;
       });
-
-      // Setup MQTT connection
-      setupMQTT();
     });
   }
 };
@@ -352,9 +240,5 @@ onMounted(async () => {
   document.title = "All Stations | DRSYS";
   await getAllStations();
   initMap();
-});
-
-onUnmounted(() => {
-  mqttStore.disconnect();
 });
 </script>
