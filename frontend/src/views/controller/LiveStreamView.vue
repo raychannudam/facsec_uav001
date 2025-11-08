@@ -117,8 +117,10 @@ const droneMarker = ref(null);
 
 // Drone icons
 const droneIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2906/2906192.png',
-  iconSize: [40, 40],
+  iconUrl: 'https://api.iconify.design/mdi/quadcopter.svg?color=%232196f3&width=48&height=48',
+  iconSize: [48, 48],
+  iconAnchor: [24, 24],
+  popupAnchor: [0, -24]
 });
 
 // Watch for drone location updates from parent
