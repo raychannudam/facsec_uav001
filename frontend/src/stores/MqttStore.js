@@ -65,6 +65,24 @@ export const useMqttStore = defineStore("mqtt", () => {
     });
   };
 
+  const unsubscribe = (topic) => {
+    if (!mqttClient.value) {
+      console.warn("⚠️ MQTT client not available. Cannot unsubscribe.");
+      return;
+    }
+
+    // Unsubscribe from the topic
+    mqttClient.value.unsubscribe(topic, (err) => {
+      if (!err) {
+        console.log(`🔕 Unsubscribed from topic: ${topic}`);
+        // Remove the callback
+        delete topicCallbacks.value[topic];
+      } else {
+        console.error(`❌ Failed to unsubscribe from ${topic}:`, err);
+      }
+    });
+  };
+
   const publish = (topic, message) => {
     if (mqttClient.value && isConnected.value) {
       mqttClient.value.publish(topic, message);
@@ -76,6 +94,11 @@ export const useMqttStore = defineStore("mqtt", () => {
 
   const disconnect = () => {
     if (mqttClient.value) {
+      // Unsubscribe from all topics before disconnecting
+      Object.keys(topicCallbacks.value).forEach((topic) => {
+        mqttClient.value.unsubscribe(topic);
+      });
+
       mqttClient.value.end();
       mqttClient.value = null;
       isConnected.value = false;
@@ -89,6 +112,7 @@ export const useMqttStore = defineStore("mqtt", () => {
     isConnected,
     connect,
     subscribe,
+    unsubscribe, // <-- Don't forget to export this!
     publish,
     disconnect,
   };
