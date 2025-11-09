@@ -22,39 +22,18 @@ client.on("connect", () => {
   console.log(`📍 Starting position: ${currentLat}, ${currentLng}`);
   console.log("🚁 Drone will update location every 5 seconds...\n");
 
-  // Send location every 5 seconds
   setInterval(() => {
-    // Simulate random drone movement
-    // The drone will move in small random steps
     const latChange = (Math.random() - 0.5) * MOVEMENT_SPEED;
     const lngChange = (Math.random() - 0.5) * MOVEMENT_SPEED;
 
     currentLat += latChange;
     currentLng += lngChange;
 
-    // Create location data object
-    const locationData = {
-      droneId: "DRONE-001",
-      lat: currentLat,
-      lng: currentLng,
-      timestamp: new Date().toISOString(),
-    };
+    const locationText = `${currentLat.toFixed(6)},${currentLng.toFixed(6)}`;
+    client.publish(topic, locationText);
 
-    // Convert to JSON and publish
-    client.publish(topic, JSON.stringify(locationData));
-
-    // Log to console
-    console.log("📤 Published location:");
-    console.log(`   Drone: ${locationData.droneId}`);
-    console.log(
-      `   Position: ${locationData.lat.toFixed(6)}, ${locationData.lng.toFixed(
-        6
-      )}`
-    );
-    console.log(
-      `   Time: ${new Date(locationData.timestamp).toLocaleTimeString()}\n`
-    );
-  }, 5000); // 5000 milliseconds = 5 seconds
+    console.log("📤 Published:", locationText);
+  }, 5000);
 });
 
 client.on("error", (err) => {
