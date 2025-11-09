@@ -23,9 +23,23 @@ class StationService:
             return db.query(StationModel).filter(StationModel.name.like(f"%{query}%")).all()
         return db.query(StationModel).all()
 
+
     @staticmethod
     def get_station_by_id(station_id: int, db: Session):
-        return db.query(StationModel).filter(StationModel.id == station_id).first()
+        station = db.query(StationModel).filter(StationModel.id == station_id).first()
+        
+        if station:
+            # Check if UAVs are associated with this station
+            if hasattr(station, 'uavs') and station.uavs:
+                print(f"Station ID {station_id}: {len(station.uavs)} UAV(s) associated")
+                for uav in station.uavs:
+                    print(f"  - UAV ID: {uav.id}, Name: {uav.name if hasattr(uav, 'name') else 'N/A'}")
+            else:
+                print(f"Station ID {station_id}: No UAVs associated")
+        else:
+            print(f"Station ID {station_id}: Not found")
+        
+        return station
 
     @staticmethod
     def update_station(station_id: int, update_data: dict, db: Session):

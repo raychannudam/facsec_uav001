@@ -1,0 +1,30 @@
+user string1
+
+user stringnew
+
+user stringtest123
+
+user nakclient
+
+user nakclienttoo
+topic readwrite string123
+topic readwrite string111
+
+user admin
+topic readwrite drsys/admin/altitude
+topic readwrite drsys/admin/battery
+topic readwrite drsys/admin/gps_latlng
+topic readwrite drsys/admin/speed
+
+user user
+topic readwrite drsys/user/altitude
+topic readwrite drsys/user/battery
+topic readwrite drsys/user/gps_latlng
+topic readwrite drsys/user/speed
+
+user string
+topic readwrite drsys/string/altitude
+topic readwrite drsys/string/battery
+topic readwrite drsys/string/gps_latlng
+topic readwrite drsys/string/speed
+

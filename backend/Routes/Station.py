@@ -5,6 +5,7 @@ from Schemas.Station import StationCreateSchema, StationUpdateSchema, StationRes
 from Services.Station import StationService
 from Security.jwt import get_current_user
 from Models import UserModel
+from typing import Optional, List
 
 router = APIRouter()
 
@@ -24,10 +25,36 @@ def create_station(station: StationCreateSchema, db: Session = Depends(get_db), 
         updated_at=str(result.updated_at)
     )
 
-@router.get("/stations", response_model=list[StationResponseSchema])
-def get_stations(query="", db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
-    stations = StationService.get_stations(db, query=query)
-    return stations
+@router.get("/stations", response_model=List[StationResponseSchema])
+def get_stations(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    stations = StationService.get_stations(db)
+    
+    result = []
+    for station in stations:
+        uavs = []
+        if hasattr(station, 'uavs') and station.uavs:
+            for uav in station.uavs:
+                uavs.append({
+                    "id": uav.id,
+                    "name": uav.name,
+                    "description": uav.description if hasattr(uav, 'description') else None,
+                    "status": uav.status if hasattr(uav, 'status') else None,
+                    "station_id": uav.station_id if hasattr(uav, 'station_id') else None,
+                    "created_at": str(uav.created_at) if hasattr(uav, 'created_at') else None,
+                    "updated_at": str(uav.updated_at) if hasattr(uav, 'updated_at') else None
+                })
+        result.append(StationResponseSchema(
+            id=station.id,
+            name=station.name,
+            description=station.description,
+            lat=station.lat,
+            long=station.long,
+            uavs=uavs,
+            created_at=str(station.created_at),
+            updated_at=str(station.updated_at)
+        ))
+    
+    return result
 
 @router.get("/stations/{station_id}", response_model=StationResponseSchema)
 def get_station(station_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
@@ -35,12 +62,27 @@ def get_station(station_id: int, db: Session = Depends(get_db), current_user: Us
     if not station:
         raise HTTPException(status_code=404, detail="Station not found")
     
+    # Get associated UAVs
+    uavs = []
+    if hasattr(station, 'uavs') and station.uavs:
+        for uav in station.uavs:
+            uavs.append({
+                "id": uav.id,
+                "name": uav.name,
+                "description": uav.description if hasattr(uav, 'description') else None,
+                "status": uav.status if hasattr(uav, 'status') else None,
+                "station_id": uav.station_id if hasattr(uav, 'station_id') else None,
+                "created_at": str(uav.created_at) if hasattr(uav, 'created_at') else None,
+                "updated_at": str(uav.updated_at) if hasattr(uav, 'updated_at') else None
+            })
+    
     return StationResponseSchema(
         id=station.id,
         name=station.name,
         description=station.description,
         lat=station.lat,
         long=station.long,
+        uavs=uavs,  # Add UAVs list
         created_at=str(station.created_at),
         updated_at=str(station.updated_at)
     )
