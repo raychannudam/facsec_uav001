@@ -84,6 +84,20 @@ services:
       - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
     restart: always
 
+  streaming_facsec:
+    build:
+      context: ./streaming
+      dockerfile: Dockerfile.streaming
+    container_name: streaming_facsec
+    restart: always
+    environment:
+      - RTSP_USERNAME=test
+      - RTSP_PASSWORD=testpass
+      - RTSP_HOST=0.tcp.ap.ngrok.io
+      - RTSP_PORT=14163
+      - RTSP_DEPTH_PATH=drsys/test/test
+      - RTSP_DEPTH_OUTPUT_PATH=drsys/test/test/obj
+
 networks:
   default:
     driver: bridge

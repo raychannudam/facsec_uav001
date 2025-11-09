@@ -1,0 +1,7 @@
+pyrealsense2
+numpy
+ultralytics
+opencv-python
+paho-mqtt
+onnx
+onnxruntime
