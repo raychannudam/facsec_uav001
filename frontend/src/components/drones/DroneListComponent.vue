@@ -6,8 +6,8 @@
                 class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                 <div
                     class="w-full h-40 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center overflow-hidden">
-                    <img v-if="drone.image" :src="drone.image" :alt="drone.name" class="w-full h-full object-cover" />
-                    <div v-else class="text-white text-4xl">🚁</div>
+                    <img :src="drone.image || 'https://media.thedroningcompany.com/images/blog/1701889259.png'"
+                        :alt="drone.name" class="w-full h-full object-cover" />
                 </div>
 
                 <div class="p-4">
