@@ -41,10 +41,16 @@
         <!-- Drone info -->
         <div v-if="droneLocation"
           class="absolute left-3 top-3 bg-black bg-opacity-70 text-white px-3 py-2 rounded-md text-xs z-index-20">
-          <div><strong>🚁 {{ droneLocation.droneId }}</strong></div>
+
+          <div class="flex items-center gap-1">
+            <img src="https://cdn-icons-png.flaticon.com/512/4056/4056808.png" alt="drone icon" class="w-4 h-4" />
+            <strong>{{ droneLocation.droneId }}</strong>
+          </div>
+
           <div v-if="droneLocation.altitude">Alt: {{ droneLocation.altitude }}m</div>
           <div v-if="droneLocation.battery">Battery: {{ droneLocation.battery }}%</div>
         </div>
+
       </div>
 
       <div class="col-span-4 h-[60vh]">
@@ -105,13 +111,14 @@ const droneMarker = ref(null);
 const droneIcon = L.divIcon({
   className: '',
   html: `
-    <div class="drone-icon-inner">
-      <img src="https://api.iconify.design/mdi/quadcopter.svg?color=%232196f3" />
+    <div class="drone-icon-inner" style="width:24px; height:24px;">
+      <img src="https://cdn-icons-png.flaticon.com/512/4056/4056808.png" style="width:100%; height:100%;" />
     </div>
   `,
-  iconSize: [48, 48],
-  iconAnchor: [24, 24]
+  iconSize: [24, 24],
+  iconAnchor: [12, 12]
 });
+
 
 watch(() => props.droneLocation, (loc) => {
   if (loc && leafletMap.value) updateDroneOnMap(loc);
