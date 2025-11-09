@@ -111,13 +111,14 @@ const droneMarker = ref(null);
 const droneIcon = L.divIcon({
   className: '',
   html: `
-    <div class="drone-icon-inner">
-      <img src="https://cdn-icons-png.flaticon.com/512/4056/4056808.png" />
+    <div class="drone-icon-inner" style="width:24px; height:24px;">
+      <img src="https://cdn-icons-png.flaticon.com/512/4056/4056808.png" style="width:100%; height:100%;" />
     </div>
   `,
-  iconSize: [48, 48],
-  iconAnchor: [24, 24]
+  iconSize: [24, 24],
+  iconAnchor: [12, 12]
 });
+
 
 watch(() => props.droneLocation, (loc) => {
   if (loc && leafletMap.value) updateDroneOnMap(loc);
