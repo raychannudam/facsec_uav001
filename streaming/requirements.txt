@@ -4,4 +4,4 @@ ultralytics
 opencv-python
 paho-mqtt
 onnx
-onnxruntime
+onnxruntime-gpu
