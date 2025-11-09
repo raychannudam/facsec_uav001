@@ -222,10 +222,15 @@ export default {
         },
         async updateController() {
             if (this.isEditing == true) {
+                // Preserve the default section from the original controller
                 let data = {
                     'name': this.myController.name,
                     'description': this.myController.description,
-                    "config": this.config
+                    "config": {
+                        ...this.config,
+                        // Keep the default section from the original controller
+                        default: this.myController.config.default || {}
+                    }
                 }
                 this.appStore.displayPageLoading(true);
                 let res = await this.controllerStore.updateController(this.myController.id, data);
