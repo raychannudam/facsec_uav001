@@ -59,16 +59,11 @@ watch(() => mqttStore.isConnected, (isConnected) => {
 
         mqttStore.subscribe(topic, (message) => {
             try {
-                const locationData = JSON.parse(message.toString());
-                console.log('📥 Drone location received:', locationData);
-
-                // Update current drone location
+                const text = message.toString();
+                const [latStr, lngStr] = text.split(",");
                 currentDroneLocation.value = {
-                    droneId: locationData.droneId,
-                    lat: locationData.lat,
-                    lng: locationData.lng,
-                    altitude: locationData.altitude,
-                    battery: locationData.battery,
+                    lat: parseFloat(latStr),
+                    lng: parseFloat(lngStr),
                     timestamp: new Date()
                 };
             } catch (error) {
