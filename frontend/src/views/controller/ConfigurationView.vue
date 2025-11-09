@@ -36,7 +36,7 @@
         </div>
 
         <hr class="border-0.5 border-gray-200">
-        <div class="flex flex-col space-y-3 h-[50vh] overflow-scroll relative"
+        <div class="flex flex-col space-y-3 h-[60vh] overflow-scroll relative"
             :class="{ 'pointer-events-none opacity-70': !isEditing }">
             <!-- Select UAV -->
             <div class="flex flex-row space-x-3 items-center justify-start">
