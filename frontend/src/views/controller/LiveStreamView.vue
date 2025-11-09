@@ -41,10 +41,16 @@
         <!-- Drone info -->
         <div v-if="droneLocation"
           class="absolute left-3 top-3 bg-black bg-opacity-70 text-white px-3 py-2 rounded-md text-xs z-index-20">
-          <div><strong>🚁 {{ droneLocation.droneId }}</strong></div>
+
+          <div class="flex items-center gap-1">
+            <img src="https://cdn-icons-png.flaticon.com/512/4056/4056808.png" alt="drone icon" class="w-4 h-4" />
+            <strong>{{ droneLocation.droneId }}</strong>
+          </div>
+
           <div v-if="droneLocation.altitude">Alt: {{ droneLocation.altitude }}m</div>
           <div v-if="droneLocation.battery">Battery: {{ droneLocation.battery }}%</div>
         </div>
+
       </div>
 
       <div class="col-span-4 h-[60vh]">
@@ -106,7 +112,7 @@ const droneIcon = L.divIcon({
   className: '',
   html: `
     <div class="drone-icon-inner">
-      <img src="https://api.iconify.design/mdi/quadcopter.svg?color=%232196f3" />
+      <img src="https://cdn-icons-png.flaticon.com/512/4056/4056808.png" />
     </div>
   `,
   iconSize: [48, 48],
