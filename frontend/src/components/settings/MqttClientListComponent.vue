@@ -12,10 +12,10 @@
                 v-if="data.status">ACTIVE</span> <span class="block font-bold text-xl text-red-600"
                 v-else>INACTIVE</span></p>
             <p class="text-sm text-start">Description <span class="block font-bold text-xl">{{ data.description
-                }}</span>
+            }}</span>
             </p>
             <p class="text-sm text-start">Last Modified <span class="block font-bold text-xl">{{ data.updated_at
-                }}</span></p>
+            }}</span></p>
           </div>
           <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
@@ -33,10 +33,10 @@
                 v-if="data.status">ACTIVE</span> <span class="block font-bold text-xl text-red-600 px-3 rounded-md"
                 v-else>INACTIVE</span></p>
             <p class="text-sm text-start">Description <span class="block font-bold text-xl">{{ data.description
-                }}</span>
+            }}</span>
             </p>
             <p class="text-sm text-start">Last Modified <span class="block font-bold text-xl">{{ data.updated_at
-                }}</span></p>
+            }}</span></p>
           </div>
           <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
@@ -55,10 +55,10 @@
                 class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base"> MQTTS </code>
             </p>
             <p class="text-xs max-w-max">HOST <code
-                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base"> mqtt-broker.aitips.digital </code>
+                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base">0.tcp.ap.ngrok.io</code>
             </p>
             <p class="text-xs max-w-max">PORT <code
-                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base"> 8883 </code>
+                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base">16108</code>
             </p>
             <p class="text-xs max-w-max">USERNAME <code
                 class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base"> {{ data.username }} </code>
@@ -90,7 +90,8 @@
               </span>
               <p>Delete client</p>
             </button>
-            <MqtqClientUpdateComponent v-if="data" :data="data" @onClose="mqttClientEditModalClosed"></MqtqClientUpdateComponent>
+            <MqtqClientUpdateComponent v-if="data" :data="data" @onClose="mqttClientEditModalClosed">
+            </MqtqClientUpdateComponent>
             <ConfirmPopupModelComponent :model_id="'delete_mqtt_client_confirm_popup' + data.id">
             </ConfirmPopupModelComponent>
           </div>
@@ -123,7 +124,8 @@
             </div>
           </div>
           <div>
-            <MqttTopicTableComponent :allMqttTopic="allMqttTopic[data.id]" @onDeleteMqttTopic="mqttTopicDeleted"></MqttTopicTableComponent>
+            <MqttTopicTableComponent :allMqttTopic="allMqttTopic[data.id]" @onDeleteMqttTopic="mqttTopicDeleted">
+            </MqttTopicTableComponent>
           </div>
         </div>
       </div>
@@ -208,7 +210,7 @@ export default {
       this.appStore.displayRightToast(res.status, res.message);
       await this.getAllMqttTopic();
     },
-    async mqttTopicDeleted(){
+    async mqttTopicDeleted() {
       await this.getAllMqttTopic();
     }
   },
