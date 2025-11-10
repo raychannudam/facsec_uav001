@@ -15,6 +15,16 @@
             <div class="flex items-center space-x-3 dark:text-gray-400 px-3">
                 <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
                     <span class="material-symbols-outlined">
+                        battery_charging_full
+                    </span>
+                    <p>Batt, </p>
+                    <p class="font-bold dark:text-white">-- V</p>
+                </div>
+                <div>
+                    |
+                </div>
+                <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
+                    <span class="material-symbols-outlined">
                         device_thermostat
                     </span>
                     <p>Temp, </p>

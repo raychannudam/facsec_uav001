@@ -6,17 +6,25 @@
         <p>Live Streams</p>
       </div>
 
-      <button @click="startStream" :disabled="isStarted == true"
-        class="flex flex-row space-x-2 text-sm py-1 items-center px-4 hover:bg-blue-500 rounded-full border-blue-500 border">
+      <button @click="startStream" :disabled="isStarted == true" v-if="!isStarted"
+        class="flex flex-row space-x-2 text-sm py-1 items-center px-4 hover:bg-blue-500 rounded-full border-blue-500 border dark:text-white hover:text-white">
         <span class="material-symbols-outlined text-sm">play_arrow</span>
         <p>Start Now</p>
       </button>
 
-      <button @click="restartStream"
-        class="flex flex-row space-x-2 text-sm py-1 items-center px-4 hover:bg-red-500 rounded-full border-red-500 border">
+
+      <button @click="restartStream" v-if="isStarted"
+        class="flex flex-row space-x-2 text-sm py-1 items-center px-4 hover:bg-red-500 rounded-full border-red-500 border dark:text-white hover:text-white">
         <span class="material-symbols-outlined text-sm">restart_alt</span>
         <p>Restart</p>
       </button>
+
+      <div class="" v-if="isStarted">
+        <p class="text-green-600 flex items-center space-x-2">
+          <span class="material-symbols-outlined text-sm animate-pulse">bigtop_updates</span>
+          <span class="animate-pulse">Streaming...</span>
+        </p>
+      </div>
     </div>
 
     <p class="text-gray-600 dark:text-gray-400">
@@ -25,7 +33,7 @@
     <hr class="border-0.5 border-gray-200" />
 
     <div class="grid grid-cols-12 gap-3">
-      <div class="col-span-8 bg-gray-500 rounded-md w-full h-[60vh] relative overflow-hidden">
+      <div class="col-span-8 dark:bg-gray-800 bg-gray-100 rounded-md w-full h-[60vh] relative overflow-hidden">
 
         <div v-if="streamingUrls.stream1 == undefined" class="flex items-center justify-center h-full space-x-3">
           <span class="material-symbols-outlined animate-pulse">videocam</span>
@@ -55,21 +63,21 @@
 
       <div class="col-span-4 h-[60vh]">
         <div class="grid grid-rows-3 gap-3 w-full h-full">
-          <div class="bg-gray-500 rounded-md flex items-center justify-center overflow-hidden">
+          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
             <div v-if="streamingUrls.stream2 == undefined" class="flex items-center justify-center space-x-3">
               <span class="material-symbols-outlined animate-pulse">videocam</span>
               <p class="animate-pulse">CAM 02</p>
             </div>
             <iframe v-else :src="streamingUrls.stream2" class="w-full h-full"></iframe>
           </div>
-          <div class="bg-gray-500 rounded-md flex items-center justify-center overflow-hidden">
+          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
             <div v-if="streamingUrls.stream3 == undefined" class="flex items-center justify-center space-x-3">
               <span class="material-symbols-outlined animate-pulse">videocam</span>
               <p class="animate-pulse">CAM 03</p>
             </div>
             <iframe v-else :src="streamingUrls.stream3" class="w-full h-full"></iframe>
           </div>
-          <div class="bg-gray-500 rounded-md flex items-center justify-center overflow-hidden">
+          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
             <div v-if="streamingUrls.stream4 == undefined" class="flex items-center justify-center space-x-3">
               <span class="material-symbols-outlined animate-pulse">videocam</span>
               <p class="animate-pulse">CAM 04</p>
