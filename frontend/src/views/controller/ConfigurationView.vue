@@ -295,6 +295,7 @@ export default {
                     let streamingUrlRes = await this.settingStore.getAllStreamingUrls(newVal.streaming_client_id)
                     if (mqttTopicRes.status == "success") {
                         this.availableMqttTopics = mqttTopicRes.data
+                        this.availableMqttTopics = this.availableMqttTopics.filter(topic => topic.is_default != true);
                     }
                     if (streamingUrlRes.status == "success") {
                         this.availableStreamingUrls = streamingUrlRes.data

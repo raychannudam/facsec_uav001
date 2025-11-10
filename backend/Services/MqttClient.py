@@ -204,7 +204,8 @@ class MqttClientService:
                         name=topic['topic'],
                         description=topic['description'] if 'description' in topic else "",
                         config={},
-                        status=True
+                        status=True,
+                        is_default=True
                     ),
                     db
                 )

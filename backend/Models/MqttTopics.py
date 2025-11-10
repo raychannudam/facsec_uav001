@@ -12,6 +12,7 @@ class MqttTopicModel(Base):
     description = Column(Text)
     config = Column(JSON, nullable=False)
     status = Column(Boolean, nullable=False)
+    is_default = Column(Boolean, nullable=True, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 

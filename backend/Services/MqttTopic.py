@@ -112,6 +112,8 @@ class MqttTopicService:
     @staticmethod
     def delete_mqtt_topic(mqtt_topic_id: int, db: Session):
         mqtt_topic = db.query(MqttTopicModel).filter(MqttTopicModel.id == mqtt_topic_id).first()
+        if mqtt_topic.is_default:
+            raise HTTPException(status_code=400, detail="Cannot delete a default topic")
         if not mqtt_topic:
             return None
         

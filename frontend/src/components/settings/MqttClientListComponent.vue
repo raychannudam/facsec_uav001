@@ -124,7 +124,7 @@
             </div>
           </div>
           <div>
-            <MqttTopicTableComponent :allMqttTopic="allMqttTopic[data.id]" @onDeleteMqttTopic="mqttTopicDeleted">
+            <MqttTopicTableComponent :key="allMqttTopic[data.id]" :allMqttTopic="allMqttTopic[data.id]" @onDeleteMqttTopic="mqttTopicDeleted">
             </MqttTopicTableComponent>
           </div>
         </div>

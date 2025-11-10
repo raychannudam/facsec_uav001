@@ -14,7 +14,7 @@
             <hr class="border-0.5 border-gray-200">
             <MqttClientListComponent @onCompletedDeleteMqttClient="triggerCompletedDeleteMqttClient"
                 @onMqttClientEditModalClose="mqttClientEditModalClosed" id="mqtt_client_list"
-                :mqttClientList="allMqttClients" v-if="allMqttClients.length > 0"></MqttClientListComponent>
+                :mqttClientList="allMqttClients" :key="allMqttClients" v-if="allMqttClients.length > 0"></MqttClientListComponent>
             <div v-else>
                 <p class="text-center italic">There is no available MQTT Client. Please create a new client!</p>
             </div>
