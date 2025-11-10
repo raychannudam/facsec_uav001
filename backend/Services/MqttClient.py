@@ -195,6 +195,7 @@ class MqttClientService:
                 {'name': 'battery', 'topic': f'drsys/{mqtt_client.username}/battery'},
                 {'name': 'gps_latlng', 'topic': f'drsys/{mqtt_client.username}/gps_latlng'},
                 {'name': 'speed', 'topic': f'drsys/{mqtt_client.username}/speed'},
+                {'name': 'temperature', 'topic': f'drsys/{mqtt_client.username}/temperature'}
             ]
             for topic in default_topics:
                 MqttTopicService.create_mqtt_topic(

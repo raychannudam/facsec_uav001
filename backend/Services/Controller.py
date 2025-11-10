@@ -45,9 +45,11 @@ class ControllerService:
             if (mqtt_topic.name == f"drsys/{update_dict['config']['selectedDrone']['mqtt_client']['username']}/altitude" or
                 mqtt_topic.name == f"drsys/{update_dict['config']['selectedDrone']['mqtt_client']['username']}/battery" or 
                 mqtt_topic.name == f"drsys/{update_dict['config']['selectedDrone']['mqtt_client']['username']}/gps_latlng" or 
-                mqtt_topic.name == f"drsys/{update_dict['config']['selectedDrone']['mqtt_client']['username']}/speed"):
+                mqtt_topic.name == f"drsys/{update_dict['config']['selectedDrone']['mqtt_client']['username']}/speed" or
+                mqtt_topic.name == f"drsys/{update_dict['config']['selectedDrone']['mqtt_client']['username']}/temperature"):
                 # Convert datetime fields to ISO format for JSON serialization
                 default_mqtt_topics.append({
+                    'id': mqtt_topic.name.split('/')[-1],
                     'name': mqtt_topic.name,
                 })
         for key, value in update_dict.items():
