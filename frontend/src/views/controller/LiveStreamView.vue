@@ -33,7 +33,7 @@
     <hr class="border-0.5 border-gray-200" />
 
     <div class="grid grid-cols-12 gap-3">
-      <div class="col-span-8 dark:bg-gray-800 bg-gray-100 rounded-md w-full h-[60vh] relative overflow-hidden">
+      <div class="col-span-8 dark:bg-gray-800 bg-gray-100 rounded-md w-full h-[60vh] relative overflow-hidden dark:text-white text-gray-900">
 
         <div v-if="streamingUrls.stream1 == undefined" class="flex items-center justify-center h-full space-x-3">
           <span class="material-symbols-outlined animate-pulse">videocam</span>
@@ -63,21 +63,21 @@
 
       <div class="col-span-4 h-[60vh]">
         <div class="grid grid-rows-3 gap-3 w-full h-full">
-          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
+          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden dark:text-white text-gray-900">
             <div v-if="streamingUrls.stream2 == undefined" class="flex items-center justify-center space-x-3">
               <span class="material-symbols-outlined animate-pulse">videocam</span>
               <p class="animate-pulse">CAM 02</p>
             </div>
             <iframe v-else :src="streamingUrls.stream2" class="w-full h-full"></iframe>
           </div>
-          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
+          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden dark:text-white text-gray-900">
             <div v-if="streamingUrls.stream3 == undefined" class="flex items-center justify-center space-x-3">
               <span class="material-symbols-outlined animate-pulse">videocam</span>
               <p class="animate-pulse">CAM 03</p>
             </div>
             <iframe v-else :src="streamingUrls.stream3" class="w-full h-full"></iframe>
           </div>
-          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden">
+          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden dark:text-white text-gray-900">
             <div v-if="streamingUrls.stream4 == undefined" class="flex items-center justify-center space-x-3">
               <span class="material-symbols-outlined animate-pulse">videocam</span>
               <p class="animate-pulse">CAM 04</p>
@@ -204,7 +204,7 @@ const startStream = async () => {
 
   selectedStreams.forEach(id => {
     const stream = controller.value.config.streamingUrls.find(i => i.id === id);
-    if (stream?.selectedUrl) {
+    if (stream?.selectedUrl.name != undefined) {
       streamingUrls.value[id] = `${streamingBaseUrl}/${stream.selectedUrl.name}?username=${username.value}&password=${password.value}`;
     }
   });
