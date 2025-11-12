@@ -58,7 +58,7 @@
                 class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base">0.tcp.ap.ngrok.io</code>
             </p>
             <p class="text-xs max-w-max">PORT <code
-                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base">16108</code>
+                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base">16130</code>
             </p>
             <p class="text-xs max-w-max">USERNAME <code
                 class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base"> {{ data.username }} </code>
