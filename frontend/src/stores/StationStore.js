@@ -2,46 +2,92 @@ import { defineStore } from "pinia";
 import api from "@/plugins/api";
 
 export const useStationStore = defineStore("station", {
-    state(){
-        return {
-
-        }
+  state() {
+    return {};
+  },
+  actions: {
+    async createStation(data) {
+      let status = "";
+      let message = "";
+      await api
+        .post("/api/v1/stations", data)
+        .then((res) => {
+          status = "success";
+          message = "Successfully created station!";
+        })
+        .catch((err) => {
+          status = "fail";
+          message = err.response?.data?.detail || "Failed to create station!";
+        });
+      return {
+        status: status,
+        message: message,
+      };
     },
-    actions:{
-        async createStation(data){
-            let status = ""
-            let message = ""
-            await api.post("/api/v1/stations", data).then((res) => {
-                status = "success";
-                message = "Successfully created station!";
-            })
-            .catch((err) => {
-                status = "fail";
-                message = err.response?.data?.detail || "Failed to create station!";
-            });
-            return {
-                status: status,
-                message: message,
-            };
-        },
-        async getAllStations(query=""){
-            let status = ""
-            let message = ""
-            let data = []
-            await api.get(`/api/v1/stations?query=${query}`).then((res) => {
-                status = "success";
-                message = "Successfully getting all stations!";
-                data = res.data
-            })
-            .catch((err) => {
-                status = "fail";
-                message = err.response?.data?.detail || "Failed to get all stations!";
-            });
-            return {
-                status: status,
-                message: message,
-                data: data
-            };
-        }
-    }
-})
+    async getAllStations(query = "") {
+      let status = "";
+      let message = "";
+      let data = [];
+      await api
+        .get(`/api/v1/stations?query=${query}`)
+        .then((res) => {
+          status = "success";
+          message = "Successfully getting all stations!";
+          data = res.data;
+        })
+        .catch((err) => {
+          status = "fail";
+          message = err.response?.data?.detail || "Failed to get all stations!";
+        });
+      return {
+        status: status,
+        message: message,
+        data: data,
+      };
+    },
+    async getAvailableUavs() {
+      let status = "";
+      let message = "";
+      let data = [];
+      await api
+        .get("/api/v1/avaliable-uavs")
+        .then((res) => {
+          status = "success";
+          message = "Successfully getting available UAVs!";
+          data = res.data;
+        })
+        .catch((err) => {
+          status = "fail";
+          message =
+            err.response?.data?.detail || "Failed to get available UAVs!";
+        });
+      return {
+        status: status,
+        message: message,
+        data: data,
+      };
+    },
+    async assignUavToStation(stationId, uavId) {
+      let status = "";
+      let message = "";
+      console.log("stationId", stationId);
+      console.log("uavId", uavId);
+      await api
+        .put(`/api/v1/uavs/${uavId}`, { station_id: stationId })
+        .then((res) => {
+          status = "success";
+          message = "Successfully assigned UAV to station!";
+        })
+        .catch((err) => {
+          status = "fail";
+          message =
+            err.response?.data?.detail || "Failed to assign UAV to station!";
+        });
+
+      return {
+        status: status,
+        message: message,
+      };
+    },
+  },
+});
