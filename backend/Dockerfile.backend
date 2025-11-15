@@ -4,15 +4,19 @@ FROM ubuntu:24.04
 # Avoid prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update and install Python, pip, and Mosquitto
+# Update and install Python, pip, Mosquitto, and necessary tools
 RUN apt-get update && \
-    apt-get install -y software-properties-common && \
-    apt-get install -y python3 python3-pip python3-venv && \
-    apt-add-repository ppa:mosquitto-dev/mosquitto-ppa && \
-    apt-get update && \
-    apt-get install -y mosquitto mosquitto-clients && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y \
+        software-properties-common \
+        python3 \
+        python3-pip \
+        python3-venv \
+        mosquitto \
+        mosquitto-clients \
+        build-essential \
+        pkg-config \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
@@ -24,12 +28,11 @@ RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir --timeout 120 -r requirements.txt
 
-
-# Copy FastAPI code
+# Copy application code
 COPY . .
 
-# Expose ports # 8000 for api service, 9001 & 8883 for mqtt broker
+# Expose ports: 8000 (API), 9001/8883 (MQTT)
 EXPOSE 8000 9001 8883
 
-# Run the script
+# Run the service
 CMD ["./start.sh"]
