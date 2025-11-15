@@ -93,8 +93,8 @@ services:
     environment:
       - RTSP_USERNAME=test
       - RTSP_PASSWORD=testpass
-      - RTSP_HOST=0.tcp.ap.ngrok.io
-      - RTSP_PORT=14163
+      - RTSP_HOST=152.42.234.202
+      - RTSP_PORT=8554
       - RTSP_DEPTH_PATH=drsys/test/test
       - RTSP_DEPTH_OUTPUT_PATH=drsys/test/test/obj
 

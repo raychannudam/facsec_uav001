@@ -9,7 +9,7 @@ enable_detection = True   # Always run YOLO detection
 # ---------------- MediaMTX RTSP URL ----------------
 username = os.environ.get("RTSP_USERNAME")
 password = os.environ.get("RTSP_PASSWORD")
-host = os.environ.get("RTSP_HOST", "0.tcp.ap.ngrok.io")
+host = os.environ.get("RTSP_HOST", "152.42.234.202")
 port = os.environ.get("RTSP_PORT", "8554")
 input_path = os.environ.get("RTSP_DEPTH_PATH", "drsys/test/test")
 output_path = os.environ.get("RTSP_DEPTH_OUTPUT_PATH", "drsys/test/test/obj")
