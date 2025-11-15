@@ -88,7 +88,9 @@
 
     <!-- Station Detail View -->
     <div>
-      <StationDetailView :station-data="clickedStation"></StationDetailView>
+      <StationDetailView :station-data="clickedStation" @onDroneAssigned="handleDroneAssigned"
+        @onDroneRemoved="handleDroneRemoved">
+      </StationDetailView>
     </div>
   </div>
 </template>
@@ -166,7 +168,9 @@ const addStationsToMap = () => {
       L.marker([station.lat, station.long], {
         icon: stationIcon
       }).addTo(map.value).on("click", () => {
-        clickedStation.value = station;
+        // Find the latest station data instead of using the closure variable
+        const latestStationData = allStations.value.find(s => s.id === station.id);
+        clickedStation.value = latestStationData || station;
       });
     });
   }
@@ -206,6 +210,7 @@ const searchStation = async () => {
 
 const selectStation = (stationData) => {
   selectedStation.value = stationData;
+  clickedStation.value = stationData;
   map.value.flyTo([stationData.lat, stationData.long], 16, {
     animate: true,
     duration: 0.5
@@ -231,6 +236,33 @@ const stationCreateFormSubmited = async () => {
       }).addTo(map.value).on("click", () => {
         clickedStation.value = newStation;
       });
+    }
+  }
+};
+
+// DRONE ASSIGNMENT HANDLERS
+const handleDroneAssigned = async () => {
+  // Refresh the station data to show updated drone list
+  await getAllStations();
+
+  // Update the clicked station with fresh data
+  if (clickedStation.value) {
+    const updatedStation = allStations.value.find(s => s.id === clickedStation.value.id);
+    if (updatedStation) {
+      clickedStation.value = updatedStation;
+    }
+  }
+};
+
+const handleDroneRemoved = async () => {
+  // Refresh the station data to show updated drone list
+  await getAllStations();
+
+  // Update the clicked station with fresh data
+  if (clickedStation.value) {
+    const updatedStation = allStations.value.find(s => s.id === clickedStation.value.id);
+    if (updatedStation) {
+      clickedStation.value = updatedStation;
     }
   }
 };
