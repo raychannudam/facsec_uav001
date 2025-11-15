@@ -54,6 +54,10 @@ class UavService:
         return query_obj.all()
 
     @staticmethod
+    def get_available_uavs(db: Session):
+        return db.query(UavModel).filter(UavModel.station_id == None).all()
+        
+    @staticmethod
     def get_uav_by_id(uav_id: int, db: Session):
         return db.query(UavModel) \
             .options(

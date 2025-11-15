@@ -251,6 +251,108 @@ def get_uavs(
         ) for u in uavs
     ]
 
+
+@router.get("/avaliable-uavs", response_model=list[UavResponseSchema])
+def get_uavs(
+    query: str = "",
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user)
+):
+    # Admins see all UAVs; regular users see only UAVs linked to their streaming clients
+    if is_admin(current_user):
+        uavs = UavService.get_available_uavs(db)
+    else:
+        uavs = UavService.get_available_uavs(db)
+    
+    return [
+        UavResponseSchema(
+            id=u.id,
+            type=u.type,
+            name=u.name,
+            mqtt_client_id=u.mqtt_client_id,
+            streaming_client_id=u.streaming_client_id,
+            station_id=u.station_id,
+            last_lat=u.last_lat,
+            last_long=u.last_long,
+            operation_data=u.operation_data,
+            created_at=str(u.created_at),
+            updated_at=str(u.updated_at),
+            mqtt_client=MqttClientResponseSchema(
+                id=u.mqtt_client.id,
+                user_id=u.mqtt_client.user_id,
+                name=u.mqtt_client.name,
+                description=u.mqtt_client.description,
+                username=u.mqtt_client.username,
+                password=u.mqtt_client.password,
+                raw_password=u.mqtt_client.raw_password,
+                config=u.mqtt_client.config,
+                status=u.mqtt_client.status,
+                created_at=str(u.mqtt_client.created_at),
+                updated_at=str(u.mqtt_client.updated_at),
+                user=UserResponseSchema(
+                    id=u.mqtt_client.user.id,
+                    email=u.mqtt_client.user.email,
+                    username=u.mqtt_client.user.username,
+                    fullname=u.mqtt_client.user.fullname,
+                    age=u.mqtt_client.user.age,
+                    gender=u.mqtt_client.user.gender,
+                    created_at=str(u.mqtt_client.user.created_at),
+                    updated_at=str(u.mqtt_client.user.updated_at),
+                    roles=[
+                        RoleResponseSchema(
+                            id=role.id,
+                            name=role.name,
+                            description=role.description,
+                            created_at=str(role.created_at),
+                            updated_at=str(role.updated_at)
+                        ) for role in u.mqtt_client.user.roles
+                    ]
+                )
+            ) if u.mqtt_client else None,
+            streaming_client=StreamingClientResponseSchema(
+                id=u.streaming_client.id,
+                user_id=u.streaming_client.user_id,
+                name=u.streaming_client.name,
+                description=u.streaming_client.description,
+                username=u.streaming_client.username,
+                password=u.streaming_client.password,
+                config=u.streaming_client.config,
+                status=u.streaming_client.status,
+                validation_code=u.streaming_client.validation_code,
+                created_at=str(u.streaming_client.created_at),
+                updated_at=str(u.streaming_client.updated_at),
+                user=UserResponseSchema(
+                    id=u.streaming_client.user.id,
+                    email=u.streaming_client.user.email,
+                    username=u.streaming_client.user.username,
+                    fullname=u.streaming_client.user.fullname,
+                    age=u.streaming_client.user.age,
+                    gender=u.streaming_client.user.gender,
+                    created_at=str(u.streaming_client.user.created_at),
+                    updated_at=str(u.streaming_client.user.updated_at),
+                    roles=[
+                        RoleResponseSchema(
+                            id=role.id,
+                            name=role.name,
+                            description=role.description,
+                            created_at=str(role.created_at),
+                            updated_at=str(role.updated_at)
+                        ) for role in u.streaming_client.user.roles
+                    ]
+                )
+            ) if u.streaming_client else None,
+            station=StationResponseSchema(
+                id=u.station.id,
+                name=u.station.name,
+                description=u.station.description,
+                created_at=str(u.station.created_at),
+                updated_at=str(u.station.updated_at),
+                lat=u.station.lat if hasattr(u.station, 'lat') else None,
+                long=u.station.long if hasattr(u.station, 'long') else None
+            ) if u.station else None
+        ) for u in uavs
+    ]
+
 @router.get("/uavs/{uav_id}", response_model=UavResponseSchema)
 def get_uav(
     uav_id: int,
