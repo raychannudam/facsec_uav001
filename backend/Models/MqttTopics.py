@@ -12,7 +12,10 @@ class MqttTopicModel(Base):
     description = Column(Text)
     config = Column(JSON, nullable=False)
     status = Column(Boolean, nullable=False)
-    is_default = Column(Boolean, nullable=True, default=False)
+
+    # FIXED: default + server_default so DB and SQLAlchemy stay consistent
+    is_default = Column(Boolean,nullable=True,default=False,server_default="false")
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
