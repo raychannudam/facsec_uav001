@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import inspect
 
 
 # revision identifiers, used by Alembic.
@@ -20,13 +21,21 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
+    conn = op.get_bind()
+    inspector = inspect(conn)
+    columns = [col['name'] for col in inspector.get_columns('mqtt_clients')]
     # Add raw_password column to mqtt_clients table
-    op.add_column('mqtt_clients', 
-        sa.Column('raw_password', sa.String(length=255), nullable=True)
-    )
+    if 'raw_password' not in columns:
+        op.add_column('mqtt_clients',
+            sa.Column('raw_password', sa.String(length=255), nullable=True)
+        )
 
 
 def downgrade() -> None:
     """Downgrade schema."""
+    conn = op.get_bind()
+    inspector = inspect(conn)
+    columns = [col['name'] for col in inspector.get_columns('mqtt_clients')]
     # Remove raw_password column from mqtt_clients table
-    op.drop_column('mqtt_clients', 'raw_password')
+    if 'raw_password' in columns:
+        op.drop_column('mqtt_clients', 'raw_password')
