@@ -25,7 +25,7 @@ class MqttTopicResponseSchema(BaseModel):
     description: Optional[str] = Field(None, description="The description of the MQTT topic")
     config: Dict = Field(..., description="Configuration for the MQTT topic")
     status: bool = Field(..., description="The status of the MQTT topic")
-    is_default: bool = Field(...)
+    is_default: bool = Field(False)
     created_at: datetime = Field(..., description="Created timestamp")
     updated_at: datetime = Field(..., description="Updated timestamp")
     mqtt_client: MqttClientResponseSchema = Field(..., description="The MQTT client associated with the topic")
