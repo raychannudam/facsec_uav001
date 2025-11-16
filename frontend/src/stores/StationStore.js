@@ -89,5 +89,26 @@ export const useStationStore = defineStore("station", {
         message: message,
       };
     },
+    async removeUavFromStation(uavId) {
+      let status = "";
+      let message = "";
+      console.log("Removing UAV ID:", uavId);
+      await api
+        .put(`/api/v1/uavs/${uavId}`, { station_id: null })
+        .then((res) => {
+          status = "success";
+          message = "Successfully removed UAV from station!";
+        })
+        .catch((err) => {
+          status = "fail";
+          message =
+            err.response?.data?.detail || "Failed to remove UAV from station!";
+        });
+
+      return {
+        status: status,
+        message: message,
+      };
+    },
   },
 });

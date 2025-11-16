@@ -122,6 +122,7 @@
                             <th scope="col" class="px-6 py-4 font-semibold">Description</th>
                             <th scope="col" class="px-6 py-4 font-semibold">Status</th>
                             <th scope="col" class="px-6 py-4 font-semibold">Created</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -153,6 +154,19 @@
 
                             <td class="px-6 py-4 text-xs font-mono text-gray-600 dark:text-gray-400">
                                 {{ new Date(drone.created_at).toLocaleString() }}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                <div>
+                                    <button @click="removeDroneFromStation(drone.id)"
+                                        :disabled="removingDroneId === drone.id"
+                                        class="px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 rounded-lg hover:from-red-600 hover:to-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:from-red-600 dark:to-red-700 dark:hover:from-red-700 dark:hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-400 flex items-center space-x-1 transition-all shadow-sm hover:shadow-md">
+                                        <span class="material-symbols-outlined text-sm"
+                                            v-if="removingDroneId !== drone.id">delete</span>
+                                        <span class="material-symbols-outlined text-sm animate-spin"
+                                            v-else>progress_activity</span>
+                                    </button>
+                                </div>
                             </td>
 
                         </tr>
@@ -213,6 +227,7 @@ const appStore = useAppStore();
 const availableDrones = ref([]);
 const selectedDroneId = ref(null);
 const isAssigning = ref(false);
+const removingDroneId = ref(null);
 
 // Fetch available drones
 const fetchAvailableDrones = async () => {
@@ -236,6 +251,20 @@ const assignDroneToStation = async () => {
         selectedDroneId.value = null;
         await fetchAvailableDrones();
         emit('onDroneAssigned');
+    }
+};
+
+// Remove drone from station
+const removeDroneFromStation = async (droneId) => {
+    removingDroneId.value = droneId;
+    const res = await stationStore.removeUavFromStation(droneId);
+    removingDroneId.value = null;
+
+    appStore.displayRightToast(res.status, res.message);
+
+    if (res.status === 'success') {
+        await fetchAvailableDrones();
+        emit('onDroneRemoved');
     }
 };
 
