@@ -84,19 +84,19 @@ services:
       - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
     restart: always
 
-  streaming_facsec:
-    build:
-      context: ./streaming
-      dockerfile: Dockerfile.streaming
-    container_name: streaming_facsec
-    restart: always
-    environment:
-      - RTSP_USERNAME=test
-      - RTSP_PASSWORD=testpass
-      - RTSP_HOST=152.42.234.202
-      - RTSP_PORT=8554
-      - RTSP_DEPTH_PATH=drsys/test/test
-      - RTSP_DEPTH_OUTPUT_PATH=drsys/test/test/obj
+  # streaming_facsec:
+  #   build:
+  #     context: ./streaming
+  #     dockerfile: Dockerfile.streaming
+  #   container_name: streaming_facsec
+  #   restart: always
+  #   environment:
+  #     - RTSP_USERNAME=uav001_stream
+  #     - RTSP_PASSWORD=uav001_stream
+  #     - RTSP_HOST=152.42.234.202
+  #     - RTSP_PORT=8554
+  #     - RTSP_DEPTH_PATH=drsys/uav001_stream/realsense/normal
+  #     - RTSP_DEPTH_OUTPUT_PATH=drsys/uav001_stream/realsense/ai
 
 networks:
   default:

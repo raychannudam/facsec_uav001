@@ -197,8 +197,10 @@ export default {
             }
         },
         assignTopic(data) {
+            console.log(data)
             const mqttTopic = this.config.mqttTopics.find(item => item.id == data.id)
             if (mqttTopic) {
+                mqttTopic.name = data.name
                 mqttTopic.selectedTopic = data.selectedTopic
                 mqttTopic.minPayload = data.minPayload
                 mqttTopic.maxPayload = data.maxPayload
@@ -225,7 +227,11 @@ export default {
                     this.config.streamingUrls = this.myController.config['streamingUrls']
                 }
                 if (this.myController.config['mqttTopics'].length > 0) {
-                    this.config.mqttTopics = this.myController.config['mqttTopics']
+                    // this.config.mqttTopics = this.myController.config['mqttTopics']
+                    this.config.mqttTopics = this.config.mqttTopics.map(topic => {
+                        const savedTopic = this.myController.config['mqttTopics'].find(t => t.id === topic.id);
+                        return savedTopic ? { ...topic, name:savedTopic.name, selectedTopic: savedTopic.selectedTopic, onPayload: savedTopic.onPayload, offPayload: savedTopic.offPayload, minPayload: savedTopic.minPayload, maxPayload: savedTopic.maxPayload } : topic;
+                    });
                 }
             }
         },
@@ -241,6 +247,7 @@ export default {
                         default: this.myController.config.default || {}
                     }
                 }
+                console.log(data)
                 this.appStore.displayPageLoading(true);
                 let res = await this.controllerStore.updateController(this.myController.id, data);
                 this.appStore.displayPageLoading(false);

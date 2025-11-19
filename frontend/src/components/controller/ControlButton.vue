@@ -3,7 +3,7 @@
         :class="isActive
             ? 'bg-blue-200 dark:bg-blue-800/40 text-blue-700 dark:text-blue-300 scale-95 shadow-inner'
             : 'bg-blue-50 dark:bg-blue-400/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800/20 hover:shadow-md'"
-        @click="handleClick">
+         @mousedown="handleMouseDown" @mouseup="handleMouseUp" tabindex="0">
         <!-- Title with extra icon, top-left -->
         <div class="flex items-center gap-1 mb-2 w-full justify-start">
             <span class="material-symbols-outlined text-base">touch_app</span>
@@ -35,6 +35,7 @@ const props = defineProps({
 
 const emit = defineEmits(['trigger'])
 const isActive = ref(false)
+const holdInterval = ref(null);
 
 const handleClick = () => {
     emit('trigger', {
@@ -52,5 +53,23 @@ const handleClick = () => {
         })
         isActive.value = false
     }, 1000)
+}
+
+const handleMouseDown = (event) => {
+    if (holdInterval.value) return;
+    holdInterval.value = setInterval(() => {
+        console.log("mouse down event:", event);
+        isActive.value = true;
+        // You can emit or trigger actions here
+    }, 100);
+}
+
+const handleMouseUp = (event) => {
+    if (holdInterval.value) {
+        clearInterval(holdInterval.value);
+        holdInterval.value = null;
+        isActive.value = false;
+    }
+    console.log("mouse up event:", event);
 }
 </script>

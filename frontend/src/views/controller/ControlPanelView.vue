@@ -9,7 +9,7 @@
                     <p>Control Panel</p>
                 </div>
                 <p class="text-gray-600 dark:text-gray-400 text-sm">
-                    Get real-time live stream video from the cameras on the drone.
+                    Real-time controller interface for drone.
                 </p>
             </div>
             <div class="flex items-center space-x-3 dark:text-gray-400 px-3">
@@ -50,13 +50,13 @@
                     <p>Altitude, </p>
                     <p class="font-bold dark:text-white">---- m</p>
                 </div>
-                <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
+                <!-- <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
                     <span class="material-symbols-outlined">
                         timer
                     </span>
                     <p>Time, </p>
                     <p class="font-bold dark:text-white">-- mn</p>
-                </div>
+                </div> -->
             </div>
         </div>
         <hr class="border-0.5 border-gray-200">

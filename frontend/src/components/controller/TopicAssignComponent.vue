@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-row space-x-3 items-center justify-start relative">
-        <p class="text-sm">{{ name }}</p>
+        <input class="text-sm bg-transparent max-w-max border-transparent dark:border-b-white border-b-gray-900 outline-none ring-0 outline-0" v-model="nameData" type="text" :id="id + 'name'"/>
         <button :id="id + 'Button'" :data-dropdown-toggle="id" data-dropdown-placement="bottom"
             class="focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center  flex-1  dark:focus:ring-blue-800 border border-blue-600 shadow-blue-50"
             type="button">
@@ -100,6 +100,7 @@ export default {
             offPayload: "",
             minPayload: "",
             maxPayload: "",
+            nameData: this.name
         }
     },
     methods: {
@@ -107,7 +108,7 @@ export default {
             if (this.type != 'slider') {
                 this.$emit("onTopicSelect", {
                     id: this.id,
-                    name: this.name,
+                    name: this.nameData,
                     type: this.type,
                     selectedTopic: this.selectTopic,
                     onPayload: this.onPayload,
@@ -116,7 +117,7 @@ export default {
             } else {
                 this.$emit("onTopicSelect", {
                     id: this.id,
-                    name: this.name,
+                    name: this.nameData,
                     type: this.type,
                     selectedTopic: this.selectTopic,
                     minPayload: this.minPayload,
@@ -174,6 +175,13 @@ export default {
             }
         },
         maxPayload: {
+            handler(newVal, oldVal) {
+                if (newVal != oldVal) {
+                    this.topicSelected();
+                }
+            }
+        },
+        nameData: {
             handler(newVal, oldVal) {
                 if (newVal != oldVal) {
                     this.topicSelected();
