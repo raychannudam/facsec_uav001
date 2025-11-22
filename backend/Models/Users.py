@@ -13,7 +13,7 @@ class UserModel(Base):
     fullname = Column(String)
     age = Column(Integer)
     gender = Column(String)
-    validation_code = Column(String, nullable=True)  # Added for password reset
+    validation_code = Column(String, nullable=True)  # For password reset
     created_by = Column(Integer, ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -23,3 +23,6 @@ class UserModel(Base):
     mqtt_clients = relationship("MqttClientModel", back_populates="user", cascade="all, delete-orphan")
     streaming_clients = relationship("StreamingClientModel", back_populates="user", cascade="all, delete-orphan")
     controllers = relationship("ControllerModel", back_populates="user", cascade="all, delete-orphan")
+    chat_conversations = relationship("ChatConversationModel", back_populates="user", cascade="all, delete-orphan")
+    chat_sessions = relationship("ChatSessionModel", back_populates="user", cascade="all, delete-orphan")
+    chat_messages = relationship("ChatMessageModel", back_populates="user", cascade="all, delete-orphan")
