@@ -9,6 +9,8 @@ from Schemas import (
     ChatMessageCreateSchema
 )
 from Services.Chat import ChatService
+from typing import List
+
 
 router = APIRouter(
     prefix="/chat",
@@ -42,6 +44,14 @@ def get_chat_conversation(conversation_id: int, db: Session = Depends(get_db)):
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return conversation
+
+@router.get("/conversations/{conversation_id}/messages/", response_model=List[ChatMessageResponseSchema])
+def get_messages_in_conversation(conversation_id: int, db: Session = Depends(get_db)):
+    messages = ChatService.get_messages_by_conversation(conversation_id, db)
+    if not messages:
+        raise HTTPException(status_code=404, detail="No messages found for this conversation")
+    return messages
+
 
 @router.post("/messages/", response_model=ChatMessageResponseSchema)
 def create_chat_message(conversation_id: int, user_id: int, message: ChatMessageCreateSchema, db: Session = Depends(get_db)):

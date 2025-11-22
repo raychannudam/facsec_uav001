@@ -43,3 +43,10 @@ class ChatService:
         db.commit()
         db.refresh(message)
         return message
+
+    @staticmethod
+    def get_messages_by_conversation(conversation_id: int, db: Session) -> list[ChatMessageModel]:
+        conversation = db.query(ChatConversationModel).filter(ChatConversationModel.id == conversation_id).first()
+        if not conversation:
+            return []
+        return conversation.messages
