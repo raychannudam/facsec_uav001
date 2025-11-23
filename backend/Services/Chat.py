@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
 from Models.Chat import ChatMessageModel, ChatConversationModel, ChatSessionModel
-from Schemas.Chat import ChatMessageCreateSchema, ChatConversationCreateSchema, ChatSessionCreateSchema
+from Schemas.Chat import ChatMessageCreateSchema
+from Agent.agent import get_agent
 
 class ChatService:
 
@@ -18,7 +18,7 @@ class ChatService:
         return db.query(ChatSessionModel).filter(ChatSessionModel.id == session_id).first()
 
     @staticmethod
-    def create_chat_conversation(session_id: int, user_id: int, name: str = "New Conversation", db: Session = None) -> ChatConversationModel:
+    def create_chat_conversation(session_id: int, user_id: int, db: Session, name: str = "New Conversation") -> ChatConversationModel:
         conversation = ChatConversationModel(session_id=session_id, user_id=user_id, name=name)
         db.add(conversation)
         db.commit()
@@ -31,12 +31,25 @@ class ChatService:
 
     @staticmethod
     def create_chat_message(conversation_id: int, user_id: int, user_prompt: str, db: Session) -> ChatMessageModel:
-        # Simple echo bot for now
-        bot_response = f"Echo: {user_prompt}"
+        agent_executor = get_agent()
+
+        # 🔥 Pass db session to tools through config
+        response = agent_executor.invoke({
+            "messages": [
+                {"role": "user", "content": user_prompt}
+            ]
+        })
+        ai_messages = [msg for msg in response["messages"] if hasattr(msg, 'content') and msg.content]
+        if ai_messages:
+            bot_response = ai_messages[-1].content
+        else:
+            bot_response = "No AI response generated"
+        
+
         message = ChatMessageModel(
-            conversation_id=conversation_id, 
-            user_id=user_id, 
-            user_prompt=user_prompt, 
+            conversation_id=conversation_id,
+            user_id=user_id,
+            user_prompt=user_prompt,
             response=bot_response
         )
         db.add(message)
