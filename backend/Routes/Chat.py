@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
+import json
 
-from Models import get_db, ChatSessionModel, ChatConversationModel, ChatMessageModel
+from Models import get_db
 from Schemas import (
     ChatSessionResponseSchema,
     ChatConversationResponseSchema,
@@ -16,6 +17,27 @@ router = APIRouter(
     prefix="/chat",
     tags=["chat"]
 )
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: dict[int, list[WebSocket]] = {}
+
+    async def connect(self, websocket: WebSocket, conversation_id: int):
+        await websocket.accept()
+        if conversation_id not in self.active_connections:
+            self.active_connections[conversation_id] = []
+        self.active_connections[conversation_id].append(websocket)
+
+    def disconnect(self, websocket: WebSocket, conversation_id: int):
+        if conversation_id in self.active_connections:
+            self.active_connections[conversation_id].remove(websocket)
+
+    async def broadcast(self, message: str, conversation_id: int):
+        if conversation_id in self.active_connections:
+            for connection in self.active_connections[conversation_id]:
+                await connection.send_text(message)
+
+manager = ConnectionManager()
 
 @router.post("/sessions/", response_model=ChatSessionResponseSchema)
 def create_chat_session(user_id: int, db: Session = Depends(get_db)):
@@ -64,3 +86,30 @@ def create_chat_message(conversation_id: int, user_id: int, message: ChatMessage
     if not chat_message:
         raise HTTPException(status_code=400, detail="Unable to create message")
     return chat_message
+
+@router.websocket("/ws/{conversation_id}")
+async def websocket_endpoint(websocket: WebSocket, conversation_id: int, db: Session = Depends(get_db)):
+    await manager.connect(websocket, conversation_id)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message_data = json.loads(data)
+            user_id = message_data.get("user_id")
+            user_prompt = message_data.get("user_prompt")
+
+            if user_id is None or user_prompt is None:
+                continue
+
+            chat_message = ChatService.create_chat_message(
+                conversation_id=conversation_id,
+                user_id=user_id,
+                user_prompt=user_prompt,
+                db=db
+            )
+
+            if chat_message:
+                response_message = ChatMessageResponseSchema.from_orm(chat_message).dict()
+                await manager.broadcast(json.dumps(response_message, default=str), conversation_id)
+
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, conversation_id)
