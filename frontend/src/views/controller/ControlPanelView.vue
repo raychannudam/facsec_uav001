@@ -50,19 +50,17 @@
                     <p>Altitude, </p>
                     <p class="font-bold dark:text-white">---- m</p>
                 </div>
-                <!-- <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                    <span class="material-symbols-outlined">
-                        timer
-                    </span>
-                    <p>Time, </p>
-                    <p class="font-bold dark:text-white">-- mn</p>
-                </div> -->
             </div>
         </div>
         <hr class="border-0.5 border-gray-200">
 
+        <!-- Show message if no profile selected -->
+        <div v-if="!controllerStore.selectedController" class="text-center text-gray-500 dark:text-gray-400 py-8">
+            No profile selected. Please select a profile in the Configuration panel.
+        </div>
+
         <!-- New Grid Layout: 4 columns -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
+        <div v-else class="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
             <!-- Buttons Section - 25% width (1 column) -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col">
                 <div class="flex items-center gap-2 mb-4">
@@ -73,9 +71,12 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Buttons</h3>
                 </div>
-                <div class="space-y-2">
+                <div v-if="controllerStore.buttons.length > 0" class="space-y-2">
                     <ControlButton v-for="button in controllerStore.buttons" :key="button.id" :button="button"
                         @trigger="handleButtonClick" />
+                </div>
+                <div v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                    No buttons configured
                 </div>
             </div>
 
@@ -89,9 +90,12 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Switches</h3>
                 </div>
-                <div class="space-y-2">
+                <div v-if="controllerStore.switches.length > 0" class="space-y-2">
                     <ControlSwitch v-for="switchItem in controllerStore.switches" :key="switchItem.id"
                         :switchData="switchItem" @toggle="handleSwitchToggle" />
+                </div>
+                <div v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                    No switches configured
                 </div>
             </div>
 
@@ -105,9 +109,12 @@
                     </svg>
                     <h3 class="text-lg font-bold text-gray-800 dark:text-white">Sliders</h3>
                 </div>
-                <div class="space-y-2">
+                <div v-if="controllerStore.sliders.length > 0" class="space-y-2">
                     <ControlSlider v-for="slider in controllerStore.sliders" :key="slider.id" :slider="slider"
                         @change="handleSliderChange" />
+                </div>
+                <div v-else class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                    No sliders configured
                 </div>
             </div>
         </div>
@@ -115,7 +122,7 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import ControlButton from '@/components/controller/ControlButton.vue';
 import ControlSlider from '@/components/controller/ControlSlider.vue';
 import ControlSwitch from '@/components/controller/ControlSwitch.vue';
@@ -127,26 +134,50 @@ const { publish, isConnected } = useMqttStore();
 
 onMounted(async () => {
     await controllerStore.getAllControllers();
+    console.log('🎮 Control Panel mounted, selected controller:', controllerStore.selectedController?.name);
 });
+
+// Watch for controller changes and log the controls
+watch(
+    () => controllerStore.selectedController,
+    (newController) => {
+        if (newController) {
+            console.log('🔄 Controller changed to:', newController.name);
+            console.log('🎚️ Available buttons:', controllerStore.buttons.length);
+            console.log('🔘 Available switches:', controllerStore.switches.length);
+            console.log('📊 Available sliders:', controllerStore.sliders.length);
+        }
+    },
+    { deep: true, immediate: true }
+);
 
 const handleButtonClick = (data) => {
     const button = controllerStore.buttons.find(b => b.id === data.id);
     if (button?.selectedTopic?.name) {
+        console.log(`🔵 Button clicked: ${button.name}, publishing to ${button.selectedTopic.name}`);
         publish(button.selectedTopic.name, String(data.payload));
+    } else {
+        console.warn('⚠️ Button has no topic configured:', data.id);
     }
 };
 
 const handleSwitchToggle = (data) => {
     const switchItem = controllerStore.switches.find(s => s.id === data.id);
     if (switchItem?.selectedTopic?.name) {
+        console.log(`🟢 Switch toggled: ${switchItem.name}, publishing to ${switchItem.selectedTopic.name}`);
         publish(switchItem.selectedTopic.name, String(data.payload));
+    } else {
+        console.warn('⚠️ Switch has no topic configured:', data.id);
     }
 };
 
 const handleSliderChange = (data) => {
     const slider = controllerStore.sliders.find(s => s.id === data.id);
     if (slider?.selectedTopic?.name) {
+        console.log(`🟣 Slider changed: ${slider.name}, value: ${data.value}`);
         publish(slider.selectedTopic.name, String(data.value));
+    } else {
+        console.warn('⚠️ Slider has no topic configured:', data.id);
     }
 };
 </script>
