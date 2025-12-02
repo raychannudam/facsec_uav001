@@ -85,7 +85,7 @@ export const useMqttStore = defineStore("mqtt", () => {
 
   const publish = (topic, message) => {
     if (mqttClient.value && isConnected.value) {
-    mqttClient.value.publish(topic, message, { qos: 1 });
+      mqttClient.value.publish(topic, message, { qos: 1 });
       console.log(`📤 Published to ${topic}`);
     } else {
       console.warn("⚠️ MQTT client not connected. Cannot publish.");
