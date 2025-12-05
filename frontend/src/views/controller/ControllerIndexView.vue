@@ -85,7 +85,7 @@ const subscribeToDroneLocation = (controller) => {
     mqttStore.subscribe(topicName, (message) => {
         try {
             const text = message.toString();
-            const [latStr, lngStr] = text.split(",");
+            const [latStr, lngStr] = text.split("/");
 
             const lat = parseFloat(latStr);
             const lng = parseFloat(lngStr);

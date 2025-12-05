@@ -6,8 +6,8 @@
                 class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                 <div
                     class="w-full h-40 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center overflow-hidden">
-                    <img :src="drone.image || require('@/assets/drone.png')"
-                        :alt="drone.name" class="w-full h-full object-cover" />
+                    <img :src="drone.image || require('@/assets/drone.png')" :alt="drone.name"
+                        class="w-full h-full object-cover" />
                 </div>
 
                 <div class="p-4">
@@ -50,7 +50,11 @@
 
         <!-- Empty State -->
         <div v-if="!drones || drones.length === 0" class="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div class="text-5xl mb-4">🚁</div>
+            <div class="text-5xl mb-4">
+                <span class="material-symbols-outlined text-5xl">
+                    drone
+                </span>
+            </div>
             <p class="text-gray-600 dark:text-gray-400 mb-4">No drones available</p>
             <button @click="showCreateModal = true"
                 class="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors">

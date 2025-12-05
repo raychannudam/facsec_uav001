@@ -130,7 +130,7 @@ import { useControllerStore } from '@/stores/ControllerStore';
 import { useMqttStore } from '@/stores/MqttStore';
 
 const controllerStore = useControllerStore();
-const { publish, isConnected } = useMqttStore();
+const { publish, subscribe, isConnected } = useMqttStore();
 
 onMounted(async () => {
     await controllerStore.getAllControllers();
