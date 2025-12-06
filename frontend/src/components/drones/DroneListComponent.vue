@@ -65,16 +65,17 @@
         <DroneModalComponent :is-open="showCreateModal || showEditModal" :is-edit="showEditModal" :drone="editingDrone"
             @close="closeModal" @save="handleSave" />
 
-        <DroneDeleteComponent :is-open="showDeleteModal"
-            :message="'Are you sure you want to delete this drone? This will permanently remove all associated data.'"
-            :drone="droneToDelete" @close="showDeleteModal = false" @confirm="confirmDelete" />
+        <DeleteModal :isOpen="showDeleteModal" :title="'Confirm Drone Deletion'"
+            :message="`Are you sure you want to delete this drone? This will permanently remove all associated data.`"
+            :confirmText="'Delete'" :itemId="droneToDelete?.id" @close="showDeleteModal = false"
+            @confirm="confirmDelete" />
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import DroneModalComponent from './DroneModalComponent.vue'
-import DroneDeleteComponent from './DroneDeleteComponent.vue'
+import DeleteModal from '../utils/DeleteModal.vue'
 
 defineProps({
     drones: {
@@ -101,6 +102,7 @@ const closeModal = () => {
     showEditModal.value = false
     showDeleteModal.value = false
     editingDrone.value = null
+    droneToDelete.value = null
 }
 
 const handleSave = (droneData) => {
