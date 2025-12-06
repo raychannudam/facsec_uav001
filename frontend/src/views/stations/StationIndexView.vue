@@ -89,7 +89,7 @@
     <!-- Station Detail View -->
     <div>
       <StationDetailView :station-data="clickedStation" @onDroneAssigned="handleDroneAssigned"
-        @onDroneRemoved="handleDroneRemoved">
+        @onDroneRemoved="handleDroneRemoved" @onStationDeleted="handleStationDeleted">
       </StationDetailView>
     </div>
   </div>
@@ -115,6 +115,7 @@ const clickedStation = ref(undefined);
 
 // Map
 const map = ref(undefined);
+const stationMarkers = ref([]); // Store marker references
 
 // LEAFLET ICONS
 const currentUserIcon = L.icon({
@@ -163,15 +164,24 @@ const initMap = (lat = undefined, lng = undefined) => {
 };
 
 const addStationsToMap = () => {
+  // Clear existing station markers
+  stationMarkers.value.forEach(marker => {
+    map.value.removeLayer(marker);
+  });
+  stationMarkers.value = [];
+
+  // Add new station markers
   if (allStations.value.length > 0) {
     allStations.value.forEach(station => {
-      L.marker([station.lat, station.long], {
+      const marker = L.marker([station.lat, station.long], {
         icon: stationIcon
       }).addTo(map.value).on("click", () => {
         // Find the latest station data instead of using the closure variable
         const latestStationData = allStations.value.find(s => s.id === station.id);
         clickedStation.value = latestStationData || station;
       });
+
+      stationMarkers.value.push(marker);
     });
   }
 };
@@ -227,16 +237,9 @@ const stationCreateFormSubmited = async () => {
   isCreatingStation.value = false;
   await getAllStations();
 
+  // Refresh map markers
   if (map.value) {
-    const newStation = allStations.value[allStations.value.length - 1];
-
-    if (newStation) {
-      L.marker([newStation.lat, newStation.long], {
-        icon: stationIcon
-      }).addTo(map.value).on("click", () => {
-        clickedStation.value = newStation;
-      });
-    }
+    addStationsToMap();
   }
 };
 
@@ -264,6 +267,27 @@ const handleDroneRemoved = async () => {
     if (updatedStation) {
       clickedStation.value = updatedStation;
     }
+  }
+};
+
+const handleStationDeleted = () => {
+  // Store the deleted station ID
+  const deletedStationId = clickedStation.value?.id;
+
+  console.log('Deleting station:', deletedStationId);
+
+  // Clear the clicked station immediately to hide the detail view
+  clickedStation.value = null;
+  selectedStation.value = undefined;
+
+  // Remove the deleted station from allStations array immediately
+  allStations.value = allStations.value.filter(s => s.id !== deletedStationId);
+
+  console.log('Remaining stations:', allStations.value.length);
+
+  // Refresh the map markers to reflect the deletion
+  if (map.value) {
+    addStationsToMap();
   }
 };
 

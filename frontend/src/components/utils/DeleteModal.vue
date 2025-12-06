@@ -16,7 +16,7 @@
                             </div>
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                                    Confirm Deletion
+                                    {{ title || 'Confirm Deletion' }}
                                 </h3>
                                 <p class="text-sm text-gray-600 dark:text-gray-400">
                                     This action cannot be undone
@@ -32,9 +32,9 @@
                         </p>
 
                         <div class="flex gap-3">
-                            <button type="button" @click="handleDelete"
+                            <button type="button" @click="handleConfirm"
                                 class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                Delete
+                                {{ confirmText || 'Delete' }}
                             </button>
                             <button type="button" @click="$emit('close')"
                                 class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 transition-colors">
@@ -49,53 +49,60 @@
 </template>
 
 <script setup>
-import { ref, watch, onBeforeUnmount } from 'vue'
+import { watch, onBeforeUnmount } from 'vue';
 
 const props = defineProps({
     isOpen: {
         type: Boolean,
         default: false
     },
+    title: {
+        type: String,
+        default: 'Confirm Deletion'
+    },
     message: {
         type: String,
-        default: ''
+        default: 'Are you sure you want to delete this item?'
     },
-    drone: {
-        type: Object,
+    confirmText: {
+        type: String,
+        default: 'Delete'
+    },
+    itemId: {
+        type: [String, Number],
         default: null
     }
-})
+});
 
-const emit = defineEmits(['close', 'confirm'])
+const emit = defineEmits(['close', 'confirm']);
 
 // Lock body scroll when modal opens
 watch(
     () => props.isOpen,
     (isOpen) => {
         if (isOpen) {
-            const scrollY = window.scrollY
-            document.body.style.position = 'fixed'
-            document.body.style.top = `-${scrollY}px`
-            document.body.style.width = '100%'
+            const scrollY = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
         } else {
-            const scrollY = document.body.style.top
-            document.body.style.position = ''
-            document.body.style.top = ''
-            document.body.style.width = ''
-            window.scrollTo(0, parseInt(scrollY || '0') * -1)
+            const scrollY = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            window.scrollTo(0, parseInt(scrollY || '0') * -1);
         }
     },
     { immediate: true }
-)
+);
 
 onBeforeUnmount(() => {
-    document.body.style.position = ''
-    document.body.style.top = ''
-    document.body.style.width = ''
-})
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+});
 
-const handleDelete = () => {
-    if (!props.drone || !props.drone.id) return
-    emit('confirm', props.drone.id)
-}
+const handleConfirm = () => {
+    emit('confirm', props.itemId);
+};
 </script>

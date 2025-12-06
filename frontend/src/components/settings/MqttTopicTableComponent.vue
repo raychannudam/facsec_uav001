@@ -22,7 +22,7 @@
             </thead>
             <tbody>
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
-                    v-for="data in allMqttTopic">
+                    v-for="data in allMqttTopic" :key="data.id">
                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                         {{ data.name }}
                     </th>
@@ -39,14 +39,8 @@
                         Inactive
                     </td>
                     <td class="px-6 py-4 flex items-center space-x-3">
-                        <!-- <a type="button"
-                            class="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a> -->
-                        <a type="button" @click="displayMqttTopicDeleteComfirmPopup(data.id)"
-                            :data-modal-target="'delete_mqtt_topic_confirm_popup' + data.id"
-                            :data-modal-toggle="'delete_mqtt_topic_confirm_popup' + data.id"
+                        <a type="button" @click="handleDeleteTopic(data)"
                             class="cursor-pointer font-medium text-red-600 dark:text-red-500 hover:underline">Delete</a>
-                        <ConfirmPopupModelComponent :model_id="'delete_mqtt_topic_confirm_popup' + data.id">
-                        </ConfirmPopupModelComponent>
                     </td>
                 </tr>
             </tbody>
@@ -55,13 +49,20 @@
     <div v-else>
         <p class="text-center italic py-3">There is no available MQTT Topic. Please create a new topic!</p>
     </div>
+
+    <!-- MQTT Topic Delete Modal -->
+    <DeleteModal :is-open="showDeleteTopicModal" title="Confirm Deletion"
+        :message="`Are you sure you want to delete this topic? This will permanently remove this topic configuration.`"
+        confirm-text="Delete" :item-id="topicToDelete?.id" @close="showDeleteTopicModal = false"
+        @confirm="confirmDeleteTopic" />
 </template>
 
 <script>
 import { useAppStore } from '@/stores/AppStore';
 import { useSettingStore } from '@/stores/SettingStore';
-import ConfirmPopupModelComponent from '../utils/ConfirmPopupModelComponent.vue';
-import { storeToRefs } from 'pinia';
+import DeleteModal from '@/components/utils/DeleteModal.vue';
+import { ref } from 'vue';
+
 export default {
     props: {
         allMqttTopic: {
@@ -72,46 +73,32 @@ export default {
     setup() {
         const appStore = useAppStore();
         const settingStore = useSettingStore();
-        const { popupFeedback } = storeToRefs(appStore);
+        const showDeleteTopicModal = ref(false);
+        const topicToDelete = ref(null);
+
         return {
             appStore,
             settingStore,
-            popupFeedback
+            showDeleteTopicModal,
+            topicToDelete
         }
     },
     components: {
-        ConfirmPopupModelComponent
+        DeleteModal
     },
-    data(){
-        return {
-            toDeleteMqttTopicId: undefined
-        }
-    },
-    methods:{
-        displayMqttTopicDeleteComfirmPopup(id){
-            this.toDeleteMqttTopicId = id
-            this.appStore.displayConfirmPopupModel("Are you sure to delete this topic?", this.deleteMqttTopic)
+    methods: {
+        handleDeleteTopic(topic) {
+            this.topicToDelete = topic;
+            this.showDeleteTopicModal = true;
         },
-        async deleteMqttTopic(){
-            this.appStore.displayPageLoading(true)
-            let res = await this.settingStore.deleteMqttTopic(this.toDeleteMqttTopicId)
-            this.appStore.displayPageLoading(false)
-            this.appStore.displayRightToast(res.status, res.message)
-            this.$emit("onDeleteMqttTopic")
+        async confirmDeleteTopic(topicId) {
+            this.showDeleteTopicModal = false;
+            this.appStore.displayPageLoading(true);
+            let res = await this.settingStore.deleteMqttTopic(topicId);
+            this.appStore.displayPageLoading(false);
+            this.appStore.displayRightToast(res.status, res.message);
+            this.$emit("onDeleteMqttTopic");
         }
-    },
-    watch: {
-    popupFeedback: {
-      handler(newValue, oldValue) {
-        if (newValue === true && newValue != oldValue) {
-          this.appStore.displayPageLoading(true)
-          setTimeout(() => {
-            this.appStore.displayPageLoading(false)
-            this.appStore.popupCallBack()
-          }, 1000)
-        }
-      },
-    },
-  }
+    }
 }
 </script>

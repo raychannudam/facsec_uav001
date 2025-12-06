@@ -45,6 +45,24 @@ export const useStationStore = defineStore("station", {
         data: data,
       };
     },
+    async deleteStation(stationId) {
+      let status = "";
+      let message = "";
+      await api
+        .delete(`/api/v1/stations/${stationId}`)
+        .then((res) => {
+          status = "success";
+          message = "Successfully deleted station!";
+        })
+        .catch((err) => {
+          status = "fail";
+          message = err.response?.data?.detail || "Failed to delete station!";
+        });
+      return {
+        status: status,
+        message: message,
+      };
+    },
     async getAvailableUavs() {
       let status = "";
       let message = "";

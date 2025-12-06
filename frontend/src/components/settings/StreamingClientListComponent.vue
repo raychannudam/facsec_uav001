@@ -1,6 +1,6 @@
 <template>
   <div :id="id" data-accordion="collapse" v-if="streamingClientList.length > 0">
-    <div v-for="data, index in streamingClientList">
+    <div v-for="data, index in streamingClientList" :key="data.id">
       <h2 :id="'streaming-accordion-collapse-heading-' + index">
         <button v-if="index == 0" type="button"
           class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 rounded-t-xl border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
@@ -60,7 +60,8 @@
             <p class="text-xs max-w-max">ACTIONS <code
                 class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base"> {{ data.config["actions"] }} </code>
             </p>
-            <button type="button" :data-modal-target="'streaming-reset-pass-popup-modal-detail' + data.id" :data-modal-toggle="'streaming-reset-pass-popup-modal-detail' + data.id"
+            <button type="button" :data-modal-target="'streaming-reset-pass-popup-modal-detail' + data.id"
+              :data-modal-toggle="'streaming-reset-pass-popup-modal-detail' + data.id"
               class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
               <span class="material-symbols-outlined">
                 key
@@ -75,24 +76,24 @@
               </span>
               <p>Edit client</p>
             </button>
-            <button type="button" :data-modal-target="'delete_streaming_client_confirm_popup'+data.id"
-              :data-modal-toggle="'delete_streaming_client_confirm_popup'+data.id" @click="displayStreamingClientDeleteConfirmPopup(data.id)"
-            class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 rounded-lg text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
+            <button type="button" @click="handleDeleteClient(data)"
+              class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 rounded-lg text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
               <span class="material-symbols-outlined">
                 delete_forever
               </span>
               <p>Delete client</p>
             </button>
-            <StreamingClientResetPasswordComponent  v-if="data" :data="data"></StreamingClientResetPasswordComponent>
-            <StreamingClientUpdateComponent v-if="data" :data="data" @onClose="streamingClientEditModalClosed"></StreamingClientUpdateComponent>
-            <ConfirmPopupModelComponent :model_id="'delete_streaming_client_confirm_popup'+data.id"></ConfirmPopupModelComponent>
+            <StreamingClientResetPasswordComponent v-if="data" :data="data"></StreamingClientResetPasswordComponent>
+            <StreamingClientUpdateComponent v-if="data" :data="data" @onClose="streamingClientEditModalClosed">
+            </StreamingClientUpdateComponent>
           </div>
           <div>
             <hr class="border-0.5 border-dashed">
           </div>
           <!-- URL Info -->
-           <div class="flex items-center justify-start space-x-3 ">
-            <StreamingUrlCreateFormComponent :streamingClientData="data" @onSubmit="createStreamingUrl"></StreamingUrlCreateFormComponent>
+          <div class="flex items-center justify-start space-x-3 ">
+            <StreamingUrlCreateFormComponent :streamingClientData="data" @onSubmit="createStreamingUrl">
+            </StreamingUrlCreateFormComponent>
             <div class="flex-1 flex justify-end">
               <form class="max-w-md w-full">
                 <label for="streamingUrlQuery"
@@ -115,27 +116,34 @@
             </div>
           </div>
           <div>
-            <StreamingUrlTableComponent @onDeleteStreamingUrl="streamingURLDeleted" :allStreamingUrls="allStreamingUrls[data.id]"></StreamingUrlTableComponent>
-            <!-- {{ allStreamingUrls }} -->
+            <StreamingUrlTableComponent @onDeleteStreamingUrl="streamingURLDeleted"
+              :allStreamingUrls="allStreamingUrls[data.id]"></StreamingUrlTableComponent>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Streaming Client Delete Modal -->
+  <DeleteModal :is-open="showDeleteClientModal" title="Confirm Deletion"
+    :message="`Are you sure you want to delete this streaming client? This will permanently remove all associated URLs and configurations.`"
+    confirm-text="Delete" :item-id="clientToDelete?.id" @close="showDeleteClientModal = false"
+    @confirm="confirmDeleteClient" />
 </template>
+
 <script>
 import { useAppStore } from '@/stores/AppStore';
 import { useSettingStore } from '@/stores/SettingStore';
 import { initFlowbite } from 'flowbite';
-import { storeToRefs } from 'pinia';
-import ConfirmPopupModelComponent from '../utils/ConfirmPopupModelComponent.vue';
 import StreamingClientUpdateComponent from './StreamingClientUpdateComponent.vue';
 import StreamingClientResetPasswordComponent from './StreamingClientResetPasswordComponent.vue';
 import StreamingUrlCreateFormComponent from './StreamingUrlCreateFormComponent.vue';
 import StreamingUrlTableComponent from './StreamingUrlTableComponent.vue';
+import DeleteModal from '../utils/DeleteModal.vue';
+import { ref } from 'vue';
+
 export default {
   name: "StreamingClientListComponent",
-  // props: ['streamingClientList', 'id'],
   props: {
     streamingClientList: {
       type: Array,
@@ -144,25 +152,27 @@ export default {
     id: String
   },
   components: {
-    ConfirmPopupModelComponent,
     StreamingClientUpdateComponent,
     StreamingClientResetPasswordComponent,
     StreamingUrlCreateFormComponent,
-    StreamingUrlTableComponent
+    StreamingUrlTableComponent,
+    DeleteModal
   },
   setup() {
     const appStore = useAppStore();
     const settingStore = useSettingStore();
-    const { popupFeedback } = storeToRefs(appStore);
+    const showDeleteClientModal = ref(false);
+    const clientToDelete = ref(null);
+
     return {
       appStore,
       settingStore,
-      popupFeedback
+      showDeleteClientModal,
+      clientToDelete
     }
   },
   data() {
     return {
-      toDeleteStreamingClient: undefined,
       streamingUrlQuery: "",
       allStreamingUrls: {}
     }
@@ -172,53 +182,39 @@ export default {
     await this.getAllStreamingUrl();
   },
   methods: {
-    displayStreamingClientDeleteConfirmPopup(id){
-      this.toDeleteStreamingClient = id
-      this.appStore.displayConfirmPopupModel("Are you sure to delete this client?", this.deleteStreamingClient)
+    handleDeleteClient(client) {
+      this.clientToDelete = client;
+      this.showDeleteClientModal = true;
     },
-    async deleteStreamingClient(){
-      if (this.toDeleteStreamingClient != undefined){
-        this.appStore.displayPageLoading(true)
-        let res = await this.settingStore.deleteStreamingClient(this.toDeleteStreamingClient)
-        this.appStore.displayPageLoading(false)
-        this.appStore.displayRightToast(res.status, res.message);
-        this.$emit("onCompletedDeleteStreamingClient")
-      }
+    async confirmDeleteClient(clientId) {
+      this.showDeleteClientModal = false;
+      this.appStore.displayPageLoading(true);
+      let res = await this.settingStore.deleteStreamingClient(clientId);
+      this.appStore.displayPageLoading(false);
+      this.appStore.displayRightToast(res.status, res.message);
+      this.$emit("onCompletedDeleteStreamingClient");
     },
-    streamingClientEditModalClosed(){
-      this.$emit("onStreamingClientEditModalClose")
+    streamingClientEditModalClosed() {
+      this.$emit("onStreamingClientEditModalClose");
     },
-    async createStreamingUrl(data){
+    async createStreamingUrl(data) {
       this.appStore.displayPageLoading(true);
       let res = await this.settingStore.crateStreamingUrl(data);
       this.appStore.displayPageLoading(false);
-      this.appStore.displayRightToast(res.status, res.message)
+      this.appStore.displayRightToast(res.status, res.message);
       await this.getAllStreamingUrl();
     },
-    async getAllStreamingUrl(){
-      this.streamingClientList.forEach(async item=>{
+    async getAllStreamingUrl() {
+      this.streamingClientList.forEach(async item => {
         let res = await this.settingStore.getAllStreamingUrls(item.id);
-        if (res.status == "success"){
-          this.allStreamingUrls[item.id] = res.data
+        if (res.status == "success") {
+          this.allStreamingUrls[item.id] = res.data;
         }
       })
     },
-    async streamingURLDeleted(){
+    async streamingURLDeleted() {
       await this.getAllStreamingUrl();
     }
-  },
-  watch: {
-    popupFeedback: {
-      handler(newValue, oldValue) {
-        if (newValue === true) {
-          this.appStore.displayPageLoading(true)
-          setTimeout(() => {
-            this.appStore.displayPageLoading(false)
-            this.appStore.popupCallBack()
-          }, 1000)
-        }
-      },
-    },
   }
 }
 </script>

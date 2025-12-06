@@ -228,8 +228,10 @@
     <!-- Modals -->
     <CreateProfileModal :isOpen="showCreateModal" @close="showCreateModal = false" @create="handleCreateProfile" />
 
-    <DeleteProfileModal :isOpen="showDeleteModal" :profileName="selectedProfile?.name" :requireConfirmation="true"
-        @close="showDeleteModal = false" @delete="handleDeleteProfile" />
+    <DeleteModal :isOpen="showDeleteModal" :title="'Confirm Profile Deletion'"
+        :message="`Are you sure you want to delete this profile? This will permanently remove all profile configurations and settings.`"
+        :confirmText="'Delete'" :itemId="selectedProfile?.id" @close="showDeleteModal = false"
+        @confirm="handleDeleteProfile" />
 </template>
 
 <script>
@@ -241,14 +243,14 @@ import { useControllerStore } from '@/stores/ControllerStore';
 import TopicAssignComponent from '@/components/controller/TopicAssignComponent.vue';
 import StreamingUrlAssignComponent from '@/components/controller/StreamingUrlAssignComponent.vue';
 import CreateProfileModal from '@/components/controller/CreateProfileModal.vue';
-import DeleteProfileModal from '@/components/controller/DeleteProfileModal.vue';
+import DeleteModal from '@/components/utils/DeleteModal.vue';
 
 export default {
     components: {
         TopicAssignComponent,
         StreamingUrlAssignComponent,
         CreateProfileModal,
-        DeleteProfileModal
+        DeleteModal
     },
     setup() {
         const uavStore = useUavStore();
