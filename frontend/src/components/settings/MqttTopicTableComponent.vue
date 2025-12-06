@@ -52,7 +52,7 @@
 
     <!-- MQTT Topic Delete Modal -->
     <MqttTopicDeleteModal :is-open="showDeleteTopicModal"
-        :message="`Are you sure you want to delete topic '${topicToDelete?.name}'? This will permanently remove this topic configuration.`"
+        :message="`Are you sure you want to delete this topic? This will permanently remove this topic configuration.`"
         :topic-id="topicToDelete?.id" @close="showDeleteTopicModal = false" @confirm="confirmDeleteTopic" />
 </template>
 

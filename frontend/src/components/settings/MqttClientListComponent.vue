@@ -12,10 +12,10 @@
                 v-if="data.status">ACTIVE</span> <span class="block font-bold text-xl text-red-600"
                 v-else>INACTIVE</span></p>
             <p class="text-sm text-start">Description <span class="block font-bold text-xl">{{ data.description
-            }}</span>
+                }}</span>
             </p>
             <p class="text-sm text-start">Last Modified <span class="block font-bold text-xl">{{ data.updated_at
-            }}</span></p>
+                }}</span></p>
           </div>
           <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
@@ -33,10 +33,10 @@
                 v-if="data.status">ACTIVE</span> <span class="block font-bold text-xl text-red-600 px-3 rounded-md"
                 v-else>INACTIVE</span></p>
             <p class="text-sm text-start">Description <span class="block font-bold text-xl">{{ data.description
-            }}</span>
+                }}</span>
             </p>
             <p class="text-sm text-start">Last Modified <span class="block font-bold text-xl">{{ data.updated_at
-            }}</span></p>
+                }}</span></p>
           </div>
           <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
@@ -131,7 +131,7 @@
 
   <!-- MQTT Client Delete Modal -->
   <MqttClientDeleteModal :is-open="showDeleteClientModal"
-    :message="`Are you sure you want to delete MQTT client '${clientToDelete?.name}'? This will permanently remove all associated topics and configurations.`"
+    :message="`Are you sure you want to delete this MQTT client? This will permanently remove all associated topics and configurations.`"
     :client-id="clientToDelete?.id" @close="showDeleteClientModal = false" @confirm="confirmDeleteClient" />
 </template>
 
