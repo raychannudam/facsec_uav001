@@ -24,7 +24,7 @@
                         <p class="text-xs font-medium uppercase tracking-wide">Description</p>
                     </div>
                     <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ stationData.description || 'N/A'
-                        }}</p>
+                    }}</p>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
@@ -206,16 +206,16 @@
     </div>
 
     <!-- Remove Drone Modal -->
-    <DroneRemoveModal :is-open="showRemoveModal"
-        :message="`Are you sure you want to remove '${droneToRemove?.name}' from this station?`" :drone="droneToRemove"
-        @close="showRemoveModal = false" @confirm="confirmRemoveDrone" />
+    <DeleteModal :is-open="showRemoveModal" title="Remove Drone"
+        :message="`Are you sure you want to remove '${droneToRemove?.name}' from this station?`" confirm-text="Remove"
+        :item-id="droneToRemove?.id" @close="showRemoveModal = false" @confirm="confirmRemoveDrone" />
 </template>
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import { useStationStore } from '@/stores/StationStore';
 import { useAppStore } from '@/stores/AppStore';
-import DroneRemoveModal from '@/components/stations/DroneRemoveModal.vue';
+import DeleteModal from '@/components/utils/DeleteModal.vue';
 
 const props = defineProps({
     stationData: {
