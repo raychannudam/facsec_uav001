@@ -1,73 +1,56 @@
 <template>
-    <div v-if="isOpen" id="deleteProfileModal" tabindex="-1"
-        class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full bg-gray-900 bg-opacity-50 flex items-center justify-center">
-        <div class="relative w-full max-w-md max-h-full">
-            <!-- Modal content -->
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                <!-- Modal header -->
-                <div class="flex items-center justify-between p-4 border-b dark:border-gray-600">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                        Delete Profile
-                    </h3>
-                    <button @click="closeModal" type="button"
-                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
-                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Modal body -->
-                <div class="p-6">
-                    <!-- Warning Icon -->
-                    <div class="flex justify-center mb-4">
-                        <div class="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full dark:bg-red-900">
-                            <span
-                                class="material-symbols-outlined text-3xl text-red-600 dark:text-red-300">delete</span>
+    <Teleport to="body">
+        <div v-if="isOpen" class="fixed inset-0 z-50 overflow-y-auto" style="background-color: rgba(0, 0, 0, 0.5);">
+            <div class="min-h-screen px-4 flex items-center justify-center">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full overflow-hidden">
+                    <!-- Header -->
+                    <div class="bg-red-50 dark:bg-red-900/20 px-6 py-4 border-b border-red-200 dark:border-red-800">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="flex-shrink-0 w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                                    Confirm Deletion
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    This action cannot be undone
+                                </p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Warning Text -->
-                    <div class="text-center mb-4">
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                            Are you sure you want to delete
+                    <!-- Body -->
+                    <div class="p-6">
+                        <p class="text-gray-700 dark:text-gray-300 mb-12">
+                            Are you sure you want to delete the profile "{{ profileName }}"? This will permanently
+                            remove all profile configurations and settings.
                         </p>
-                        <p class="text-base font-semibold text-gray-900 dark:text-white">
-                            "{{ profileName }}"?
-                        </p>
-                    </div>
 
-                    <!-- Confirmation Input -->
-                    <div class="mb-6">
-                        <label for="confirmInput" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                            Type <span class="font-bold text-red-600">DELETE</span> to confirm
-                        </label>
-                        <input v-model="confirmText" type="text" id="confirmInput"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                            placeholder="Type DELETE">
-                    </div>
-
-                    <!-- Modal footer -->
-                    <div class="flex items-center justify-end space-x-2">
-                        <button @click="closeModal" type="button"
-                            class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">
-                            Cancel
-                        </button>
-                        <button @click="handleDelete" :disabled="!isConfirmed" type="button"
-                            class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                            Delete
-                        </button>
+                        <div class="flex gap-3">
+                            <button type="button" @click="handleDelete"
+                                class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                Delete
+                            </button>
+                            <button type="button" @click="$emit('close')"
+                                class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 transition-colors">
+                                Cancel
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </Teleport>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, watch, onBeforeUnmount } from 'vue';
 
 const props = defineProps({
     isOpen: {
@@ -82,30 +65,33 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'delete']);
 
-const confirmText = ref('');
+// Lock body scroll when modal opens
+watch(
+    () => props.isOpen,
+    (isOpen) => {
+        if (isOpen) {
+            const scrollY = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
+        } else {
+            const scrollY = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        }
+    },
+    { immediate: true }
+);
 
-const isConfirmed = computed(() => {
-    return confirmText.value.trim().toUpperCase() === 'DELETE';
+onBeforeUnmount(() => {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
 });
-
-const closeModal = () => {
-    confirmText.value = '';
-    emit('close');
-};
 
 const handleDelete = () => {
-    if (!isConfirmed.value) {
-        return;
-    }
-
     emit('delete');
-    confirmText.value = '';
 };
-
-// Reset confirmation text when modal is closed
-watch(() => props.isOpen, (newVal) => {
-    if (!newVal) {
-        confirmText.value = '';
-    }
-});
 </script>
