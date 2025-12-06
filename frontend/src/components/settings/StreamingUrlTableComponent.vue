@@ -22,7 +22,7 @@
             </thead>
             <tbody>
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200"
-                    v-for="data in allStreamingUrls">
+                    v-for="data in allStreamingUrls" :key="data.id">
                     <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                         {{ data.name }}
                     </th>
@@ -39,14 +39,8 @@
                         Inactive
                     </td>
                     <td class="px-6 py-4 flex items-center space-x-3">
-                        <!-- <a type="button"
-                            class="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a> -->
-                        <a type="button" @click="displayStreamingUrlDeleteComfirmPopup(data.id)"
-                            :data-modal-target="'delete_streaming_url_confirm_popup' + data.id"
-                            :data-modal-toggle="'delete_streaming_url_confirm_popup' + data.id"
+                        <a type="button" @click="handleDeleteUrl(data)"
                             class="cursor-pointer font-medium text-red-600 dark:text-red-500 hover:underline">Delete</a>
-                        <ConfirmPopupModelComponent :model_id="'delete_streaming_url_confirm_popup' + data.id">
-                        </ConfirmPopupModelComponent>
                     </td>
                 </tr>
             </tbody>
@@ -55,13 +49,20 @@
     <div v-else>
         <p class="text-center italic py-3">There is no available Streaming URL. Please create a new URL!</p>
     </div>
+
+    <!-- Streaming URL Delete Modal -->
+    <DeleteModal :is-open="showDeleteUrlModal" title="Confirm Deletion"
+        :message="`Are you sure you want to delete this streaming URL? This will permanently remove this URL configuration.`"
+        confirm-text="Delete" :item-id="urlToDelete?.id" @close="showDeleteUrlModal = false"
+        @confirm="confirmDeleteUrl" />
 </template>
 
 <script>
 import { useAppStore } from '@/stores/AppStore';
 import { useSettingStore } from '@/stores/SettingStore';
-import ConfirmPopupModelComponent from '../utils/ConfirmPopupModelComponent.vue';
-import { storeToRefs } from 'pinia';
+import DeleteModal from '@/components/utils/DeleteModal.vue';
+import { ref } from 'vue';
+
 export default {
     props: {
         allStreamingUrls: {
@@ -72,46 +73,32 @@ export default {
     setup() {
         const appStore = useAppStore();
         const settingStore = useSettingStore();
-        const { popupFeedback } = storeToRefs(appStore);
+        const showDeleteUrlModal = ref(false);
+        const urlToDelete = ref(null);
+
         return {
             appStore,
             settingStore,
-            popupFeedback
+            showDeleteUrlModal,
+            urlToDelete
         }
     },
     components: {
-        ConfirmPopupModelComponent
+        DeleteModal
     },
-    data(){
-        return {
-            toDeleteStreamingUrlId: undefined
-        }
-    },
-    methods:{
-        displayStreamingUrlDeleteComfirmPopup(id){
-            this.toDeleteStreamingUrlId = id
-            this.appStore.displayConfirmPopupModel("Are you sure to delete this topic?", this.deleteStreamingUrl)
+    methods: {
+        handleDeleteUrl(url) {
+            this.urlToDelete = url;
+            this.showDeleteUrlModal = true;
         },
-        async deleteStreamingUrl(){
-            this.appStore.displayPageLoading(true)
-            let res = await this.settingStore.deleteStreamingUrl(this.toDeleteStreamingUrlId)
-            this.appStore.displayPageLoading(false)
-            this.appStore.displayRightToast(res.status, res.message)
-            this.$emit("onDeleteStreamingUrl")
+        async confirmDeleteUrl(urlId) {
+            this.showDeleteUrlModal = false;
+            this.appStore.displayPageLoading(true);
+            let res = await this.settingStore.deleteStreamingUrl(urlId);
+            this.appStore.displayPageLoading(false);
+            this.appStore.displayRightToast(res.status, res.message);
+            this.$emit("onDeleteStreamingUrl");
         }
-    },
-    watch: {
-    popupFeedback: {
-      handler(newValue, oldValue) {
-        if (newValue === true && newValue != oldValue) {
-          this.appStore.displayPageLoading(true)
-          setTimeout(() => {
-            this.appStore.displayPageLoading(false)
-            this.appStore.popupCallBack()
-          }, 1000)
-        }
-      },
-    },
-  }
+    }
 }
 </script>

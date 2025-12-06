@@ -51,15 +51,16 @@
     </div>
 
     <!-- MQTT Topic Delete Modal -->
-    <MqttTopicDeleteModal :is-open="showDeleteTopicModal"
+    <DeleteModal :is-open="showDeleteTopicModal" title="Confirm Deletion"
         :message="`Are you sure you want to delete this topic? This will permanently remove this topic configuration.`"
-        :topic-id="topicToDelete?.id" @close="showDeleteTopicModal = false" @confirm="confirmDeleteTopic" />
+        confirm-text="Delete" :item-id="topicToDelete?.id" @close="showDeleteTopicModal = false"
+        @confirm="confirmDeleteTopic" />
 </template>
 
 <script>
 import { useAppStore } from '@/stores/AppStore';
 import { useSettingStore } from '@/stores/SettingStore';
-import MqttTopicDeleteModal from '@/components/settings/MqttTopicDeleteModal.vue';
+import DeleteModal from '@/components/utils/DeleteModal.vue';
 import { ref } from 'vue';
 
 export default {
@@ -83,7 +84,7 @@ export default {
         }
     },
     components: {
-        MqttTopicDeleteModal
+        DeleteModal
     },
     methods: {
         handleDeleteTopic(topic) {

@@ -12,10 +12,10 @@
                 v-if="data.status">ACTIVE</span> <span class="block font-bold text-xl text-red-600"
                 v-else>INACTIVE</span></p>
             <p class="text-sm text-start">Description <span class="block font-bold text-xl">{{ data.description
-                }}</span>
+            }}</span>
             </p>
             <p class="text-sm text-start">Last Modified <span class="block font-bold text-xl">{{ data.updated_at
-                }}</span></p>
+            }}</span></p>
           </div>
           <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
@@ -33,10 +33,10 @@
                 v-if="data.status">ACTIVE</span> <span class="block font-bold text-xl text-red-600 px-3 rounded-md"
                 v-else>INACTIVE</span></p>
             <p class="text-sm text-start">Description <span class="block font-bold text-xl">{{ data.description
-                }}</span>
+            }}</span>
             </p>
             <p class="text-sm text-start">Last Modified <span class="block font-bold text-xl">{{ data.updated_at
-                }}</span></p>
+            }}</span></p>
           </div>
           <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
@@ -130,16 +130,17 @@
   </div>
 
   <!-- MQTT Client Delete Modal -->
-  <MqttClientDeleteModal :is-open="showDeleteClientModal"
+  <DeleteModal :is-open="showDeleteClientModal" title="Confirm Deletion"
     :message="`Are you sure you want to delete this MQTT client? This will permanently remove all associated topics and configurations.`"
-    :client-id="clientToDelete?.id" @close="showDeleteClientModal = false" @confirm="confirmDeleteClient" />
+    confirm-text="Delete" :item-id="clientToDelete?.id" @close="showDeleteClientModal = false"
+    @confirm="confirmDeleteClient" />
 </template>
 
 <script>
 import MqttTopicTableComponent from './MqttTopicTableComponent.vue';
 import MqttTopicCreateFormComponent from './MqttTopicCreateFormComponent.vue';
 import MqtqClientUpdateComponent from '@/components/settings/MqttClientUpdateComponent.vue';
-import MqttClientDeleteModal from '@/components/settings/MqttClientDeleteModal.vue';
+import DeleteModal from '@/components/utils/DeleteModal.vue';
 import { useAppStore } from '@/stores/AppStore';
 import { useSettingStore } from '@/stores/SettingStore';
 import { initFlowbite } from 'flowbite';
@@ -158,7 +159,7 @@ export default {
     MqttTopicTableComponent,
     MqttTopicCreateFormComponent,
     MqtqClientUpdateComponent,
-    MqttClientDeleteModal,
+    DeleteModal,
   },
   setup() {
     const appStore = useAppStore();
