@@ -14,7 +14,8 @@
             <hr class="border-0.5 border-gray-200">
             <MqttClientListComponent @onCompletedDeleteMqttClient="triggerCompletedDeleteMqttClient"
                 @onMqttClientEditModalClose="mqttClientEditModalClosed" id="mqtt_client_list"
-                :mqttClientList="allMqttClients" :key="allMqttClients" v-if="allMqttClients.length > 0"></MqttClientListComponent>
+                :mqttClientList="allMqttClients" :key="allMqttClients" v-if="allMqttClients.length > 0">
+            </MqttClientListComponent>
             <div v-else>
                 <p class="text-center italic">There is no available MQTT Client. Please create a new client!</p>
             </div>
@@ -31,7 +32,10 @@
             <StreamingClientCreateFormComponent @onSubmit="onStreamingClientCreateFormSubmit"
                 id="streaming_client_confirm_create_popup"></StreamingClientCreateFormComponent>
             <hr class="border-0.5 border-gray-200">
-            <StreamingClientListComponent @onStreamingClientEditModalClose="streamingClientEditModalClosed" @onCompletedDeleteStreamingClient="triggerCompletedDeleteStreamingClient" :streamingClientList="allStreamingClients"  v-if="allStreamingClients.length > 0" ></StreamingClientListComponent>
+            <StreamingClientListComponent @onStreamingClientEditModalClose="streamingClientEditModalClosed"
+                @onCompletedDeleteStreamingClient="triggerCompletedDeleteStreamingClient"
+                :streamingClientList="allStreamingClients" v-if="allStreamingClients.length > 0">
+            </StreamingClientListComponent>
             <div v-else>
                 <p class="text-center italic">There is no available Streaming Client. Please create a new client!</p>
             </div>
@@ -84,7 +88,7 @@ export default {
             let res = await this.settingStore.createMqttClient(data);
             this.appStore.displayPageLoading(false);
             this.appStore.displayRightToast(res.status, res.message);
-            if (res.status == "success"){
+            if (res.status == "success") {
                 await this.getAllMqttClients();
             }
         },
@@ -106,19 +110,19 @@ export default {
         async mqttClientEditModalClosed() {
             await this.getAllMqttClients();
         },
-        async onStreamingClientCreateFormSubmit(data){
+        async onStreamingClientCreateFormSubmit(data) {
             this.appStore.displayPageLoading(true)
             let res = await this.settingStore.createStreamingClient(data);
             this.appStore.displayPageLoading(false);
             this.appStore.displayRightToast(res.status, res.message);
-            if (res.status == "success"){
+            if (res.status == "success") {
                 await this.getAllStreamingClients();
             }
         },
-        async triggerCompletedDeleteStreamingClient(){
+        async triggerCompletedDeleteStreamingClient() {
             await this.getAllStreamingClients();
         },
-        async streamingClientEditModalClosed(){
+        async streamingClientEditModalClosed() {
             await this.getAllStreamingClients();
         }
     }
