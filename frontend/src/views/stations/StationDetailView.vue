@@ -24,7 +24,7 @@
                         <p class="text-xs font-medium uppercase tracking-wide">Description</p>
                     </div>
                     <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ stationData.description || 'N/A'
-                    }}</p>
+                        }}</p>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
@@ -158,8 +158,7 @@
 
                             <td class="px-6 py-4">
                                 <div>
-                                    <button @click="removeDroneFromStation(drone.id)"
-                                        :disabled="removingDroneId === drone.id"
+                                    <button @click="handleRemoveDrone(drone)" :disabled="removingDroneId === drone.id"
                                         class="px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 rounded-lg hover:from-red-600 hover:to-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:from-red-600 dark:to-red-700 dark:hover:from-red-700 dark:hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-400 flex items-center space-x-1 transition-all shadow-sm hover:shadow-md">
                                         <span class="material-symbols-outlined text-sm"
                                             v-if="removingDroneId !== drone.id">delete</span>
@@ -205,12 +204,18 @@
                 details</p>
         </div>
     </div>
+
+    <!-- Remove Drone Modal -->
+    <DroneRemoveModal :is-open="showRemoveModal"
+        :message="`Are you sure you want to remove '${droneToRemove?.name}' from this station?`" :drone="droneToRemove"
+        @close="showRemoveModal = false" @confirm="confirmRemoveDrone" />
 </template>
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import { useStationStore } from '@/stores/StationStore';
 import { useAppStore } from '@/stores/AppStore';
+import DroneRemoveModal from '@/components/stations/DroneRemoveModal.vue';
 
 const props = defineProps({
     stationData: {
@@ -228,6 +233,8 @@ const availableDrones = ref([]);
 const selectedDroneId = ref(null);
 const isAssigning = ref(false);
 const removingDroneId = ref(null);
+const showRemoveModal = ref(false);
+const droneToRemove = ref(null);
 
 // Fetch available drones
 const fetchAvailableDrones = async () => {
@@ -254,8 +261,15 @@ const assignDroneToStation = async () => {
     }
 };
 
-// Remove drone from station
-const removeDroneFromStation = async (droneId) => {
+// Handle remove drone button click
+const handleRemoveDrone = (drone) => {
+    droneToRemove.value = drone;
+    showRemoveModal.value = true;
+};
+
+// Confirm remove drone from station
+const confirmRemoveDrone = async (droneId) => {
+    showRemoveModal.value = false;
     removingDroneId.value = droneId;
     const res = await stationStore.removeUavFromStation(droneId);
     removingDroneId.value = null;
