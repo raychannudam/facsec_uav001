@@ -14,4 +14,4 @@ class StationModel(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    uavs = relationship("UavModel", back_populates="station", cascade="all, delete-orphan")
+    uavs = relationship("UavModel", back_populates="station")

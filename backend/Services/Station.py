@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from Models import StationModel
+from Models import StationModel, UavModel
 from Schemas.Station import StationCreateSchema, StationUpdateSchema
 
 class StationService:
@@ -69,6 +69,10 @@ class StationService:
         station = db.query(StationModel).filter(StationModel.id == station_id).first()
         if not station:
             return None
+
+        # Set station_id to null for associated UAVs
+        db.query(UavModel).filter(UavModel.station_id == station_id).update({"station_id": None})
+
         db.delete(station)
         db.commit()
         return station
