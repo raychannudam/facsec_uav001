@@ -229,7 +229,7 @@
     <CreateProfileModal :isOpen="showCreateModal" @close="showCreateModal = false" @create="handleCreateProfile" />
 
     <DeleteModal :isOpen="showDeleteModal" :title="'Confirm Profile Deletion'"
-        :message="`Are you sure you want to delete the profile &quot;${selectedProfile?.name}&quot;? This will permanently remove all profile configurations and settings.`"
+        :message="`Are you sure you want to delete this profile? This will permanently remove all profile configurations and settings.`"
         :confirmText="'Delete'" :itemId="selectedProfile?.id" @close="showDeleteModal = false"
         @confirm="handleDeleteProfile" />
 </template>
