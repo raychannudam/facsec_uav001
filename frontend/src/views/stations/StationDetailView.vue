@@ -4,9 +4,19 @@
         <div
             class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-xl p-6 shadow-sm border border-blue-100 dark:border-gray-600">
 
-            <div class="flex items-center space-x-3 mb-4">
-                <span class="material-symbols-outlined text-3xl text-blue-600 dark:text-blue-400">warehouse</span>
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-white capitalize">{{ stationData.name }}</h2>
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <span class="material-symbols-outlined text-3xl text-blue-600 dark:text-blue-400">warehouse</span>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white capitalize">{{ stationData.name }}</h2>
+                </div>
+
+                <!-- Delete Station Button -->
+                <button @click="handleDeleteStation" :disabled="isDeletingStation"
+                    class="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 rounded-lg hover:from-red-600 hover:to-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 dark:from-red-600 dark:to-red-700 dark:hover:from-red-700 dark:hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-400 disabled:to-gray-400 flex items-center space-x-2 transition-all shadow-md hover:shadow-lg">
+                    <span class="material-symbols-outlined text-lg" v-if="!isDeletingStation">delete</span>
+                    <span class="material-symbols-outlined text-lg animate-spin" v-else>progress_activity</span>
+                    <span>{{ isDeletingStation ? 'Deleting...' : 'Delete Station' }}</span>
+                </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -24,7 +34,7 @@
                         <p class="text-xs font-medium uppercase tracking-wide">Description</p>
                     </div>
                     <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ stationData.description || 'N/A'
-                        }}</p>
+                    }}</p>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
@@ -209,6 +219,12 @@
     <DeleteModal :is-open="showRemoveModal" title="Remove Drone"
         :message="`Are you sure you want to remove this drone from this station?`" confirm-text="Remove"
         :item-id="droneToRemove?.id" @close="showRemoveModal = false" @confirm="confirmRemoveDrone" />
+
+    <!-- Delete Station Modal -->
+    <DeleteModal :is-open="showDeleteStationModal" title="Delete Station"
+        :message="`Are you sure you want to delete this station? This will also unassign all drones from this station.`"
+        confirm-text="Delete Station" :item-id="stationData?.id" @close="showDeleteStationModal = false"
+        @confirm="confirmDeleteStation" />
 </template>
 
 <script setup>
@@ -224,7 +240,7 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['onDroneAssigned', 'onDroneRemoved']);
+const emit = defineEmits(['onDroneAssigned', 'onDroneRemoved', 'onStationDeleted']);
 
 const stationStore = useStationStore();
 const appStore = useAppStore();
@@ -235,6 +251,8 @@ const isAssigning = ref(false);
 const removingDroneId = ref(null);
 const showRemoveModal = ref(false);
 const droneToRemove = ref(null);
+const showDeleteStationModal = ref(false);
+const isDeletingStation = ref(false);
 
 // Fetch available drones
 const fetchAvailableDrones = async () => {
@@ -279,6 +297,25 @@ const confirmRemoveDrone = async (droneId) => {
     if (res.status === 'success') {
         await fetchAvailableDrones();
         emit('onDroneRemoved');
+    }
+};
+
+// Handle delete station button click
+const handleDeleteStation = () => {
+    showDeleteStationModal.value = true;
+};
+
+// Confirm delete station
+const confirmDeleteStation = async (stationId) => {
+    showDeleteStationModal.value = false;
+    isDeletingStation.value = true;
+    const res = await stationStore.deleteStation(stationId);
+    isDeletingStation.value = false;
+
+    appStore.displayRightToast(res.status, res.message);
+
+    if (res.status === 'success') {
+        emit('onStationDeleted');
     }
 };
 
