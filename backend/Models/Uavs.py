@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, JSON, DateTime, String
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, JSON, DateTime
 from sqlalchemy.orm import relationship
 from Models import Base
 
@@ -11,7 +11,7 @@ class UavModel(Base):
     name = Column(String, unique=True, nullable=False, index=True)
     mqtt_client_id = Column(Integer, ForeignKey("mqtt_clients.id", ondelete="CASCADE"), nullable=True)
     streaming_client_id = Column(Integer, ForeignKey("streaming_clients.id", ondelete="CASCADE"), nullable=True)
-    station_id = Column(Integer, ForeignKey("stations.id", ondelete="CASCADE"), nullable=True)
+    station_id = Column(Integer, ForeignKey("stations.id", ondelete="SET NULL"), nullable=True)
     last_lat = Column(Float)
     last_long = Column(Float)
     operation_data = Column(JSON, nullable=False)
