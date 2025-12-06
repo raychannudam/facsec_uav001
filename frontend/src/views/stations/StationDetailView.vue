@@ -24,7 +24,7 @@
                         <p class="text-xs font-medium uppercase tracking-wide">Description</p>
                     </div>
                     <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ stationData.description || 'N/A'
-                    }}</p>
+                        }}</p>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
@@ -207,7 +207,7 @@
 
     <!-- Remove Drone Modal -->
     <DeleteModal :is-open="showRemoveModal" title="Remove Drone"
-        :message="`Are you sure you want to remove '${droneToRemove?.name}' from this station?`" confirm-text="Remove"
+        :message="`Are you sure you want to remove this drone from this station?`" confirm-text="Remove"
         :item-id="droneToRemove?.id" @close="showRemoveModal = false" @confirm="confirmRemoveDrone" />
 </template>
 
