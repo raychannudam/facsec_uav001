@@ -1,6 +1,6 @@
 <template>
   <div :id="id" data-accordion="collapse" v-if="mqttClientList.length > 0">
-    <div v-for="data, index in mqttClientList">
+    <div v-for="data, index in mqttClientList" :key="data.id">
       <h2 :id="'accordion-collapse-heading-' + index">
         <button v-if="index == 0" type="button"
           class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 rounded-t-xl border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
@@ -81,9 +81,7 @@
               </span>
               <p>Edit client</p>
             </button>
-            <button type="button" @click="displayMqttClientDeleteComfirmPopup(data.id)"
-              :data-modal-target="'delete_mqtt_client_confirm_popup' + data.id"
-              :data-modal-toggle="'delete_mqtt_client_confirm_popup' + data.id"
+            <button type="button" @click="handleDeleteClient(data)"
               class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 rounded-lg text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
               <span class="material-symbols-outlined">
                 delete_forever
@@ -92,8 +90,6 @@
             </button>
             <MqtqClientUpdateComponent v-if="data" :data="data" @onClose="mqttClientEditModalClosed">
             </MqtqClientUpdateComponent>
-            <ConfirmPopupModelComponent :model_id="'delete_mqtt_client_confirm_popup' + data.id">
-            </ConfirmPopupModelComponent>
           </div>
           <div>
             <hr class="border-0.5 border-dashed">
@@ -124,26 +120,33 @@
             </div>
           </div>
           <div>
-            <MqttTopicTableComponent :key="allMqttTopic[data.id]" :allMqttTopic="allMqttTopic[data.id]" @onDeleteMqttTopic="mqttTopicDeleted">
+            <MqttTopicTableComponent :key="allMqttTopic[data.id]" :allMqttTopic="allMqttTopic[data.id]"
+              @onDeleteMqttTopic="mqttTopicDeleted">
             </MqttTopicTableComponent>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- MQTT Client Delete Modal -->
+  <MqttClientDeleteModal :is-open="showDeleteClientModal"
+    :message="`Are you sure you want to delete MQTT client '${clientToDelete?.name}'? This will permanently remove all associated topics and configurations.`"
+    :client-id="clientToDelete?.id" @close="showDeleteClientModal = false" @confirm="confirmDeleteClient" />
 </template>
+
 <script>
 import MqttTopicTableComponent from './MqttTopicTableComponent.vue';
 import MqttTopicCreateFormComponent from './MqttTopicCreateFormComponent.vue';
-import ConfirmPopupModelComponent from '../utils/ConfirmPopupModelComponent.vue';
 import MqtqClientUpdateComponent from '@/components/settings/MqttClientUpdateComponent.vue';
+import MqttClientDeleteModal from '@/components/settings/MqttClientDeleteModal.vue';
 import { useAppStore } from '@/stores/AppStore';
 import { useSettingStore } from '@/stores/SettingStore';
 import { initFlowbite } from 'flowbite';
-import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
+
 export default {
   name: "MqttClientListComponent",
-  // props: ['mqttClientList', 'id'],
   props: {
     mqttClientList: {
       type: Array,
@@ -154,22 +157,24 @@ export default {
   components: {
     MqttTopicTableComponent,
     MqttTopicCreateFormComponent,
-    ConfirmPopupModelComponent,
     MqtqClientUpdateComponent,
+    MqttClientDeleteModal,
   },
   setup() {
     const appStore = useAppStore();
     const settingStore = useSettingStore();
-    const { popupFeedback } = storeToRefs(appStore);
+    const showDeleteClientModal = ref(false);
+    const clientToDelete = ref(null);
+
     return {
       appStore,
       settingStore,
-      popupFeedback
+      showDeleteClientModal,
+      clientToDelete
     }
   },
   data() {
     return {
-      toDeleteMqttClientId: undefined,
       allMqttTopic: {},
       mqttTopicQuery: ""
     }
@@ -179,27 +184,26 @@ export default {
     await this.getAllMqttTopic();
   },
   methods: {
-    displayMqttClientDeleteComfirmPopup(id) {
-      this.toDeleteMqttClientId = id
-      this.appStore.displayConfirmPopupModel("Are you sure to delete this MQTT client?", this.deleteMqttClient)
+    handleDeleteClient(client) {
+      this.clientToDelete = client;
+      this.showDeleteClientModal = true;
     },
-    async deleteMqttClient() {
-      if (this.toDeleteMqttClientId != undefined) {
-        this.appStore.displayPageLoading(true)
-        let res = await this.settingStore.deleteMqttClient(this.toDeleteMqttClientId)
-        this.appStore.displayPageLoading(false)
-        this.appStore.displayRightToast(res.status, res.message);
-        this.$emit("onCompletedDeleteMqttClient")
-      }
+    async confirmDeleteClient(clientId) {
+      this.showDeleteClientModal = false;
+      this.appStore.displayPageLoading(true);
+      let res = await this.settingStore.deleteMqttClient(clientId);
+      this.appStore.displayPageLoading(false);
+      this.appStore.displayRightToast(res.status, res.message);
+      this.$emit("onCompletedDeleteMqttClient");
     },
     async mqttClientEditModalClosed() {
-      this.$emit("onMqttClientEditModalClose")
+      this.$emit("onMqttClientEditModalClose");
     },
     async getAllMqttTopic() {
       this.mqttClientList.forEach(async item => {
-        let res = await this.settingStore.getAllMqttTopicByMqttClientId(item.id)
+        let res = await this.settingStore.getAllMqttTopicByMqttClientId(item.id);
         if (res.status == "success") {
-          this.allMqttTopic[item.id] = res.data
+          this.allMqttTopic[item.id] = res.data;
         }
       })
     },
@@ -213,19 +217,6 @@ export default {
     async mqttTopicDeleted() {
       await this.getAllMqttTopic();
     }
-  },
-  watch: {
-    popupFeedback: {
-      handler(newValue, oldValue) {
-        if (newValue === true) {
-          this.appStore.displayPageLoading(true)
-          setTimeout(() => {
-            this.appStore.displayPageLoading(false)
-            this.appStore.popupCallBack()
-          }, 1000)
-        }
-      },
-    },
   }
 }
 </script>
