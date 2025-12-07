@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-col space-y-3">
-        <div class="flex flex-row space-x-3 w-full items-end justify-between">
+        <!-- <div class="flex flex-row space-x-3 w-full items-end justify-between">
             <div class="text-2xl flex flex-col items-start space-y-3">
                 <div class="flex font-bold flex-row space-x-3 items-center">
                     <span class="text-2xl material-symbols-outlined">
@@ -51,7 +51,7 @@
                     <p class="font-bold dark:text-white">---- m</p>
                 </div>
             </div>
-        </div>
+        </div> -->
         <hr class="border-0.5 border-gray-200">
 
         <!-- Show message if no profile selected -->

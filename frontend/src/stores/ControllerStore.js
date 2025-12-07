@@ -1,11 +1,8 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import api from "@/plugins/api";
-import { useAppStore } from "./AppStore";
 
 export const useControllerStore = defineStore("controller", () => {
-  const appStore = useAppStore();
-
   const controllers = ref([]);
   const selectedController = ref(null);
 
