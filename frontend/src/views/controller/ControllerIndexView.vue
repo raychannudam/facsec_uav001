@@ -11,6 +11,8 @@
         <div class="col-span-12">
             <ControlPanelView />
         </div>
+
+        <ChatbotView />
     </div>
 </template>
 
@@ -22,6 +24,7 @@ import ControlPanelView from './ControlPanelView.vue';
 import LiveStreamView from './LiveStreamView.vue';
 import { useControllerStore } from '@/stores/ControllerStore';
 import { useMqttStore } from '@/stores/MqttStore';
+import ChatbotView from './ChatbotView.vue';
 
 const controllerStore = useControllerStore();
 const mqttStore = useMqttStore();

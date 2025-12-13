@@ -1,6 +1,7 @@
 <template>
     <div class="flex flex-col space-y-3">
-        <!-- <div class="flex flex-row space-x-3 w-full items-end justify-between">
+
+        <div class="flex flex-row space-x-3 w-full items-end justify-between">
             <div class="text-2xl flex flex-col items-start space-y-3">
                 <div class="flex font-bold flex-row space-x-3 items-center">
                     <span class="text-2xl material-symbols-outlined">
@@ -14,44 +15,43 @@
             </div>
             <div class="flex items-center space-x-3 dark:text-gray-400 px-3">
                 <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                    <span class="material-symbols-outlined">
+                    <span class="material-symbols-outlined text-sm">
                         battery_charging_full
                     </span>
                     <p>Batt, </p>
-                    <p class="font-bold dark:text-white">-- V</p>
+                    <p class="font-bold dark:text-white">{{ telemetryData.battery !== null ? telemetryData.battery + '%'
+                        : '--' }}</p>
                 </div>
-                <div>
-                    |
-                </div>
+                <div>|</div>
                 <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                    <span class="material-symbols-outlined">
+                    <span class="material-symbols-outlined text-sm">
                         device_thermostat
                     </span>
                     <p>Temp, </p>
-                    <p class="font-bold dark:text-white">-- &#8451;</p>
+                    <p class="font-bold dark:text-white">{{ telemetryData.temperature !== null ?
+                        telemetryData.temperature + '°C' : '--' }}</p>
                 </div>
-                <div>
-                    |
-                </div>
+                <div>|</div>
                 <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                    <span class="material-symbols-outlined">
+                    <span class="material-symbols-outlined text-sm">
                         speed
                     </span>
                     <p>Speed, </p>
-                    <p class="font-bold dark:text-white">-- km/h</p>
+                    <p class="font-bold dark:text-white">{{ telemetryData.speed !== null ? telemetryData.speed + ' m/s'
+                        : '--' }}</p>
                 </div>
-                <div>
-                    |
-                </div>
+                <div>|</div>
                 <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                    <span class="material-symbols-outlined">
-                        altitude
+                    <span class="material-symbols-outlined text-sm">
+                        height
                     </span>
                     <p>Altitude, </p>
-                    <p class="font-bold dark:text-white">---- m</p>
+                    <p class="font-bold dark:text-white">{{ telemetryData.altitude !== null ? telemetryData.altitude +
+                        'm' : '--' }}</p>
                 </div>
             </div>
-        </div> -->
+        </div>
+
         <hr class="border-0.5 border-gray-200">
 
         <!-- Show message if no profile selected -->
@@ -79,6 +79,7 @@
                     No buttons configured
                 </div>
             </div>
+
 
             <!-- Switches Section - 25% width (1 column) -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col">
@@ -122,7 +123,7 @@
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import ControlButton from '@/components/controller/ControlButton.vue';
 import ControlSlider from '@/components/controller/ControlSlider.vue';
 import ControlSwitch from '@/components/controller/ControlSwitch.vue';
@@ -130,11 +131,101 @@ import { useControllerStore } from '@/stores/ControllerStore';
 import { useMqttStore } from '@/stores/MqttStore';
 
 const controllerStore = useControllerStore();
-const { publish, subscribe, isConnected } = useMqttStore();
+const mqttStore = useMqttStore();
+const { publish } = mqttStore;
+
+const telemetryData = ref({
+    altitude: null,
+    battery: null,
+    speed: null,
+    temperature: null
+});
+
+const subscribedTelemetryTopics = ref([]);
+
+// Define functions first before using them in watchers
+const resetTelemetryData = () => {
+    telemetryData.value = {
+        altitude: null,
+        battery: null,
+        speed: null,
+        temperature: null
+    };
+};
+
+const unsubscribeFromTelemetry = () => {
+    subscribedTelemetryTopics.value.forEach(topic => {
+        console.log(`🔕 Unsubscribing from telemetry in Control Panel:`, topic);
+        mqttStore.unsubscribe(topic);
+    });
+    subscribedTelemetryTopics.value = [];
+    resetTelemetryData();
+};
+
+const subscribeToTelemetry = () => {
+    const controller = controllerStore.selectedController;
+
+    if (!controller?.config?.default?.mqttTopics || !mqttStore.isConnected) {
+        console.log('⚠️ Cannot subscribe to telemetry - missing topics or MQTT not connected');
+        return;
+    }
+
+    const defaultTopics = controller.config.default.mqttTopics;
+    console.log('🔍 Available default topics for telemetry:', defaultTopics.map(t => t.name));
+
+    const topicMap = {
+        altitude: 'altitude',
+        battery: 'battery',
+        speed: 'speed',
+        temperature: 'temperature'
+    };
+
+    Object.entries(topicMap).forEach(([key, searchTerm]) => {
+        const topic = defaultTopics.find(t =>
+            t.id?.toLowerCase() === searchTerm ||
+            t.name?.toLowerCase().includes(searchTerm)
+        );
+
+        if (topic?.name) {
+            console.log(`📡 Subscribing to ${key}:`, topic.name);
+
+            mqttStore.subscribe(topic.name, (message) => {
+                try {
+                    const rawValue = message.toString().trim();
+                    const value = parseFloat(rawValue);
+
+                    if (!isNaN(value)) {
+                        telemetryData.value[key] = value;
+                        console.log(`📊 ${key} updated in Control Panel:`, value);
+                    } else {
+                        console.warn(`⚠️ Could not parse ${key} value:`, rawValue);
+                    }
+                } catch (error) {
+                    console.error(`❌ Error parsing ${key}:`, error);
+                }
+            });
+
+            subscribedTelemetryTopics.value.push(topic.name);
+        } else {
+            console.warn(`⚠️ No topic found for ${key} (searching for: ${searchTerm})`);
+        }
+    });
+};
 
 onMounted(async () => {
     await controllerStore.getAllControllers();
     console.log('🎮 Control Panel mounted, selected controller:', controllerStore.selectedController?.name);
+    console.log('🔍 MQTT connected?', mqttStore.isConnected);  // ADD THIS
+    console.log('🔍 Has default topics?', controllerStore.selectedController?.config?.default?.mqttTopics?.length);  // ADD THIS
+
+    // Subscribe to telemetry if MQTT is already connected
+    if (mqttStore.isConnected && controllerStore.selectedController) {
+        subscribeToTelemetry();
+    }
+});
+
+onBeforeUnmount(() => {
+    unsubscribeFromTelemetry();
 });
 
 // Watch for controller changes and log the controls
@@ -146,9 +237,29 @@ watch(
             console.log('🎚️ Available buttons:', controllerStore.buttons.length);
             console.log('🔘 Available switches:', controllerStore.switches.length);
             console.log('📊 Available sliders:', controllerStore.sliders.length);
+
+            // Resubscribe to telemetry when controller changes
+            unsubscribeFromTelemetry();
+            if (mqttStore.isConnected) {
+                subscribeToTelemetry();
+            }
         }
     },
     { deep: true, immediate: true }
+);
+
+// Watch for MQTT connection status
+watch(
+    () => mqttStore.isConnected,
+    (isConnected) => {
+        if (isConnected && controllerStore.selectedController) {
+            console.log('✅ MQTT connected in Control Panel, subscribing to telemetry...');
+            subscribeToTelemetry();
+        } else if (!isConnected) {
+            console.log('❌ MQTT disconnected in Control Panel');
+            resetTelemetryData();
+        }
+    }
 );
 
 const handleButtonClick = (data) => {
