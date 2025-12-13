@@ -16,7 +16,7 @@ def get_agent():
     llm_provider = os.getenv("LLM_PROVIDER", "gemini").lower()
 
     if llm_provider == "gemini":
-        llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro", convert_system_message_to_human=True)
+        llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", convert_system_message_to_human=True)
     else:
         raise ValueError(f"Unsupported LLM provider: {llm_provider}")
 
