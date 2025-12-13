@@ -189,40 +189,6 @@
                             class="h-40" alt="">
                     </div>
 
-                    <!-- Real-time Telemetry Data -->
-                    <div v-if="selectedDrone && !isEditing"
-                        class="grid grid-cols-2 gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
-                        <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">height</span>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Altitude</p>
-                            <p class="text-lg font-bold text-gray-900 dark:text-white">
-                                {{ telemetryData.altitude !== null ? telemetryData.altitude + ' m' : '--' }}
-                            </p>
-                        </div>
-                        <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                            <span
-                                class="material-symbols-outlined text-green-600 dark:text-green-400">battery_charging_full</span>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Battery</p>
-                            <p class="text-lg font-bold text-gray-900 dark:text-white">
-                                {{ telemetryData.battery !== null ? telemetryData.battery + '%' : '--' }}
-                            </p>
-                        </div>
-                        <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                            <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">speed</span>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Speed</p>
-                            <p class="text-lg font-bold text-gray-900 dark:text-white">
-                                {{ telemetryData.speed !== null ? telemetryData.speed + ' m/s' : '--' }}
-                            </p>
-                        </div>
-                        <div class="text-center p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                            <span class="material-symbols-outlined text-red-600 dark:text-red-400">thermostat</span>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Temperature</p>
-                            <p class="text-lg font-bold text-gray-900 dark:text-white">
-                                {{ telemetryData.temperature !== null ? telemetryData.temperature + '°C' : '--' }}
-                            </p>
-                        </div>
-                    </div>
-
                     <!-- Streaming URL Section -->
                     <div class="pb-2 border-dashed border-b">
                         <p class="font-bold">Streaming URLs</p>
@@ -249,6 +215,48 @@
                                 'minPayload': mqttTopic.minPayload,
                                 'maxPayload': mqttTopic.maxPayload
                             }" />
+                    </div>
+                </div>
+
+                <!-- Real-time Telemetry Data - At the bottom -->
+                <div v-if="selectedDrone"
+                    class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-center space-x-3 dark:text-gray-400 px-3 py-3">
+                        <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
+                            <span class="material-symbols-outlined text-sm">
+                                battery_charging_full
+                            </span>
+                            <p>Batt, </p>
+                            <p class="font-bold dark:text-white">{{ telemetryData.battery !== null ?
+                                telemetryData.battery + '%' : '--' }}</p>
+                        </div>
+                        <div>|</div>
+                        <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
+                            <span class="material-symbols-outlined text-sm">
+                                device_thermostat
+                            </span>
+                            <p>Temp, </p>
+                            <p class="font-bold dark:text-white">{{ telemetryData.temperature !== null ?
+                                telemetryData.temperature + '°C' : '--' }}</p>
+                        </div>
+                        <div>|</div>
+                        <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
+                            <span class="material-symbols-outlined text-sm">
+                                speed
+                            </span>
+                            <p>Speed, </p>
+                            <p class="font-bold dark:text-white">{{ telemetryData.speed !== null ? telemetryData.speed +
+                                ' m/s' : '--' }}</p>
+                        </div>
+                        <div>|</div>
+                        <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
+                            <span class="material-symbols-outlined text-sm">
+                                height
+                            </span>
+                            <p>Altitude, </p>
+                            <p class="font-bold dark:text-white">{{ telemetryData.altitude !== null ?
+                                telemetryData.altitude + ' m' : '--' }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
