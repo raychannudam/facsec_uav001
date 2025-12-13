@@ -217,48 +217,6 @@
                             }" />
                     </div>
                 </div>
-
-                <!-- Real-time Telemetry Data - At the bottom -->
-                <div v-if="selectedDrone"
-                    class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-center space-x-3 dark:text-gray-400 px-3 py-3">
-                        <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                            <span class="material-symbols-outlined text-sm">
-                                battery_charging_full
-                            </span>
-                            <p>Batt, </p>
-                            <p class="font-bold dark:text-white">{{ telemetryData.battery !== null ?
-                                telemetryData.battery + '%' : '--' }}</p>
-                        </div>
-                        <div>|</div>
-                        <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                            <span class="material-symbols-outlined text-sm">
-                                device_thermostat
-                            </span>
-                            <p>Temp, </p>
-                            <p class="font-bold dark:text-white">{{ telemetryData.temperature !== null ?
-                                telemetryData.temperature + '°C' : '--' }}</p>
-                        </div>
-                        <div>|</div>
-                        <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                            <span class="material-symbols-outlined text-sm">
-                                speed
-                            </span>
-                            <p>Speed, </p>
-                            <p class="font-bold dark:text-white">{{ telemetryData.speed !== null ? telemetryData.speed +
-                                ' m/s' : '--' }}</p>
-                        </div>
-                        <div>|</div>
-                        <div class="flex items-center space-x-0.5 text-xs p-1 shadow dark:shadow-white/30">
-                            <span class="material-symbols-outlined text-sm">
-                                height
-                            </span>
-                            <p>Altitude, </p>
-                            <p class="font-bold dark:text-white">{{ telemetryData.altitude !== null ?
-                                telemetryData.altitude + ' m' : '--' }}</p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -286,7 +244,6 @@ import TopicAssignComponent from '@/components/controller/TopicAssignComponent.v
 import StreamingUrlAssignComponent from '@/components/controller/StreamingUrlAssignComponent.vue';
 import CreateProfileModal from '@/components/controller/CreateProfileModal.vue';
 import DeleteModal from '@/components/utils/DeleteModal.vue';
-import { useMqttStore } from '@/stores/MqttStore';
 
 export default {
     components: {
@@ -296,7 +253,6 @@ export default {
         DeleteModal
     },
     setup() {
-        const mqttStore = useMqttStore();
         const uavStore = useUavStore();
         const appStore = useAppStore();
         const settingStore = useSettingStore();
@@ -306,7 +262,6 @@ export default {
             appStore,
             settingStore,
             controllerStore,
-            mqttStore
         }
     },
     data() {
@@ -322,14 +277,7 @@ export default {
             isEditing: false,
             config: this.getDefaultConfig(),
             showCreateModal: false,
-            showDeleteModal: false,
-            telemetryData: {
-                altitude: null,
-                battery: null,
-                speed: null,
-                temperature: null
-            },
-            subscribedTelemetryTopics: []
+            showDeleteModal: false
         }
     },
     computed: {
@@ -344,11 +292,6 @@ export default {
         initFlowbite();
         await this.loadProfiles();
         await this.getAllDrone();
-
-        // DEBUG: Listen to ALL MQTT messages
-        this.mqttStore.mqttClient?.on('message', (topic, message) => {
-            console.log('🔔 GLOBAL MQTT MESSAGE:', topic, message.toString());
-        });
     },
     methods: {
         getDefaultConfig() {
@@ -402,7 +345,6 @@ export default {
 
         async onProfileSelect() {
             this.isEditing = false;
-            this.unsubscribeFromTelemetry();
             this.availableMqttTopics = [];
             this.availableStreamingUrls = [];
 
@@ -459,7 +401,6 @@ export default {
                 this.selectedDrone = this.config.selectedDrone;
                 console.log('🚁 Loading resources for drone:', this.selectedDrone.name);
                 this.loadDroneResources();
-                this.subscribeToTelemetry();
             } else {
                 console.log('⚠️ No drone configured for this profile');
                 this.selectedDrone = undefined;
@@ -471,8 +412,6 @@ export default {
 
         async selectDrone() {
             if (!this.selectedDrone) return;
-            this.unsubscribeFromTelemetry();
-            this.resetTelemetryData();
 
             console.log('🚁 Drone selected:', this.selectedDrone.name);
 
@@ -481,8 +420,6 @@ export default {
 
             // Update the config with the new drone
             this.config.selectedDrone = this.selectedDrone;
-
-            this.subscribeToTelemetry();
 
             // Keep existing topic/URL configurations - don't reset!
             console.log('✅ Drone updated, existing configurations preserved');
@@ -658,83 +595,6 @@ export default {
                 initFlowbite();
             }
         },
-
-        subscribeToTelemetry() {
-            // Add debug logs first
-            console.log('🔍 Profile config:', this.selectedProfile?.config?.default);
-            console.log('🔍 Default topics:', this.selectedProfile?.config?.default?.mqttTopics);
-            console.log('🔍 MQTT connected:', this.mqttStore.isConnected);
-
-            if (!this.selectedProfile?.config?.default?.mqttTopics || !this.mqttStore.isConnected) {
-                console.log('⚠️ Cannot subscribe to telemetry - missing topics or MQTT not connected');
-                return;
-            }
-
-            const defaultTopics = this.selectedProfile.config.default.mqttTopics;
-            console.log('🔍 Available default topics:', defaultTopics.map(t => t.name));
-
-            // Find and subscribe to each telemetry topic
-            const topicMap = {
-                altitude: 'altitude',
-                battery: 'battery',
-                speed: 'speed',
-                temperature: 'temperature'
-            };
-
-            Object.entries(topicMap).forEach(([key, searchTerm]) => {
-                const topic = defaultTopics.find(t =>
-                    t.id?.toLowerCase() === searchTerm ||
-                    t.name?.toLowerCase().includes(searchTerm)
-                );
-
-                if (topic?.name) {
-                    console.log(`📡 Subscribing to ${key}:`, topic.name);
-
-                    this.mqttStore.subscribe(topic.name, (message) => {
-                        try {
-                            // Convert buffer/message to string first and trim whitespace
-                            const rawValue = message.toString().trim();
-                            console.log(`📥 Raw ${key} received:`, rawValue);
-
-                            // Try to parse as number
-                            const value = parseFloat(rawValue);
-                            if (!isNaN(value)) {
-                                this.telemetryData[key] = value;
-                                console.log(`📊 ${key} updated:`, value);
-                            } else {
-                                console.warn(`⚠️ Could not parse ${key} value:`, rawValue);
-                            }
-                        } catch (error) {
-                            console.error(`❌ Error parsing ${key}:`, error);
-                        }
-                    });
-
-                    this.subscribedTelemetryTopics.push(topic.name);
-                } else {
-                    console.warn(`⚠️ No topic found for ${key} (searching for: ${searchTerm})`);
-                }
-            });
-        },
-
-        // Unsubscribe from telemetry topics
-        unsubscribeFromTelemetry() {
-            this.subscribedTelemetryTopics.forEach(topic => {
-                console.log(`🔕 Unsubscribing from telemetry:`, topic);
-                this.mqttStore.unsubscribe(topic);
-            });
-            this.subscribedTelemetryTopics = [];
-            this.resetTelemetryData();
-        },
-
-        // Reset telemetry data
-        resetTelemetryData() {
-            this.telemetryData = {
-                altitude: null,
-                battery: null,
-                speed: null,
-                temperature: null
-            };
-        },
     },
 
     watch: {
@@ -760,14 +620,6 @@ export default {
                 }
             },
             deep: true
-        },
-        'mqttStore.isConnected': {
-            handler(isConnected) {
-                if (isConnected && this.selectedDrone) {
-                    console.log('✅ MQTT connected, subscribing to telemetry...');
-                    this.subscribeToTelemetry();
-                }
-            }
         }
     }
 }
