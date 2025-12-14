@@ -1,10 +1,10 @@
 <template>
-    <div class="flex flex-col space-y-3 h-full">
+    <div class="flex flex-col space-y-3">
         <!-- Header -->
-        <div class="flex flex-col w-full space-y-2">
+        <div class="flex flex-col w-full space-y-3">
             <!-- Title + Description -->
             <div class="flex flex-row items-center justify-between">
-                <div>
+                <div class="flex flex-col space-y-3">
                     <div class="flex flex-row items-center space-x-2">
                         <span class="text-2xl material-symbols-outlined">settings_input_component</span>
                         <p class="text-xl font-bold">Configuration</p>
@@ -18,7 +18,8 @@
 
         <hr class="border-0.5 border-gray-200">
 
-        <!-- SECTION 1: Profile Management -->
+        <div class="flex flex-col space-y-3 h-[60vh] overflow-scroll">
+            <!-- SECTION 1: Profile Management -->
         <div class="flex flex-col space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div class="flex flex-row items-center justify-between">
                 <p class="text-sm font-bold">Profile Management</p>
@@ -95,8 +96,6 @@
             </div>
         </div>
 
-        <hr class="border-0.5 border-gray-200">
-
         <!-- SECTION 2: Configuration Settings -->
         <div v-if="selectedProfile" class="flex flex-col space-y-3">
             <!-- Configuration Header with Actions -->
@@ -128,7 +127,7 @@
                 </div>
             </div>
 
-            <div class="flex flex-col space-y-3 h-[50vh] overflow-scroll relative">
+            <div class="flex flex-col space-y-3 relative">
                 <!-- Select UAV -->
                 <div class="flex flex-row space-x-3 items-center justify-start"
                     :class="{ 'pointer-events-none opacity-70': !isEditing }">
@@ -183,7 +182,7 @@
                 </div>
 
                 <!-- Rest of the content with proper disabled state -->
-                <div :class="{ 'pointer-events-none opacity-70': !isEditing }">
+                <div :class="{ 'pointer-events-none opacity-70': !isEditing }" class="flex flex-col space-y-3">
                     <div class="flex items-center justify-center">
                         <img src="https://www.uavfordrone.com/wp-content/uploads/2019/05/%E7%BB%8F%E7%BA%AC-M600-Pro-%E9%9B%86%E5%A4%A7%E6%88%90%EF%BC%8C%E8%BE%BE%E8%BF%9C%E8%A7%81-DJI-%E5%A4%A7%E7%96%86%E5%88%9B%E6%96%B0-3.png"
                             class="h-40" alt="">
@@ -220,8 +219,9 @@
             </div>
         </div>
 
-        <div v-else class="flex items-center justify-center h-[50vh]">
+        <div v-else class="flex items-center justify-center ">
             <p class="text-gray-500 dark:text-gray-400">Please select or create a profile to get started</p>
+        </div>
         </div>
     </div>
 

@@ -27,13 +27,13 @@
       </div>
     </div>
 
-    <p class="text-gray-600 dark:text-gray-400">
+    <p class="text-gray-600 dark:text-gray-400 text-xs">
       Get real-time live stream video from the cameras on the drone.
     </p>
     <hr class="border-0.5 border-gray-200" />
 
-    <div class="grid grid-cols-12 gap-3">
-      <div class="col-span-8 dark:bg-gray-800 bg-gray-100 rounded-md w-full h-[60vh] relative overflow-hidden dark:text-white text-gray-900">
+    <div class="grid grid-cols-12 gap-3 h-[60vh]">
+      <div class="col-span-8 dark:bg-gray-800 bg-gray-100 rounded-md w-full h-full relative overflow-hidden dark:text-white text-gray-900">
 
         <div v-if="streamingUrls.stream1 == undefined" class="flex items-center justify-center h-full space-x-3">
           <span class="material-symbols-outlined animate-pulse">videocam</span>
@@ -61,7 +61,7 @@
 
       </div>
 
-      <div class="col-span-4 h-[60vh]">
+      <div class="col-span-4 h-full">
         <div class="grid grid-rows-3 gap-3 w-full h-full">
           <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden dark:text-white text-gray-900">
             <div v-if="streamingUrls.stream2 == undefined" class="flex items-center justify-center space-x-3">
