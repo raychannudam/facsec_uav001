@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from Models.Chat import ChatMessageModel, ChatConversationModel, ChatSessionModel
 from Schemas.Chat import ChatMessageCreateSchema
 from Agent.agent import get_agent
+import json
 
 class ChatService:
 
@@ -33,29 +34,45 @@ class ChatService:
     def create_chat_message(conversation_id: int, user_id: int, user_prompt: str, db: Session) -> ChatMessageModel:
         agent_executor = get_agent()
 
-        # 🔥 Pass db session to tools through config
         response = agent_executor.invoke({
             "messages": [
                 {"role": "user", "content": user_prompt}
             ]
         })
-        ai_messages = [msg for msg in response["messages"] if hasattr(msg, 'content') and msg.content]
-        if ai_messages:
-            bot_response = ai_messages[-1].content
-        else:
-            bot_response = "No AI response generated"
-        
 
+        try:
+            messages = response.get("messages", [])
+            
+            bot_response = "No AI response generated"
+            
+            for msg in messages:
+                if msg.__class__.__name__ == "AIMessage":
+                    content = msg.content
+                    if isinstance(content, str):
+                        if content.strip():
+                            bot_response = content.strip()
+                    elif isinstance(content, list):
+                        # concatenate all text fields in the list
+                        texts = [c.get("text", "") for c in content if isinstance(c, dict) and "text" in c]
+                        if texts:
+                            bot_response = "\n".join(texts)
+                            break
+        except Exception as e:
+            bot_response = f"Error extracting AI response: {e}"
+
+        # Save to database
         message = ChatMessageModel(
             conversation_id=conversation_id,
             user_id=user_id,
+            # user_prompt=str(response.get("messages", [])),
             user_prompt=user_prompt,
-            response=bot_response
+            response=bot_response  # store only the content
         )
         db.add(message)
         db.commit()
         db.refresh(message)
         return message
+
 
     @staticmethod
     def get_messages_by_conversation(conversation_id: int, db: Session) -> list[ChatMessageModel]:
