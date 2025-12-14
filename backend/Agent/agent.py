@@ -4,7 +4,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.agents import create_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.chat_models import ChatOllama
-from .tools import search_name, get_station_data
+from .tools import get_station_data
 
 load_dotenv()
 
@@ -20,7 +20,7 @@ def get_agent():
     else:
         raise ValueError(f"Unsupported LLM provider: {llm_provider}")
 
-    tools = [search_name, get_station_data]
+    tools = [get_station_data]
 
     system_prompt = """
         You are a helpful assistant for the UAV management system named "Mission Control Copilot".

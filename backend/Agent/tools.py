@@ -1,14 +1,10 @@
+import json
 from langchain.tools import tool
 from sqlalchemy.orm import Session
 from Models import get_db, StationModel
 from Services.Station import StationService
 from Services.Uav import UavService
-
-@tool
-def search_name() -> str:
-    """Search the secondary drone name when user ask for a name.
-    """
-    return f"Whatanak"
+from fastapi.encoders import jsonable_encoder
 
 @tool
 def get_station_data() -> str:
@@ -18,5 +14,10 @@ def get_station_data() -> str:
     stations = StationService.get_stations(db)
     if not stations:
         return "No stations found."
+
+    stations_data = jsonable_encoder(stations)
     
-    return f"Found {len(stations)} stations:\n {stations}"
+    # Print JSON in the console
+    print(">> Station JSON: ", json.dumps(stations_data, indent=2))
+    
+    return f"Found {len(stations)} stations:\n{json.dumps(stations_data, indent=2)}"
