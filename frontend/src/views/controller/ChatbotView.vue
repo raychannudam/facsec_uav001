@@ -18,7 +18,19 @@
                                 <path d="M9 13v2" />
                             </svg>
                         </div>
-                        <span class="font-semibold">AI Assistant</span>
+                        <div class="flex flex-col">
+                            <span class="font-semibold">AI Assistant</span>
+                            <!-- Connection Status -->
+                            <span v-if="chatbotStore.isConnecting" class="text-xs text-blue-200">
+                                Connecting...
+                            </span>
+                            <span v-else-if="chatbotStore.isConnected" class="text-xs text-green-200">
+                                ● Connected
+                            </span>
+                            <span v-else class="text-xs text-red-200">
+                                ○ Disconnected
+                            </span>
+                        </div>
                     </div>
                     <button @click="closeChat"
                         class="hover:bg-blue-700 dark:hover:bg-blue-800 rounded-full p-1 transition-colors">
@@ -30,7 +42,7 @@
                 </div>
 
                 <!-- Chat Messages Area -->
-                <div class="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
+                <div ref="messagesContainer" class="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900">
                     <div v-if="chatbotStore.isLoading" class="flex justify-center items-center h-full">
                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400">
                         </div>
@@ -61,23 +73,58 @@
                             </div>
                         </div>
 
-                        <!-- Sample messages (replace with actual messages later) -->
-                        <!-- User message example -->
-                        <!-- <div class="flex gap-2 justify-end">
-                            <div class="bg-blue-600 dark:bg-blue-700 text-white rounded-lg p-3 shadow-sm max-w-[70%]">
-                                <p class="text-sm">This is a user message</p>
-                            </div>
-                        </div> -->
+                        <!-- ✅ NEW: Display messages -->
+                        <div v-for="msg in chatbotStore.messages" :key="msg.id"
+                            :class="['flex gap-2', msg.sender === 'user' ? 'justify-end' : '']">
+                            <!-- Bot message -->
+                            <template v-if="msg.sender === 'bot'">
+                                <div
+                                    class="w-8 h-8 bg-blue-600 dark:bg-blue-700 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M12 8V4H8" />
+                                        <rect width="16" height="12" x="4" y="8" rx="2" />
+                                        <path d="M2 14h2" />
+                                        <path d="M20 14h2" />
+                                        <path d="M15 13v2" />
+                                        <path d="M9 13v2" />
+                                    </svg>
+                                </div>
+                                <div
+                                    class="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm max-w-[70%] border border-gray-100 dark:border-gray-700">
+                                    <p class="text-sm text-gray-800 dark:text-gray-200">{{ msg.text }}</p>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                        {{ formatTime(msg.timestamp) }}
+                                    </p>
+                                </div>
+                            </template>
+
+                            <!-- User message -->
+                            <template v-else>
+                                <div
+                                    class="bg-blue-600 dark:bg-blue-700 text-white rounded-lg p-3 shadow-sm max-w-[70%]">
+                                    <p class="text-sm">{{ msg.text }}</p>
+                                    <p class="text-xs text-blue-100 mt-1">
+                                        {{ formatTime(msg.timestamp) }}
+                                    </p>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Input Area -->
                 <div class="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                    <!-- ✅ NEW: Error message -->
+                    <div v-if="chatbotStore.error" class="mb-2 text-xs text-red-600 dark:text-red-400">
+                        {{ chatbotStore.error }}
+                    </div>
+
                     <div class="flex gap-2">
                         <input v-model="message" type="text" placeholder="Type a message..."
                             class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:border-blue-600 dark:focus:border-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                            @keyup.enter="sendMessage" />
-                        <button @click="sendMessage" :disabled="!message.trim()"
+                            @keyup.enter="sendMessage" :disabled="!chatbotStore.isConnected" />
+                        <button @click="sendMessage" :disabled="!message.trim() || !chatbotStore.isConnected"
                             class="bg-blue-600 dark:bg-blue-700 text-white rounded-full p-2 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -108,23 +155,35 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
 import { useChatbotStore } from '@/stores/ChatbotStore';
 
 const chatbotStore = useChatbotStore();
 const isOpen = ref(false);
 const message = ref('');
+const messagesContainer = ref(null); // ✅ NEW: For auto-scroll
 
 onMounted(async () => {
     // Initialize chat session when component mounts
     await chatbotStore.initializeSession();
 });
 
+// ✅ NEW: Cleanup on unmount
+onBeforeUnmount(() => {
+    chatbotStore.disconnectWebSocket();
+});
+
 const openChat = async () => {
     isOpen.value = true;
+
     // Ensure session is initialized when opening
     if (!chatbotStore.currentSession) {
         await chatbotStore.initializeSession();
+    }
+
+    // ✅ NEW: Connect WebSocket if not already connected
+    if (!chatbotStore.isConnected && chatbotStore.currentConversation?.id) {
+        chatbotStore.connectWebSocket();
     }
 };
 
@@ -133,11 +192,41 @@ const closeChat = () => {
 };
 
 const sendMessage = () => {
-    if (message.value.trim()) {
-        console.log('Sending message:', message.value);
-        // TODO: Implement message sending logic
-        message.value = '';
+    if (!message.value.trim()) return;
+
+    const success = chatbotStore.sendMessage(message.value);
+
+    if (success) {
+        message.value = ''; // Clear input
+
+        // ✅ NEW: Auto-scroll to bottom after sending
+        nextTick(() => {
+            scrollToBottom();
+        });
     }
+};
+
+// ✅ NEW: Auto-scroll to bottom when new messages arrive
+const scrollToBottom = () => {
+    if (messagesContainer.value) {
+        messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+    }
+};
+
+// ✅ NEW: Watch messages and auto-scroll
+watch(() => chatbotStore.messages.length, () => {
+    nextTick(() => {
+        scrollToBottom();
+    });
+});
+
+// ✅ NEW: Format timestamp
+const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
 };
 </script>
 
@@ -206,5 +295,23 @@ const sendMessage = () => {
         transform: scale(0) rotate(180deg);
         opacity: 0;
     }
+}
+
+/* ✅ NEW: Custom scrollbar */
+.overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+}
+
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #4a5568;
 }
 </style>
