@@ -17,7 +17,4 @@ def get_station_data() -> str:
 
     stations_data = jsonable_encoder(stations)
     
-    # Print JSON in the console
-    print(">> Station JSON: ", json.dumps(stations_data, indent=2))
-    
     return f"Found {len(stations)} stations:\n{json.dumps(stations_data, indent=2)}"

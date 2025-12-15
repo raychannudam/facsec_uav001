@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisco
 from sqlalchemy.orm import Session
 import json
 
-from Models import get_db
+from Models import get_db, UserModel
 from Schemas import (
     ChatSessionResponseSchema,
     ChatConversationResponseSchema,
@@ -11,6 +11,7 @@ from Schemas import (
 )
 from Services.Chat import ChatService
 from typing import List
+from Security.jwt import get_current_user, get_current_user_ws
 
 
 router = APIRouter(
@@ -40,8 +41,8 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 @router.post("/sessions/", response_model=ChatSessionResponseSchema)
-def create_chat_session(user_id: int, db: Session = Depends(get_db)):
-    session = ChatService.create_chat_session(user_id=user_id, db=db)
+def create_chat_session(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    session = ChatService.create_chat_session(user_id=current_user.id, db=db)
     if not session:
         raise HTTPException(status_code=400, detail="Unable to create chat session")
     return session
@@ -54,11 +55,18 @@ def get_chat_session(session_id: int, db: Session = Depends(get_db)):
     return session
 
 @router.post("/conversations/", response_model=ChatConversationResponseSchema)
-def create_chat_conversation(session_id: int, user_id: int, name: str = "New Conversation", db: Session = Depends(get_db)):
-    conversation = ChatService.create_chat_conversation(session_id=session_id, user_id=user_id, name=name, db=db)
+def create_chat_conversation(session_id: int, name: str = "New Conversation", db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    conversation = ChatService.create_chat_conversation(session_id=session_id, user_id=current_user.id, name=name, db=db)
     if not conversation:
         raise HTTPException(status_code=400, detail="Unable to create conversation")
     return conversation
+
+@router.get("/conversations/", response_model=List[ChatConversationResponseSchema])
+def get_my_conversations(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    conversations = ChatService.get_conversations_by_user(current_user.id, db)
+    if not conversations:
+        raise HTTPException(status_code=404, detail="No conversations found for this user")
+    return conversations
 
 @router.get("/conversations/{conversation_id}", response_model=ChatConversationResponseSchema)
 def get_chat_conversation(conversation_id: int, db: Session = Depends(get_db)):
@@ -76,10 +84,10 @@ def get_messages_in_conversation(conversation_id: int, db: Session = Depends(get
 
 
 @router.post("/messages/", response_model=ChatMessageResponseSchema)
-def create_chat_message(conversation_id: int, user_id: int, message: ChatMessageCreateSchema, db: Session = Depends(get_db)):
+def create_chat_message(conversation_id: int, message: ChatMessageCreateSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     chat_message = ChatService.create_chat_message(
         conversation_id=conversation_id,
-        user_id=user_id,
+        user_id=current_user.id,
         user_prompt=message.user_prompt,
         db=db
     )
@@ -88,21 +96,20 @@ def create_chat_message(conversation_id: int, user_id: int, message: ChatMessage
     return chat_message
 
 @router.websocket("/ws/{conversation_id}")
-async def websocket_endpoint(websocket: WebSocket, conversation_id: int, db: Session = Depends(get_db)):
+async def websocket_endpoint(websocket: WebSocket, conversation_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user_ws)):
     await manager.connect(websocket, conversation_id)
     try:
         while True:
             data = await websocket.receive_text()
             message_data = json.loads(data)
-            user_id = message_data.get("user_id")
             user_prompt = message_data.get("user_prompt")
 
-            if user_id is None or user_prompt is None:
+            if user_prompt is None:
                 continue
 
             chat_message = ChatService.create_chat_message(
                 conversation_id=conversation_id,
-                user_id=user_id,
+                user_id=current_user.id,
                 user_prompt=user_prompt,
                 db=db
             )

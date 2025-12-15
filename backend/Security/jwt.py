@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from fastapi import HTTPException, APIRouter, Depends, status
+from fastapi import HTTPException, APIRouter, Depends, status, Query
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
@@ -100,6 +100,31 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     except InvalidTokenError:
         raise credentials_exception
 
+    user = get_user(username=username, db=db, source=AUTH_SOURCE.SYSTEM)
+    if user is None:
+        raise credentials_exception
+    return user
+
+async def get_current_user_ws(
+    db: Session = Depends(get_db),
+    token: str | None = Query(None)
+):
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing token"
+        )
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except InvalidTokenError:
+        raise credentials_exception
     user = get_user(username=username, db=db, source=AUTH_SOURCE.SYSTEM)
     if user is None:
         raise credentials_exception
@@ -243,4 +268,3 @@ def mediamtx_login(login_req: StreamingLoginSchema, db: Session = Depends(get_db
         )
 
     return {"status": "success"}
-

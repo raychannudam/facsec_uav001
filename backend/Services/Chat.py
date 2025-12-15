@@ -31,6 +31,10 @@ class ChatService:
         return db.query(ChatConversationModel).filter(ChatConversationModel.id == conversation_id).first()
 
     @staticmethod
+    def get_conversations_by_user(user_id: int, db: Session) -> list[ChatConversationModel]:
+        return db.query(ChatConversationModel).filter(ChatConversationModel.user_id == user_id).all()
+
+    @staticmethod
     def create_chat_message(conversation_id: int, user_id: int, user_prompt: str, db: Session) -> ChatMessageModel:
         agent_executor = get_agent()
 
