@@ -19,6 +19,15 @@ class ChatService:
         return db.query(ChatSessionModel).filter(ChatSessionModel.id == session_id).first()
 
     @staticmethod
+    def delete_chat_session(session_id: int, db: Session) -> ChatSessionModel:
+        session = db.query(ChatSessionModel).filter(ChatSessionModel.id == session_id).first()
+        if session:
+            db.delete(session)
+            db.commit()
+            return session
+        return None
+
+    @staticmethod
     def create_chat_conversation(session_id: int, user_id: int, db: Session, name: str = "New Conversation") -> ChatConversationModel:
         conversation = ChatConversationModel(session_id=session_id, user_id=user_id, name=name)
         db.add(conversation)
@@ -29,6 +38,15 @@ class ChatService:
     @staticmethod
     def get_chat_conversation(conversation_id: int, db: Session) -> ChatConversationModel:
         return db.query(ChatConversationModel).filter(ChatConversationModel.id == conversation_id).first()
+
+    @staticmethod
+    def delete_chat_conversation(conversation_id: int, db: Session) -> ChatConversationModel:
+        conversation = db.query(ChatConversationModel).filter(ChatConversationModel.id == conversation_id).first()
+        if conversation:
+            db.delete(conversation)
+            db.commit()
+            return conversation
+        return None
 
     @staticmethod
     def get_conversations_by_user(user_id: int, db: Session) -> list[ChatConversationModel]:
@@ -84,3 +102,12 @@ class ChatService:
         if not conversation:
             return []
         return conversation.messages
+
+    @staticmethod
+    def delete_chat_message(message_id: int, db: Session) -> ChatMessageModel:
+        message = db.query(ChatMessageModel).filter(ChatMessageModel.id == message_id).first()
+        if message:
+            db.delete(message)
+            db.commit()
+            return message
+        return None

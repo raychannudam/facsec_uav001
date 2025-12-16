@@ -54,6 +54,13 @@ def get_chat_session(session_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Session not found")
     return session
 
+@router.delete("/sessions/{session_id}", response_model=ChatSessionResponseSchema)
+def delete_chat_session(session_id: int, db: Session = Depends(get_db)):
+    session = ChatService.delete_chat_session(session_id, db)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return session
+
 @router.post("/conversations/", response_model=ChatConversationResponseSchema)
 def create_chat_conversation(session_id: int, name: str = "New Conversation", db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     conversation = ChatService.create_chat_conversation(session_id=session_id, user_id=current_user.id, name=name, db=db)
@@ -61,16 +68,23 @@ def create_chat_conversation(session_id: int, name: str = "New Conversation", db
         raise HTTPException(status_code=400, detail="Unable to create conversation")
     return conversation
 
-@router.get("/conversations/", response_model=List[ChatConversationResponseSchema])
+@router.get("/conversations/", response_model=ChatConversationResponseSchema)
 def get_my_conversations(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     conversations = ChatService.get_conversations_by_user(current_user.id, db)
     if not conversations:
         raise HTTPException(status_code=404, detail="No conversations found for this user")
-    return conversations
+    return conversations[0]
 
 @router.get("/conversations/{conversation_id}", response_model=ChatConversationResponseSchema)
 def get_chat_conversation(conversation_id: int, db: Session = Depends(get_db)):
     conversation = ChatService.get_chat_conversation(conversation_id, db)
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return conversation
+
+@router.delete("/conversations/{conversation_id}", response_model=ChatConversationResponseSchema)
+def delete_chat_conversation(conversation_id: int, db: Session = Depends(get_db)):
+    conversation = ChatService.delete_chat_conversation(conversation_id, db)
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return conversation
@@ -94,6 +108,13 @@ def create_chat_message(conversation_id: int, message: ChatMessageCreateSchema, 
     if not chat_message:
         raise HTTPException(status_code=400, detail="Unable to create message")
     return chat_message
+
+@router.delete("/messages/{message_id}", response_model=ChatMessageResponseSchema)
+def delete_chat_message(message_id: int, db: Session = Depends(get_db)):
+    message = ChatService.delete_chat_message(message_id, db)
+    if not message:
+        raise HTTPException(status_code=404, detail="Message not found")
+    return message
 
 @router.websocket("/ws/{conversation_id}")
 async def websocket_endpoint(websocket: WebSocket, conversation_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user_ws)):
