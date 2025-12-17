@@ -48,6 +48,7 @@ const connectToMqtt = (controller) => {
     const options = {
         username: mqttConfig.username,
         password: mqttConfig.raw_password,
+        reconnectPeriod: 1000,
     };
     console.log('🔌 Connecting to MQTT broker for drone tracking...');
     if (mqttStore.isConnected) mqttStore.disconnect();
