@@ -52,8 +52,8 @@
                         <p>Starting chat session...</p>
                     </div>
                     <div v-else class="space-y-3">
-                        <!-- Welcome Message -->
-                        <div class="flex gap-2">
+                        <!-- Welcome Message (only show if no messages exist) -->
+                        <div v-if="chatbotStore.messages.length === 0" class="flex gap-2">
                             <div
                                 class="w-8 h-8 bg-blue-600 dark:bg-blue-700 rounded-full flex items-center justify-center flex-shrink-0">
                                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"
@@ -73,11 +73,18 @@
                             </div>
                         </div>
 
-                        <!-- ✅ NEW: Display messages -->
-                        <div v-for="msg in chatbotStore.messages" :key="msg.id"
-                            :class="['flex gap-2', msg.sender === 'user' ? 'justify-end' : '']">
+                        <!-- Display messages (alternating user and bot) -->
+                        <template v-for="(msg, index) in chatbotStore.messages" :key="msg.id">
+                            <!-- User message -->
+                            <div v-if="msg.sender === 'user'" class="flex gap-2 justify-end">
+                                <div
+                                    class="bg-blue-600 dark:bg-blue-700 text-white rounded-lg p-3 shadow-sm max-w-[70%]">
+                                    <p class="text-sm">{{ msg.text }}</p>
+                                </div>
+                            </div>
+
                             <!-- Bot message -->
-                            <template v-if="msg.sender === 'bot'">
+                            <div v-else class="flex gap-2">
                                 <div
                                     class="w-8 h-8 bg-blue-600 dark:bg-blue-700 rounded-full flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"
@@ -92,30 +99,44 @@
                                 </div>
                                 <div
                                     class="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm max-w-[70%] border border-gray-100 dark:border-gray-700">
-                                    <p class="text-sm text-gray-800 dark:text-gray-200">{{ msg.text }}</p>
-                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                        {{ formatTime(msg.timestamp) }}
-                                    </p>
+                                    <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ msg.text
+                                    }}</p>
                                 </div>
-                            </template>
+                            </div>
+                        </template>
 
-                            <!-- User message -->
-                            <template v-else>
-                                <div
-                                    class="bg-blue-600 dark:bg-blue-700 text-white rounded-lg p-3 shadow-sm max-w-[70%]">
-                                    <p class="text-sm">{{ msg.text }}</p>
-                                    <p class="text-xs text-blue-100 mt-1">
-                                        {{ formatTime(msg.timestamp) }}
-                                    </p>
+                        <!-- Typing indicator (show when waiting for bot response) -->
+                        <div v-if="isTyping" class="flex gap-2">
+                            <div
+                                class="w-8 h-8 bg-blue-600 dark:bg-blue-700 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path d="M12 8V4H8" />
+                                    <rect width="16" height="12" x="4" y="8" rx="2" />
+                                    <path d="M2 14h2" />
+                                    <path d="M20 14h2" />
+                                    <path d="M15 13v2" />
+                                    <path d="M9 13v2" />
+                                </svg>
+                            </div>
+                            <div
+                                class="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm border border-gray-100 dark:border-gray-700">
+                                <div class="flex gap-1 items-center">
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 mr-2">AI is typing</span>
+                                    <div class="flex gap-1">
+                                        <div class="typing-dot"></div>
+                                        <div class="typing-dot" style="animation-delay: 0.2s"></div>
+                                        <div class="typing-dot" style="animation-delay: 0.4s"></div>
+                                    </div>
                                 </div>
-                            </template>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Input Area -->
                 <div class="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                    <!-- ✅ NEW: Error message -->
+                    <!-- Error message -->
                     <div v-if="chatbotStore.error" class="mb-2 text-xs text-red-600 dark:text-red-400">
                         {{ chatbotStore.error }}
                     </div>
@@ -155,20 +176,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue';
+import { ref, onBeforeUnmount, nextTick, watch } from 'vue';
 import { useChatbotStore } from '@/stores/ChatbotStore';
 
 const chatbotStore = useChatbotStore();
 const isOpen = ref(false);
 const message = ref('');
-const messagesContainer = ref(null); // ✅ NEW: For auto-scroll
+const messagesContainer = ref(null);
+const isTyping = ref(false);
 
-onMounted(async () => {
-    // Initialize chat session when component mounts
-    await chatbotStore.initializeSession();
-});
-
-// ✅ NEW: Cleanup on unmount
+// Cleanup on unmount
 onBeforeUnmount(() => {
     chatbotStore.disconnectWebSocket();
 });
@@ -176,15 +193,18 @@ onBeforeUnmount(() => {
 const openChat = async () => {
     isOpen.value = true;
 
-    // Ensure session is initialized when opening
+    // Initialize session when opening (checks for existing conversations)
     if (!chatbotStore.currentSession) {
         await chatbotStore.initializeSession();
-    }
-
-    // ✅ NEW: Connect WebSocket if not already connected
-    if (!chatbotStore.isConnected && chatbotStore.currentConversation?.id) {
+    } else if (!chatbotStore.isConnected && chatbotStore.currentConversation?.id) {
+        // If session exists but WebSocket is not connected, reconnect
         chatbotStore.connectWebSocket();
     }
+
+    // Auto-scroll to bottom when opening
+    nextTick(() => {
+        scrollToBottom();
+    });
 };
 
 const closeChat = () => {
@@ -194,39 +214,75 @@ const closeChat = () => {
 const sendMessage = () => {
     if (!message.value.trim()) return;
 
+    // Show typing indicator
+    isTyping.value = true;
+
     const success = chatbotStore.sendMessage(message.value);
 
     if (success) {
         message.value = ''; // Clear input
 
-        // ✅ NEW: Auto-scroll to bottom after sending
+        // Auto-scroll to bottom after sending
         nextTick(() => {
             scrollToBottom();
         });
+    } else {
+        // If sending failed, hide typing indicator
+        isTyping.value = false;
     }
 };
 
-// ✅ NEW: Auto-scroll to bottom when new messages arrive
+// Auto-scroll to bottom when new messages arrive
 const scrollToBottom = () => {
     if (messagesContainer.value) {
         messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
     }
 };
 
-// ✅ NEW: Watch messages and auto-scroll
-watch(() => chatbotStore.messages.length, () => {
+// Watch messages and auto-scroll + hide typing indicator when bot responds
+watch(() => chatbotStore.messages.length, (newLength, oldLength) => {
+    // If a new message was added
+    if (newLength > oldLength) {
+        const lastMessage = chatbotStore.messages[chatbotStore.messages.length - 1];
+
+        // If the last message is from the bot, hide typing indicator
+        if (lastMessage && lastMessage.sender === 'bot') {
+            isTyping.value = false;
+        }
+    }
+
+    // Auto-scroll to bottom
     nextTick(() => {
         scrollToBottom();
     });
 });
 
-// ✅ NEW: Format timestamp
+// ✅ FIXED: Format timestamp to display in LOCAL timezone
 const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    if (!timestamp) return '';
+
+    try {
+        // Parse the timestamp (backend sends UTC timestamps)
+        const date = new Date(timestamp);
+
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            console.warn('Invalid timestamp:', timestamp);
+            return '';
+        }
+
+        // Convert to local time and format
+        // This automatically handles the timezone conversion
+        return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone // Use user's local timezone
+        });
+    } catch (error) {
+        console.error('Error formatting time:', error);
+        return '';
+    }
 };
 </script>
 
@@ -297,7 +353,7 @@ const formatTime = (timestamp) => {
     }
 }
 
-/* ✅ NEW: Custom scrollbar */
+/* Custom scrollbar */
 .overflow-y-auto::-webkit-scrollbar {
     width: 6px;
 }
@@ -313,5 +369,31 @@ const formatTime = (timestamp) => {
 
 .dark .overflow-y-auto::-webkit-scrollbar-thumb {
     background: #4a5568;
+}
+
+/* Typing indicator animation */
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #3b82f6;
+    border-radius: 50%;
+    animation: typing-bounce 1.4s infinite ease-in-out;
+}
+
+.dark .typing-dot {
+    background-color: #60a5fa;
+}
+
+@keyframes typing-bounce {
+
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+    }
+
+    30% {
+        transform: translateY(-8px);
+    }
 }
 </style>
