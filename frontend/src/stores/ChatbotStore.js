@@ -1,16 +1,15 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import api from "@/plugins/api";
-import { WS_BASE_URL } from "@/plugins/websocket";
 
 export const useChatbotStore = defineStore("chatbot", () => {
   const currentSession = ref(null);
   const currentConversation = ref(null);
-  const messages = ref([]); // NEW: Store messages
+  const messages = ref([]);
   const isLoading = ref(false);
   const error = ref(null);
 
-  // NEW: WebSocket state
+  // WebSocket state
   const ws = ref(null);
   const isConnected = ref(false);
   const isConnecting = ref(false);
@@ -19,65 +18,67 @@ export const useChatbotStore = defineStore("chatbot", () => {
     return Number(localStorage.getItem("current_user_id"));
   };
 
-  // Check if session exists
-  const checkSession = async (sessionId) => {
+  // Get WebSocket URL from environment or default
+  const getWebSocketUrl = () => {
+    const wsUrl = process.env.VUE_APP_WS_URL || "ws://localhost:8001";
+    console.log("🔧 WebSocket Base URL:", wsUrl);
+    return wsUrl;
+  };
+
+  // Get conversation with messages for current user
+  const getUserConversation = async () => {
     try {
-      const response = await api.get(`/api/v1/chat/sessions/${sessionId}`);
+      const response = await api.get("/api/v1/chat/conversations/");
       return response.data;
     } catch (err) {
-      console.error("Error checking session:", err);
+      console.error("❌ Error fetching conversation:", err);
       return null;
     }
   };
 
   // Create new session
-  const createSession = async (userId) => {
+  const createSession = async () => {
     let status = "fail";
     let message = "";
     let data = undefined;
     try {
-      const response = await api.post(
-        `/api/v1/chat/sessions/?user_id=${userId}`
-      );
+      const response = await api.post("/api/v1/chat/sessions/");
       currentSession.value = response.data;
       data = response.data;
       status = "success";
       message = "Successfully created chat session!";
-
-      // Store session ID in localStorage for future reference
-      localStorage.setItem(`chat_session_${userId}`, response.data.id);
+      console.log("✅ Session created:", data);
     } catch (err) {
       status = "fail";
       message = err.response?.data?.detail || "Failed to create chat session!";
-      console.error("Error creating session:", err);
+      console.error("❌ Error creating session:", err);
       error.value = message;
     }
     return { status, message, data };
   };
 
   // Create conversation
-  const createConversation = async (sessionId, userId) => {
+  const createConversation = async (sessionId) => {
     let status = "fail";
     let message = "";
     let data = undefined;
     try {
-      const response = await api.post(
-        `/api/v1/chat/conversations/?session_id=${sessionId}&user_id=${userId}`
-      );
+      const response = await api.get(`/api/v1/chat/sessions/${sessionId}`);
       currentConversation.value = response.data;
       data = response.data;
       status = "success";
       message = "Successfully created conversation!";
+      console.log("✅ Conversation created:", data);
     } catch (err) {
       status = "fail";
       message = err.response?.data?.detail || "Failed to create conversation!";
-      console.error("Error creating conversation:", err);
+      console.error("❌ Error creating conversation:", err);
       error.value = message;
     }
     return { status, message, data };
   };
 
-  // Initialize session
+  // Initialize session when opening chatbot
   const initializeSession = async () => {
     isLoading.value = true;
     error.value = null;
@@ -85,57 +86,126 @@ export const useChatbotStore = defineStore("chatbot", () => {
     try {
       const userId = getUserId();
       if (!userId) {
-        error.value = "User ID not found";
+        error.value = "User ID not found. Please login again.";
         isLoading.value = false;
-        return { status: "fail", message: "User ID not found" };
+        return { status: "fail", message: error.value };
       }
 
-      // Check if we have a stored session ID
-      const storedSessionId = localStorage.getItem(`chat_session_${userId}`);
+      console.log("🔍 Checking for existing conversation for user:", userId);
 
-      if (storedSessionId) {
-        // Try to retrieve existing session
-        const existingSession = await checkSession(storedSessionId);
+      // Check if user has an existing conversation
+      const conversation = await getUserConversation();
 
-        if (existingSession) {
-          console.log("✅ Found existing session:", existingSession);
-          currentSession.value = existingSession;
+      if (conversation && conversation.id) {
+        // User has existing conversation, load it
+        console.log("✅ User has existing conversation, loading...");
+
+        currentConversation.value = conversation;
+        currentSession.value = { id: conversation.session_id };
+
+        console.log("📜 Loading message history from conversation");
+
+        // ✅ FIX: Transform backend messages correctly
+        // Each message has BOTH user_prompt and response, so we need to create TWO UI messages per backend message
+        messages.value = [];
+        (conversation.messages || []).forEach((msg) => {
+          // Add user message
+          if (msg.user_prompt) {
+            messages.value.push({
+              id: `user-${msg.id}`,
+              text: msg.user_prompt,
+              sender: "user",
+              timestamp: msg.timestamp,
+            });
+          }
+
+          // Add bot response
+          if (msg.response) {
+            messages.value.push({
+              id: `bot-${msg.id}`,
+              text: msg.response,
+              sender: "bot",
+              timestamp: msg.timestamp,
+            });
+          }
+        });
+
+        console.log(
+          `✅ Loaded ${messages.value.length} message(s) from ${
+            conversation.messages?.length || 0
+          } backend messages`
+        );
+
+        // Connect to WebSocket
+        try {
+          connectWebSocket();
+        } catch (wsError) {
+          console.warn(
+            "⚠️ WebSocket connection failed, but continuing...",
+            wsError
+          );
+          error.value =
+            "Chat loaded, but live connection failed. Messages may be delayed.";
+        }
+
+        isLoading.value = false;
+        return {
+          status: "success",
+          message: "Conversation loaded successfully",
+          data: conversation,
+        };
+      }
+
+      // No existing conversation, create new session and conversation
+      console.log("🆕 No conversation found, creating new session...");
+
+      const sessionResult = await createSession();
+
+      if (sessionResult.status === "success") {
+        console.log("🆕 Creating new conversation...");
+        const conversationResult = await createConversation(
+          sessionResult.data.id
+        );
+
+        if (conversationResult.status === "success") {
+          // Connect to WebSocket
+          try {
+            connectWebSocket();
+          } catch (wsError) {
+            console.warn(
+              "⚠️ WebSocket connection failed, but continuing...",
+              wsError
+            );
+            error.value =
+              "Chat created, but live connection failed. Please check your connection.";
+          }
+
           isLoading.value = false;
           return {
             status: "success",
-            message: "Session loaded",
-            data: existingSession,
+            message: "New chat session created",
+            data: conversationResult.data,
           };
         } else {
-          // Session doesn't exist anymore, remove from localStorage
-          localStorage.removeItem(`chat_session_${userId}`);
+          isLoading.value = false;
+          return conversationResult;
         }
-      }
-
-      // No existing session found, create new one
-      console.log("🔄 Creating new session for user:", userId);
-      const sessionResult = await createSession(userId);
-
-      if (sessionResult.status === "success") {
-        // Create initial conversation
-        console.log("🔄 Creating initial conversation...");
-        await createConversation(sessionResult.data.id, userId);
       }
 
       isLoading.value = false;
       return sessionResult;
     } catch (err) {
-      console.error("Error initializing session:", err);
+      console.error("❌ Error initializing session:", err);
       error.value = "Failed to initialize chat session";
       isLoading.value = false;
       return { status: "fail", message: error.value };
     }
   };
 
-  // NEW: Connect WebSocket
+  // Connect WebSocket
   const connectWebSocket = () => {
     if (!currentConversation.value?.id) {
-      console.error("❌ No conversation ID available");
+      console.error("❌ No conversation ID available for WebSocket connection");
       error.value = "No conversation ID";
       return;
     }
@@ -145,43 +215,66 @@ export const useChatbotStore = defineStore("chatbot", () => {
       return;
     }
 
+    if (isConnecting.value) {
+      console.log("⏳ WebSocket connection already in progress");
+      return;
+    }
+
     isConnecting.value = true;
     error.value = null;
 
     const conversationId = currentConversation.value.id;
-    const wsUrl = `${WS_BASE_URL}/api/v1/chat/ws/${conversationId}`;
+    const accessToken = localStorage.getItem("access_token");
+    const wsBaseUrl = getWebSocketUrl();
+    const wsUrl = `${wsBaseUrl}/api/v1/chat/ws/${conversationId}?token=${accessToken}`;
 
-    console.log("🔌 Connecting to WebSocket:", wsUrl);
+    console.log("🔌 Attempting WebSocket connection to:", wsUrl);
+    console.log("🔧 Conversation ID:", conversationId);
 
     try {
       ws.value = new WebSocket(wsUrl);
 
+      // Set a connection timeout
+      const connectionTimeout = setTimeout(() => {
+        if (ws.value && ws.value.readyState !== WebSocket.OPEN) {
+          console.error("❌ WebSocket connection timeout");
+          ws.value.close();
+          isConnecting.value = false;
+          error.value =
+            "Connection timeout. Please check if the chat server is running.";
+        }
+      }, 10000); // 10 second timeout
+
       ws.value.onopen = () => {
-        console.log("✅ WebSocket connected!");
+        clearTimeout(connectionTimeout);
+        console.log("✅ WebSocket connected successfully!");
         isConnected.value = true;
         isConnecting.value = false;
         error.value = null;
       };
 
       ws.value.onmessage = (event) => {
-        console.log("📩 Received message:", event.data);
+        console.log("📩 Received message from server:", event.data);
 
         try {
           const data = JSON.parse(event.data);
 
-          // Add bot message to messages array
-          // TODO: Adjust this based on backend's actual response format
-          messages.value.push({
+          // Add bot response to messages
+          const botMessage = {
             id: data.id || Date.now(),
-            text: data.message || data.response || data.user_prompt,
+            text:
+              data.response || data.message || data.bot_response || event.data,
             sender: "bot",
+            // ✅ FIX: Use server timestamp directly (it's already in UTC ISO format)
             timestamp: data.timestamp || new Date().toISOString(),
-          });
+          };
 
-          console.log("💬 Bot message added:", messages.value);
+          messages.value.push(botMessage);
+          console.log("💬 Bot message added to UI:", botMessage.text);
+          console.log("🕐 Bot message timestamp:", botMessage.timestamp);
         } catch (err) {
-          console.error("❌ Error parsing message:", err);
-          // If it's plain text, just add it
+          console.error("❌ Error parsing WebSocket message:", err);
+          // If it's plain text, just add it as-is
           messages.value.push({
             id: Date.now(),
             text: event.data,
@@ -192,78 +285,112 @@ export const useChatbotStore = defineStore("chatbot", () => {
       };
 
       ws.value.onerror = (event) => {
-        console.error("❌ WebSocket error:", event);
-        error.value = "WebSocket connection error";
+        clearTimeout(connectionTimeout);
+        console.error("❌ WebSocket error details:", {
+          readyState: ws.value?.readyState,
+          url: wsUrl,
+          event: event,
+        });
+
+        // More helpful error messages based on common issues
+        if (wsUrl.includes("localhost")) {
+          error.value =
+            "Cannot connect to chat server on localhost:8001. Is the server running?";
+        } else {
+          error.value =
+            "Chat server connection failed. Please try again later.";
+        }
+
         isConnecting.value = false;
       };
 
       ws.value.onclose = (event) => {
-        console.log("🔌 WebSocket closed:", event.code, event.reason);
+        clearTimeout(connectionTimeout);
+        console.log("🔌 WebSocket closed:", {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+        });
+
         isConnected.value = false;
         isConnecting.value = false;
 
-        // Auto-reconnect if not a normal closure
-        if (event.code !== 1000 && currentConversation.value?.id) {
-          console.log("🔄 Reconnecting in 3 seconds...");
+        // Don't show error for normal closures
+        if (event.code === 1000) {
+          console.log("✅ WebSocket closed normally");
+          return;
+        }
+
+        // Auto-reconnect only if it was previously connected
+        if (
+          event.code !== 1000 &&
+          currentConversation.value?.id &&
+          isConnected.value === false
+        ) {
+          console.log("🔄 Attempting to reconnect in 5 seconds...");
           setTimeout(() => {
-            connectWebSocket();
-          }, 3000);
+            if (currentConversation.value?.id && !isConnected.value) {
+              console.log("🔄 Reconnecting now...");
+              connectWebSocket();
+            }
+          }, 5000);
         }
       };
     } catch (err) {
-      console.error("❌ Failed to create WebSocket:", err);
-      error.value = "Failed to connect WebSocket";
+      console.error("❌ Failed to create WebSocket connection:", err);
+      error.value = "Failed to connect to chat server: " + err.message;
       isConnecting.value = false;
     }
   };
 
-  // ✅ NEW: Send message via WebSocket
+  // Send message via WebSocket
   const sendMessage = (messageText) => {
     if (!messageText.trim()) {
-      console.warn("⚠️ Empty message");
+      console.warn("⚠️ Cannot send empty message");
       return false;
     }
 
     if (!ws.value || ws.value.readyState !== WebSocket.OPEN) {
-      console.error("❌ WebSocket not connected");
-      error.value = "Not connected to chat";
-      return false;
-    }
+      console.error("❌ WebSocket not connected. State:", ws.value?.readyState);
+      error.value = "Not connected to chat server. Trying to reconnect...";
 
-    const userId = getUserId();
-    if (!userId) {
-      console.error("❌ No user ID");
-      error.value = "User ID not found";
+      // Try to reconnect
+      if (currentConversation.value?.id) {
+        console.log("🔄 Attempting to reconnect...");
+        connectWebSocket();
+      }
       return false;
     }
 
     try {
       const payload = {
-        user_id: userId,
         user_prompt: messageText,
       };
 
-      console.log("📤 Sending message:", payload);
+      console.log("📤 Sending message to server:", payload);
       ws.value.send(JSON.stringify(payload));
 
-      // Add user message to UI immediately (optimistic update)
-      messages.value.push({
-        id: Date.now(),
+      // ✅ FIX: Add user message with current timestamp (will be updated by server response anyway)
+      const userMessage = {
+        id: `temp-${Date.now()}`,
         text: messageText,
         sender: "user",
-        timestamp: new Date().toISOString(),
-      });
+        timestamp: new Date().toISOString(), // This will be synced with bot response timestamp
+      };
 
-      console.log("✅ Message sent!");
+      messages.value.push(userMessage);
+      console.log("✅ User message added to UI");
+
+      error.value = null;
       return true;
     } catch (err) {
       console.error("❌ Failed to send message:", err);
-      error.value = "Failed to send message";
+      error.value = "Failed to send message: " + err.message;
       return false;
     }
   };
 
-  // ✅ NEW: Disconnect WebSocket
+  // Disconnect WebSocket
   const disconnectWebSocket = () => {
     if (ws.value) {
       console.log("🔌 Disconnecting WebSocket...");
@@ -271,30 +398,29 @@ export const useChatbotStore = defineStore("chatbot", () => {
       ws.value = null;
     }
     isConnected.value = false;
+    isConnecting.value = false;
   };
 
   // Reset chat (useful for clearing session)
   const resetChat = () => {
-    disconnectWebSocket(); // ✅ NEW: Disconnect WebSocket
+    console.log("🔄 Resetting chat...");
+    disconnectWebSocket();
     currentSession.value = null;
     currentConversation.value = null;
-    messages.value = []; // ✅ NEW: Clear messages
+    messages.value = [];
     error.value = null;
-    const userId = getUserId();
-    if (userId) {
-      localStorage.removeItem(`chat_session_${userId}`);
-    }
+    isLoading.value = false;
   };
 
   return {
     // State
     currentSession,
     currentConversation,
-    messages, // ✅ NEW
+    messages,
     isLoading,
     error,
 
-    // ✅ NEW: WebSocket state
+    // WebSocket state
     isConnected,
     isConnecting,
 
@@ -302,10 +428,10 @@ export const useChatbotStore = defineStore("chatbot", () => {
     initializeSession,
     createSession,
     createConversation,
-    checkSession,
+    getUserConversation,
     resetChat,
 
-    // ✅ NEW: WebSocket actions
+    // WebSocket actions
     connectWebSocket,
     sendMessage,
     disconnectWebSocket,
