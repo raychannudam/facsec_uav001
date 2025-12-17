@@ -55,6 +55,7 @@ services:
       - 8189:8189/udp
     volumes:
       - ./mediamtx/mediamtx.yml:/mediamtx.yml:ro
+      - ./mediamtx/recordings:/recordings
     depends_on:
       - backend_facsec
 
