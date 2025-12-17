@@ -12,6 +12,7 @@
             <ControlPanelView />
         </div>
 
+        <!-- Chatbot Component -->
         <ChatbotView />
     </div>
 </template>
@@ -22,9 +23,9 @@ import { initFlowbite } from 'flowbite';
 import ConfigurationView from './ConfigurationView.vue';
 import ControlPanelView from './ControlPanelView.vue';
 import LiveStreamView from './LiveStreamView.vue';
+import ChatbotView from './ChatbotView.vue';
 import { useControllerStore } from '@/stores/ControllerStore';
 import { useMqttStore } from '@/stores/MqttStore';
-import ChatbotView from './ChatbotView.vue';
 
 const controllerStore = useControllerStore();
 const mqttStore = useMqttStore();
