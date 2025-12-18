@@ -88,8 +88,6 @@ export const useStationStore = defineStore("station", {
     async assignUavToStation(stationId, uavId) {
       let status = "";
       let message = "";
-      console.log("stationId", stationId);
-      console.log("uavId", uavId);
       await api
         .put(`/api/v1/uavs/${uavId}`, { station_id: stationId })
         .then((res) => {
@@ -110,7 +108,6 @@ export const useStationStore = defineStore("station", {
     async removeUavFromStation(uavId) {
       let status = "";
       let message = "";
-      console.log("Removing UAV ID:", uavId);
       await api
         .put(`/api/v1/uavs/${uavId}`, { station_id: null })
         .then((res) => {

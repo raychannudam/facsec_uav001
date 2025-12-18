@@ -65,9 +65,4 @@ const handleDeleteDrone = async (droneId) => {
         console.error('Failed to delete drone:', err)
     }
 }
-
-const handleDroneDetail = (drone) => {
-    console.log('Viewing drone details:', drone)
-    // Implement navigation to detail page or show modal
-}
 </script>

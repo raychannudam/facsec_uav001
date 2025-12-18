@@ -18,10 +18,6 @@ let currentLng = 104.9282;
 const MOVEMENT_SPEED = 0.001;
 
 client.on("connect", () => {
-  console.log("✅ Fake Drone Connected to MQTT broker");
-  console.log(`📍 Starting position: ${currentLat}, ${currentLng}`);
-  console.log("🚁 Drone will update location every 5 seconds...\n");
-
   setInterval(() => {
     const latChange = (Math.random() - 0.5) * MOVEMENT_SPEED;
     const lngChange = (Math.random() - 0.5) * MOVEMENT_SPEED;
@@ -31,16 +27,11 @@ client.on("connect", () => {
 
     const locationText = `${currentLat.toFixed(6)},${currentLng.toFixed(6)}`;
     client.publish(topic, locationText);
-
-    console.log("📤 Published:", locationText);
   }, 5000);
 });
 
 client.on("error", (err) => {
   console.error("❌ Connection error:", err);
-  console.log(
-    "💡 Make sure your MQTT broker is running on ws://localhost:9002"
-  );
 });
 
 client.on("close", () => {
@@ -49,7 +40,6 @@ client.on("close", () => {
 
 // Handle process termination gracefully
 process.on("SIGINT", () => {
-  console.log("\n👋 Stopping fake drone...");
   client.end();
   process.exit();
 });

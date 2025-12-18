@@ -21,7 +21,6 @@ export const useChatbotStore = defineStore("chatbot", () => {
   // Get WebSocket URL from environment or default
   const getWebSocketUrl = () => {
     const wsUrl = process.env.VUE_APP_WS_URL || "ws://localhost:8001";
-    console.log("🔧 WebSocket Base URL:", wsUrl);
     return wsUrl;
   };
 
@@ -47,7 +46,6 @@ export const useChatbotStore = defineStore("chatbot", () => {
       data = response.data;
       status = "success";
       message = "Successfully created chat session!";
-      console.log("✅ Session created:", data);
     } catch (err) {
       status = "fail";
       message = err.response?.data?.detail || "Failed to create chat session!";
@@ -68,7 +66,6 @@ export const useChatbotStore = defineStore("chatbot", () => {
       data = response.data;
       status = "success";
       message = "Successfully created conversation!";
-      console.log("✅ Conversation created:", data);
     } catch (err) {
       status = "fail";
       message = err.response?.data?.detail || "Failed to create conversation!";
@@ -91,19 +88,14 @@ export const useChatbotStore = defineStore("chatbot", () => {
         return { status: "fail", message: error.value };
       }
 
-      console.log("🔍 Checking for existing conversation for user:", userId);
-
       // Check if user has an existing conversation
       const conversation = await getUserConversation();
 
       if (conversation && conversation.id) {
         // User has existing conversation, load it
-        console.log("✅ User has existing conversation, loading...");
 
         currentConversation.value = conversation;
         currentSession.value = { id: conversation.session_id };
-
-        console.log("📜 Loading message history from conversation");
 
         // ✅ FIX: Transform backend messages correctly
         // Each message has BOTH user_prompt and response, so we need to create TWO UI messages per backend message
@@ -130,12 +122,6 @@ export const useChatbotStore = defineStore("chatbot", () => {
           }
         });
 
-        console.log(
-          `✅ Loaded ${messages.value.length} message(s) from ${
-            conversation.messages?.length || 0
-          } backend messages`
-        );
-
         // Connect to WebSocket
         try {
           connectWebSocket();
@@ -156,13 +142,9 @@ export const useChatbotStore = defineStore("chatbot", () => {
         };
       }
 
-      // No existing conversation, create new session and conversation
-      console.log("🆕 No conversation found, creating new session...");
-
       const sessionResult = await createSession();
 
       if (sessionResult.status === "success") {
-        console.log("🆕 Creating new conversation...");
         const conversationResult = await createConversation(
           sessionResult.data.id
         );
@@ -211,12 +193,10 @@ export const useChatbotStore = defineStore("chatbot", () => {
     }
 
     if (ws.value?.readyState === WebSocket.OPEN) {
-      console.log("✅ WebSocket already connected");
       return;
     }
 
     if (isConnecting.value) {
-      console.log("⏳ WebSocket connection already in progress");
       return;
     }
 
@@ -227,9 +207,6 @@ export const useChatbotStore = defineStore("chatbot", () => {
     const accessToken = localStorage.getItem("access_token");
     const wsBaseUrl = getWebSocketUrl();
     const wsUrl = `${wsBaseUrl}/api/v1/chat/ws/${conversationId}?token=${accessToken}`;
-
-    console.log("🔌 Attempting WebSocket connection to:", wsUrl);
-    console.log("🔧 Conversation ID:", conversationId);
 
     try {
       ws.value = new WebSocket(wsUrl);
@@ -247,15 +224,12 @@ export const useChatbotStore = defineStore("chatbot", () => {
 
       ws.value.onopen = () => {
         clearTimeout(connectionTimeout);
-        console.log("✅ WebSocket connected successfully!");
         isConnected.value = true;
         isConnecting.value = false;
         error.value = null;
       };
 
       ws.value.onmessage = (event) => {
-        console.log("📩 Received message from server:", event.data);
-
         try {
           const data = JSON.parse(event.data);
 
@@ -270,8 +244,6 @@ export const useChatbotStore = defineStore("chatbot", () => {
           };
 
           messages.value.push(botMessage);
-          console.log("💬 Bot message added to UI:", botMessage.text);
-          console.log("🕐 Bot message timestamp:", botMessage.timestamp);
         } catch (err) {
           console.error("❌ Error parsing WebSocket message:", err);
           // If it's plain text, just add it as-is
@@ -306,18 +278,12 @@ export const useChatbotStore = defineStore("chatbot", () => {
 
       ws.value.onclose = (event) => {
         clearTimeout(connectionTimeout);
-        console.log("🔌 WebSocket closed:", {
-          code: event.code,
-          reason: event.reason,
-          wasClean: event.wasClean,
-        });
 
         isConnected.value = false;
         isConnecting.value = false;
 
         // Don't show error for normal closures
         if (event.code === 1000) {
-          console.log("✅ WebSocket closed normally");
           return;
         }
 
@@ -327,10 +293,8 @@ export const useChatbotStore = defineStore("chatbot", () => {
           currentConversation.value?.id &&
           isConnected.value === false
         ) {
-          console.log("🔄 Attempting to reconnect in 5 seconds...");
           setTimeout(() => {
             if (currentConversation.value?.id && !isConnected.value) {
-              console.log("🔄 Reconnecting now...");
               connectWebSocket();
             }
           }, 5000);
@@ -356,7 +320,6 @@ export const useChatbotStore = defineStore("chatbot", () => {
 
       // Try to reconnect
       if (currentConversation.value?.id) {
-        console.log("🔄 Attempting to reconnect...");
         connectWebSocket();
       }
       return false;
@@ -367,7 +330,6 @@ export const useChatbotStore = defineStore("chatbot", () => {
         user_prompt: messageText,
       };
 
-      console.log("📤 Sending message to server:", payload);
       ws.value.send(JSON.stringify(payload));
 
       // ✅ FIX: Add user message with current timestamp (will be updated by server response anyway)
@@ -379,7 +341,6 @@ export const useChatbotStore = defineStore("chatbot", () => {
       };
 
       messages.value.push(userMessage);
-      console.log("✅ User message added to UI");
 
       error.value = null;
       return true;
@@ -393,7 +354,6 @@ export const useChatbotStore = defineStore("chatbot", () => {
   // Disconnect WebSocket
   const disconnectWebSocket = () => {
     if (ws.value) {
-      console.log("🔌 Disconnecting WebSocket...");
       ws.value.close(1000, "User disconnected");
       ws.value = null;
     }
@@ -403,7 +363,6 @@ export const useChatbotStore = defineStore("chatbot", () => {
 
   // Reset chat (useful for clearing session)
   const resetChat = () => {
-    console.log("🔄 Resetting chat...");
     disconnectWebSocket();
     currentSession.value = null;
     currentConversation.value = null;
