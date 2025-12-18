@@ -155,7 +155,6 @@ const resetTelemetryData = () => {
 
 const unsubscribeFromTelemetry = () => {
     subscribedTelemetryTopics.value.forEach(topic => {
-        console.log(`🔕 Unsubscribing from telemetry in Control Panel:`, topic);
         mqttStore.unsubscribe(topic);
     });
     subscribedTelemetryTopics.value = [];
@@ -166,12 +165,10 @@ const subscribeToTelemetry = () => {
     const controller = controllerStore.selectedController;
 
     if (!controller?.config?.default?.mqttTopics || !mqttStore.isConnected) {
-        console.log('⚠️ Cannot subscribe to telemetry - missing topics or MQTT not connected');
         return;
     }
 
     const defaultTopics = controller.config.default.mqttTopics;
-    console.log('🔍 Available default topics for telemetry:', defaultTopics.map(t => t.name));
 
     const topicMap = {
         altitude: 'altitude',
@@ -187,7 +184,6 @@ const subscribeToTelemetry = () => {
         );
 
         if (topic?.name) {
-            console.log(`📡 Subscribing to ${key}:`, topic.name);
 
             mqttStore.subscribe(topic.name, (message) => {
                 try {
@@ -196,7 +192,6 @@ const subscribeToTelemetry = () => {
 
                     if (!isNaN(value)) {
                         telemetryData.value[key] = value;
-                        console.log(`📊 ${key} updated in Control Panel:`, value);
                     } else {
                         console.warn(`⚠️ Could not parse ${key} value:`, rawValue);
                     }
@@ -214,9 +209,6 @@ const subscribeToTelemetry = () => {
 
 onMounted(async () => {
     await controllerStore.getAllControllers();
-    console.log('🎮 Control Panel mounted, selected controller:', controllerStore.selectedController?.name);
-    console.log('🔍 MQTT connected?', mqttStore.isConnected);  // ADD THIS
-    console.log('🔍 Has default topics?', controllerStore.selectedController?.config?.default?.mqttTopics?.length);  // ADD THIS
 
     // Subscribe to telemetry if MQTT is already connected
     if (mqttStore.isConnected && controllerStore.selectedController) {
@@ -233,10 +225,6 @@ watch(
     () => controllerStore.selectedController,
     (newController) => {
         if (newController) {
-            console.log('🔄 Controller changed to:', newController.name);
-            console.log('🎚️ Available buttons:', controllerStore.buttons.length);
-            console.log('🔘 Available switches:', controllerStore.switches.length);
-            console.log('📊 Available sliders:', controllerStore.sliders.length);
 
             // Resubscribe to telemetry when controller changes
             unsubscribeFromTelemetry();
@@ -253,10 +241,8 @@ watch(
     () => mqttStore.isConnected,
     (isConnected) => {
         if (isConnected && controllerStore.selectedController) {
-            console.log('✅ MQTT connected in Control Panel, subscribing to telemetry...');
             subscribeToTelemetry();
         } else if (!isConnected) {
-            console.log('❌ MQTT disconnected in Control Panel');
             resetTelemetryData();
         }
     }
@@ -265,7 +251,6 @@ watch(
 const handleButtonClick = (data) => {
     const button = controllerStore.buttons.find(b => b.id === data.id);
     if (button?.selectedTopic?.name) {
-        console.log(`🔵 Button clicked: ${button.name}, publishing to ${button.selectedTopic.name}`);
         publish(button.selectedTopic.name, String(data.payload));
     } else {
         console.warn('⚠️ Button has no topic configured:', data.id);
@@ -275,7 +260,6 @@ const handleButtonClick = (data) => {
 const handleSwitchToggle = (data) => {
     const switchItem = controllerStore.switches.find(s => s.id === data.id);
     if (switchItem?.selectedTopic?.name) {
-        console.log(`🟢 Switch toggled: ${switchItem.name}, publishing to ${switchItem.selectedTopic.name}`);
         publish(switchItem.selectedTopic.name, String(data.payload));
     } else {
         console.warn('⚠️ Switch has no topic configured:', data.id);
@@ -285,7 +269,6 @@ const handleSwitchToggle = (data) => {
 const handleSliderChange = (data) => {
     const slider = controllerStore.sliders.find(s => s.id === data.id);
     if (slider?.selectedTopic?.name) {
-        console.log(`🟣 Slider changed: ${slider.name}, value: ${data.value}`);
         publish(slider.selectedTopic.name, String(data.value));
     } else {
         console.warn('⚠️ Slider has no topic configured:', data.id);

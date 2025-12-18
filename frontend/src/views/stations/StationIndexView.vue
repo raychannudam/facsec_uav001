@@ -274,16 +274,12 @@ const handleStationDeleted = () => {
   // Store the deleted station ID
   const deletedStationId = clickedStation.value?.id;
 
-  console.log('Deleting station:', deletedStationId);
-
   // Clear the clicked station immediately to hide the detail view
   clickedStation.value = null;
   selectedStation.value = undefined;
 
   // Remove the deleted station from allStations array immediately
   allStations.value = allStations.value.filter(s => s.id !== deletedStationId);
-
-  console.log('Remaining stations:', allStations.value.length);
 
   // Refresh the map markers to reflect the deletion
   if (map.value) {

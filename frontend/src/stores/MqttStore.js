@@ -15,24 +15,19 @@ export const useMqttStore = defineStore("mqtt", () => {
     mqttClient.value = mqtt.connect(brokerUrl, options);
 
     mqttClient.value.on("connect", () => {
-      console.log("✅ Connected to MQTT broker");
       isConnected.value = true;
     });
 
     mqttClient.value.on("error", (err) => {
-      console.error("❌ MQTT Connection error:", err);
       isConnected.value = false;
     });
 
     mqttClient.value.on("close", () => {
-      console.log("🔌 MQTT Connection closed");
       isConnected.value = false;
     });
 
     // Setup message listener ONCE when connecting
     mqttClient.value.on("message", (receivedTopic, message) => {
-      console.log(`📥 Message received on topic: ${receivedTopic}`);
-
       // Find and call the callback for this topic
       const callback = topicCallbacks.value[receivedTopic];
       if (callback) {
