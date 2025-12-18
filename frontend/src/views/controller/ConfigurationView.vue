@@ -247,6 +247,7 @@ import CreateProfileModal from '@/components/controller/CreateProfileModal.vue';
 import DeleteModal from '@/components/utils/DeleteModal.vue';
 
 export default {
+    emits: ['onUpdate'],
     components: {
         TopicAssignComponent,
         StreamingUrlAssignComponent,
