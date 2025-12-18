@@ -12,13 +12,27 @@ export const useMqttStore = defineStore("mqtt", () => {
   const connect = (brokerUrl, options) => {
     if (mqttClient.value) mqttClient.value.end();
 
-    mqttClient.value = mqtt.connect(brokerUrl, options);
+    const enhancedOptions = {
+      ...options,
+      keepalive: 30,
+      clean: true,
+      reconnectPeriod: 1000,
+      connectTimeout: 30 * 1000,
+      clientId: `mqtt_${Math.random().toString(16).substr(2, 8)}`,
+    };
+
+    mqttClient.value = mqtt.connect(brokerUrl, enhancedOptions);
 
     mqttClient.value.on("connect", () => {
       isConnected.value = true;
     });
 
+    mqttClient.value.on("reconnect", () => {
+      isConnected.value = false;
+    });
+
     mqttClient.value.on("error", (err) => {
+      console.error("MQTT Error:", err);
       isConnected.value = false;
     });
 
@@ -26,54 +40,42 @@ export const useMqttStore = defineStore("mqtt", () => {
       isConnected.value = false;
     });
 
-    // Setup message listener ONCE when connecting
+    mqttClient.value.on("offline", () => {
+      isConnected.value = false;
+    });
+
     mqttClient.value.on("message", (receivedTopic, message) => {
-      // Find and call the callback for this topic
       const callback = topicCallbacks.value[receivedTopic];
       if (callback) {
         callback(message);
-      } else {
-        console.warn(`⚠️ No callback registered for topic: ${receivedTopic}`);
       }
     });
   };
 
   const subscribe = (topic, callback) => {
     if (!mqttClient.value || !isConnected.value) {
-      console.warn("⚠️ MQTT client not connected. Cannot subscribe.");
       return;
     }
 
-    // Store the callback FIRST
     topicCallbacks.value[topic] = callback;
-    console.log(`💾 Callback stored for topic: ${topic}`);
 
-    // Then subscribe to the topic
     mqttClient.value.subscribe(topic, (err) => {
-      if (!err) {
-        console.log(`📡 Subscribed to topic: ${topic}`);
-      } else {
-        console.error(`❌ Failed to subscribe to ${topic}:`, err);
-        // Remove callback if subscription failed
+      if (err) {
+        console.error(`Subscribe error: ${topic}`, err);
         delete topicCallbacks.value[topic];
       }
     });
   };
 
   const unsubscribe = (topic) => {
-    if (!mqttClient.value) {
-      console.warn("⚠️ MQTT client not available. Cannot unsubscribe.");
+    if (!mqttClient.value || !mqttClient.value.connected) {
+      delete topicCallbacks.value[topic];
       return;
     }
 
-    // Unsubscribe from the topic
     mqttClient.value.unsubscribe(topic, (err) => {
       if (!err) {
-        console.log(`🔕 Unsubscribed from topic: ${topic}`);
-        // Remove the callback
         delete topicCallbacks.value[topic];
-      } else {
-        console.error(`❌ Failed to unsubscribe from ${topic}:`, err);
       }
     });
   };
@@ -81,15 +83,11 @@ export const useMqttStore = defineStore("mqtt", () => {
   const publish = (topic, message) => {
     if (mqttClient.value && isConnected.value) {
       mqttClient.value.publish(topic, message, { qos: 1 });
-      console.log(`📤 Published to ${topic}`);
-    } else {
-      console.warn("⚠️ MQTT client not connected. Cannot publish.");
     }
   };
 
   const disconnect = () => {
     if (mqttClient.value) {
-      // Unsubscribe from all topics before disconnecting
       Object.keys(topicCallbacks.value).forEach((topic) => {
         mqttClient.value.unsubscribe(topic);
       });
@@ -98,7 +96,6 @@ export const useMqttStore = defineStore("mqtt", () => {
       mqttClient.value = null;
       isConnected.value = false;
       topicCallbacks.value = {};
-      console.log("👋 MQTT client disconnected");
     }
   };
 
@@ -107,7 +104,7 @@ export const useMqttStore = defineStore("mqtt", () => {
     isConnected,
     connect,
     subscribe,
-    unsubscribe, // <-- Don't forget to export this!
+    unsubscribe,
     publish,
     disconnect,
   };

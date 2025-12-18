@@ -32,29 +32,34 @@ const mqttStore = useMqttStore();
 const triggerConfigUpdate = ref(0);
 const currentDroneLocation = ref(null);
 const currentSubscribedTopic = ref(null);
+const isConnecting = ref(false);
 
 onMounted(() => {
     document.title = 'Controller | DRSYS';
     initFlowbite();
 });
 
-// Function to connect to MQTT with drone config
 const connectToMqtt = (controller) => {
-    if (!controller?.config?.selectedDrone?.mqtt_client) {
-        return;
-    }
+    if (!controller?.config?.selectedDrone?.mqtt_client) return;
+    if (isConnecting.value) return;
     const mqttConfig = controller.config.selectedDrone.mqtt_client;
     const brokerUrl = process.env.VUE_APP_MQTT_BROKER;
     const options = {
         username: mqttConfig.username,
         password: mqttConfig.raw_password,
         reconnectPeriod: 1000,
+        keepalive: 30,
+        clean: true,
     };
-    if (mqttStore.isConnected) mqttStore.disconnect();
+    if (mqttStore.isConnected) return;
+    isConnecting.value = true;
+    if (mqttStore.mqttClient) mqttStore.disconnect();
     mqttStore.connect(brokerUrl, options);
+    setTimeout(() => {
+        isConnecting.value = false;
+    }, 2000);
 };
 
-// Function to subscribe to drone location topic
 const subscribeToDroneLocation = (controller) => {
     if (!mqttStore.isConnected) {
         return;
@@ -102,7 +107,6 @@ const subscribeToDroneLocation = (controller) => {
     });
 };
 
-// Watch for controller changes and reconnect MQTT
 watch(
     () => controllerStore.selectedController,
     (controller) => {
@@ -113,7 +117,6 @@ watch(
     { immediate: true, deep: true }
 );
 
-// Watch for MQTT connection and subscribe to topic
 watch(() => mqttStore.isConnected, (isConnected) => {
     if (isConnected && controllerStore.selectedController) {
         subscribeToDroneLocation(controllerStore.selectedController);
@@ -121,16 +124,16 @@ watch(() => mqttStore.isConnected, (isConnected) => {
 });
 
 onBeforeUnmount(() => {
-    if (currentSubscribedTopic.value) {
+    if (currentSubscribedTopic.value && mqttStore.isConnected && mqttStore.mqttClient) {
         mqttStore.unsubscribe(currentSubscribedTopic.value);
     }
-    mqttStore.disconnect();
+    setTimeout(() => {
+        mqttStore.disconnect();
+    }, 100);
 });
 
 const updateConfig = async () => {
     triggerConfigUpdate.value++;
-
-    // Reload the controller to get fresh data
     await controllerStore.getAllControllers();
 };
 </script>
