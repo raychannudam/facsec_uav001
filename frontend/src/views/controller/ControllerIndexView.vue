@@ -132,7 +132,5 @@ const updateConfig = async () => {
 
     // Reload the controller to get fresh data
     await controllerStore.getAllControllers();
-
-    // The watch on selectedController will handle reconnection
 };
 </script>
