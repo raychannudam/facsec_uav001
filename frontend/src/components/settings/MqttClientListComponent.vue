@@ -52,19 +52,19 @@
           <!-- Client Info -->
           <div class="flex items-end justify-start space-x-3">
             <p class="text-xs max-w-max">PROTOCOL <code
-                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base"> MQTTS </code>
+                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base">MQTT</code>
             </p>
             <p class="text-xs max-w-max">HOST <code
-                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base">0.tcp.ap.ngrok.io</code>
+                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base">152.42.234.202</code>
             </p>
             <p class="text-xs max-w-max">PORT <code
-                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base">16130</code>
+                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base">8884</code>
             </p>
             <p class="text-xs max-w-max">USERNAME <code
                 class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base"> {{ data.username }} </code>
             </p>
             <p class="text-xs max-w-max">PASSWORD <code
-                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base"> ***** </code>
+                class=" block p-1 px-2 rounded-md dark:bg-gray-600 bg-gray-300 font-bold text-base">*****</code>
             </p>
             <button type="button"
               class="px-5 py-1 text-sm font-medium text-white inline-flex items-center space-x-2 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
