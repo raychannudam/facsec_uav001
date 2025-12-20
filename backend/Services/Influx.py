@@ -1,15 +1,17 @@
 from influxdb_client import InfluxDBClient
 from datetime import datetime
 import os
+import json
 
 class InfluxService:
     def __init__(self):
-        url = os.getenv("INFLUXDB_URL", "http://influxdb_facsec:8086")
-        token = os.getenv("DOCKER_INFLUXDB_INIT_TOKEN", "your_influx_token")
+        url = os.getenv("INFLUXDB_URL", "http://152.42.234.202:8087")
         org = os.getenv("DOCKER_INFLUXDB_INIT_ORG", "drtech")
         bucket = os.getenv("DOCKER_INFLUXDB_INIT_BUCKET", "drsys")
-        
-        self.client = InfluxDBClient(url=url, token=token, org=org)
+        user = os.getenv("INFLUXDB_USER")
+        password = os.getenv("INFLUXDB_PASSWORD")
+
+        self.client = InfluxDBClient(url=url, org=org, username=user, password=password)
         self.query_api = self.client.query_api()
         self.bucket = bucket
         self.org = org
@@ -19,25 +21,23 @@ class InfluxService:
         Executes a raw Flux query and returns structured results.
         Returns "no data" if the bucket (or query range) contains no data.
         """
-        # return "hello"
         tables = self.query_api.query(query=flux_query, org=self.org)
-        return tables
-
+        
         results = []
         for table in tables:
             for record in table.records:
-                results.append({
-                    "measurement": record.get_measurement(),
-                    "field": record.get_field(),
-                    "value": record.get_value(),
-                    "time": record.get_time().isoformat(),
-                    "tags": record.values
-                })
+                results.append(record.values)
 
         if not results:
-            return {}
+            return "no data"
 
-        return results
+        # Convert datetime objects to string
+        for row in results:
+            for key, value in row.items():
+                if isinstance(value, datetime):
+                    row[key] = value.isoformat()
+                    
+        return json.dumps(results, indent=2)
 
 
     def get_latest_value(self, measurement: str, field: str):
@@ -48,6 +48,7 @@ class InfluxService:
         flux_query = f'''
             from(bucket: "{self.bucket}")
                 |> range(start: -1h)
+                |> filter(fn: (r) => r["_measurement"] == "{measurement}" and r["_field"] == "{field}")
                 |> last()
         '''
 
@@ -60,6 +61,7 @@ class InfluxService:
         flux_query = f'''
             from(bucket: "{self.bucket}")
                 |> range(start: -{range_str})
+                |> filter(fn: (r) => r["_measurement"] == "{measurement}" and r["_field"] == "{field}")
                 |> sort(columns: ["_time"])
         '''
 

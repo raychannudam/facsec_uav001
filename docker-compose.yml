@@ -85,6 +85,15 @@ services:
       - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
     restart: always
 
+  ollama_facsec:
+    image: ollama/ollama
+    container_name: ollama_facsec
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama:/root/.ollama
+    restart: always
+
   # streaming_facsec:
   #   build:
   #     context: ./streaming

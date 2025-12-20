@@ -3,8 +3,19 @@ from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.agents import create_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_community.chat_models import ChatOllama
-from .tools import get_station_data
+from langchain_ollama import ChatOllama
+from .tools import (
+    get_station_data, 
+    get_s1_data, get_altitude_data, 
+    get_b1_data, 
+    get_gps_latlng_data, 
+    get_s2_data, 
+    get_s3_data, 
+    get_slide1_data, 
+    get_slide2_data, 
+    get_speed_data,
+    query_influxdb
+)
 
 load_dotenv()
 
@@ -13,14 +24,19 @@ def get_agent():
     Initializes and returns a LangChain agent with the specified LLM provider.
     The agent is configured with a system prompt and a set of tools for UAV management.
     """
-    llm_provider = os.getenv("LLM_PROVIDER", "gemini").lower()
+    llm_provider = os.getenv("LLM_PROVIDER", "ollama").lower()
 
-    if llm_provider == "gemini":
-        llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", convert_system_message_to_human=True)
+    if llm_provider == "ollama":
+        ollama_host = os.getenv("OLLAMA_HOST", "http://ollama_facsec")
+        ollama_port = os.getenv("OLLAMA_PORT", "11434")
+        llm = ChatOllama(
+            base_url=f"{ollama_host}:{ollama_port}",
+            model=os.getenv("OLLAMA_MODEL", "llama2")
+        )
     else:
         raise ValueError(f"Unsupported LLM provider: {llm_provider}")
 
-    tools = [get_station_data]
+    tools = [get_station_data, get_s1_data, get_altitude_data, get_b1_data, get_gps_latlng_data, get_s2_data, get_s3_data, get_slide1_data, get_slide2_data, get_speed_data, query_influxdb]
 
     system_prompt = """
         You are a helpful assistant for the UAV management system named "Mission Control Copilot".
