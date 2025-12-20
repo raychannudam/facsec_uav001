@@ -88,6 +88,13 @@ services:
   ollama_facsec:
     image: ollama/ollama
     container_name: ollama_facsec
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     ports:
       - "11434:11434"
     volumes:
