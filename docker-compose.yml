@@ -48,11 +48,11 @@ services:
     restart: always
     ports:
       - 8554:8554
-      - 1935:1935
-      - 8888:8888
+      # - 1935:1935
+      # - 8888:8888
       - 8889:8889
-      - 8890:8890/udp
-      - 8189:8189/udp
+      # - 8890:8890/udp
+      # - 8189:8189/udp
     volumes:
       - ./mediamtx/mediamtx.yml:/mediamtx.yml:ro
       - ./mediamtx/recordings:/recordings
@@ -96,24 +96,10 @@ services:
               count: 1
               capabilities: [gpu]
     ports:
-      - "11434:11434"
+      - "11435:11434"
     volumes:
       - ./ollama:/root/.ollama
     restart: always
-
-  # streaming_facsec:
-  #   build:
-  #     context: ./streaming
-  #     dockerfile: Dockerfile.streaming
-  #   container_name: streaming_facsec
-  #   restart: always
-  #   environment:
-  #     - RTSP_USERNAME=uav001_stream
-  #     - RTSP_PASSWORD=uav001_stream
-  #     - RTSP_HOST=152.42.234.202
-  #     - RTSP_PORT=8554
-  #     - RTSP_DEPTH_PATH=drsys/uav001_stream/realsense/normal
-  #     - RTSP_DEPTH_OUTPUT_PATH=drsys/uav001_stream/realsense/ai
 
 networks:
   default:
