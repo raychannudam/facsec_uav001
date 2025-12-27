@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col space-y-3 h-full text-sm">
+    <div class="flex flex-col space-y-3 max-h-full text-sm">
 
         <div class="flex flex-row space-x-3 w-full items-end justify-between">
             <div class="text-2xl flex flex-col items-start space-y-3">
@@ -60,9 +60,9 @@
         </div>
 
         <!-- New Grid Layout: 4 columns -->
-        <div v-else class="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
+        <div v-else class="grid grid-cols-1 lg:grid-cols-4 gap-2 mt-4 h-full overflow-y-scroll">
             <!-- Buttons Section - 25% width (1 column) -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 flex flex-col">
                 <div class="flex items-center gap-2 mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
@@ -82,7 +82,7 @@
 
 
             <!-- Switches Section - 25% width (1 column) -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 flex flex-col">
                 <div class="flex items-center gap-2 mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
@@ -101,7 +101,7 @@
             </div>
 
             <!-- Sliders Section - 50% width (2 columns) -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 lg:col-span-2 flex flex-col">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 lg:col-span-2 flex flex-col">
                 <div class="flex items-center gap-2 mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">

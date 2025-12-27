@@ -397,7 +397,7 @@ webrtcIPsFromInterfaces: yes
 # An empty value means to use all available interfaces.
 webrtcIPsFromInterfacesList: []
 # List of additional hosts or IPs to send to clients.
-webrtcAdditionalHosts: [webrtc.aitips.digital, webrtc.dysys.asia]
+webrtcAdditionalHosts: [webrtc.dysys.asia]
 # ICE servers. Needed only when local listeners can't be reached by clients.
 # STUN servers allows to obtain and share the public IP of the server.
 # rnTURN/TURNS servers forces all traffic through them.
