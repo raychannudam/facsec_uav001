@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col space-y-3">
+  <div class="flex flex-col space-y-3 h-full">
     <div class="flex flex-row space-x-3 items-center">
       <div class="text-2xl font-bold flex items-center space-x-3">
         <span class="text-2xl material-symbols-outlined">camera_video</span>
@@ -32,7 +32,7 @@
     </p>
     <hr class="border-0.5 border-gray-200" />
 
-    <div class="grid grid-cols-12 gap-3 h-[85vh]">
+    <div class="grid grid-cols-12 gap-3 h-full">
       <div
         class="col-span-8 dark:bg-gray-800 bg-gray-100 rounded-md w-full h-full relative overflow-hidden dark:text-white text-gray-900">
 

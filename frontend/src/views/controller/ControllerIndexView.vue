@@ -1,21 +1,12 @@
 <template>
     <div class="w-full grid grid-cols-12 gap-3">
-        <div class="col-span-7">
+        <div class="col-span-7 h-[85vh]">
             <LiveStreamView :key="triggerConfigUpdate" :drone-location="currentDroneLocation" />
         </div>
 
-        <div class="col-span-5 flex flex-col space-y-3">
+        <div class="col-span-5 flex flex-col space-y-3 h-[85vh]">
             <ControlPanelView />
-            <!-- <button data-modal-target="openConfigurationModal" data-modal-toggle="openConfigurationModal"
-                class="flex flex-row space-x-2 text-sm py-1 items-center px-4 hover:bg-blue-500 rounded-full border-blue-500 border dark:text-white hover:text-white self-end">
-                <span class="material-symbols-outlined text-sm">tune</span>
-                <p>Open Config</p>
-            </button> -->
         </div>
-
-        <!-- <div class="col-span-6">
-            <ConfigurationView @onUpdate="updateConfig" />
-        </div> -->
 
         <transition name="button">
             <button data-modal-target="openConfigurationModal" data-modal-toggle="openConfigurationModal"
@@ -49,7 +40,6 @@
             </template>
         </PopupModalComponent>
 
-        <!-- Chatbot Component -->
         <ChatbotView />
     </div>
 </template>
