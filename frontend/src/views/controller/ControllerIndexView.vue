@@ -1,10 +1,10 @@
 <template>
-    <div class="w-full grid grid-cols-12 gap-3">
-        <div class="col-span-6 h-[85vh]">
+    <div class="w-full grid grid-cols-12 gap-2">
+        <div class="col-span-6 h-[88vh]">
             <LiveStreamView :key="triggerConfigUpdate" :drone-location="currentDroneLocation" />
         </div>
 
-        <div class="col-span-6 flex flex-col space-y-3 h-[85vh]">
+        <div class="col-span-6 flex flex-col space-y-3 h-[88vh]">
             <ControlPanelView />
         </div>
 
