@@ -1,30 +1,24 @@
-user string1
-
-user stringnew
-
-user stringtest123
-
-user nakclient
-
-user nakclienttoo
-topic readwrite string123
-topic readwrite string111
-
 user admin
 topic readwrite drsys/admin/altitude
 topic readwrite drsys/admin/battery
 topic readwrite drsys/admin/gps_latlng
 topic readwrite drsys/admin/speed
+topic readwrite drsys/admin/temperature
 
 user user
 topic readwrite drsys/user/altitude
 topic readwrite drsys/user/battery
 topic readwrite drsys/user/gps_latlng
 topic readwrite drsys/user/speed
+topic readwrite drsys/user/temperature
 
-user string
-topic readwrite drsys/string/altitude
-topic readwrite drsys/string/battery
-topic readwrite drsys/string/gps_latlng
-topic readwrite drsys/string/speed
+user client1
+topic readwrite drsys/client1/altitude
+topic readwrite drsys/client1/battery
+topic readwrite drsys/client1/gps_latlng
+topic readwrite drsys/client1/speed
+topic readwrite drsys/client1/temperature
+topic readwrite drsys/client1/btn1
+topic readwrite drsys/client1/swt1
+topic readwrite drsys/client1/sld1
 

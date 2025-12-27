@@ -1,0 +1,380 @@
+{
+    "selectedDrone": {
+        "id": 1,
+        "type": "Multi-roter",
+        "name": "Drone 01",
+        "mqtt_client_id": 3,
+        "streaming_client_id": 3,
+        "station_id": null,
+        "last_lat": 0,
+        "last_long": 0,
+        "operation_data": {},
+        "created_at": "2025-12-27T01:51:31.793229",
+        "updated_at": "2025-12-27T01:51:31.793233",
+        "mqtt_client": {
+            "id": 3,
+            "user_id": 3,
+            "name": "Mqtt Client 1",
+            "description": "N/A",
+            "username": "client1",
+            "password": "$7$101$p74k8f5xva2pRLbt$SmFBgiYopr9HXl8pqdKrif/+AGnpdkDvwDb6pg2ONgoy8d3YoJgyI8sr/AT9BX1CCjN61DvYSETm+nqPJDdOLg==",
+            "raw_password": "client1",
+            "config": {},
+            "status": true,
+            "created_at": "2025-12-27T01:50:19.445415",
+            "updated_at": "2025-12-27T01:50:19.445419",
+            "user": {
+                "id": 3,
+                "email": "channudamray2002.rcu@gmail.com",
+                "username": "raychannudam",
+                "fullname": "Channudam Ray",
+                "age": 23,
+                "gender": "Male",
+                "roles": [
+                    {
+                        "id": 2,
+                        "name": "user",
+                        "description": "Regular User",
+                        "created_at": "2025-12-27T01:40:31.456819",
+                        "updated_at": "2025-12-27T01:40:31.456820"
+                    }
+                ]
+            }
+        },
+        "streaming_client": {
+            "id": 3,
+            "name": "Stream Client 1",
+            "description": "N/A",
+            "username": "client1",
+            "config": {
+                "actions": [
+                    "read",
+                    "publish"
+                ]
+            },
+            "status": true,
+            "created_at": "2025-12-27T01:51:13.317729",
+            "updated_at": "2025-12-27T01:51:13.317736",
+            "user": {
+                "id": 3,
+                "email": "channudamray2002.rcu@gmail.com",
+                "username": "raychannudam",
+                "fullname": "Channudam Ray",
+                "age": 23,
+                "gender": "Male",
+                "roles": [
+                    {
+                        "id": 2,
+                        "name": "user",
+                        "description": "Regular User",
+                        "created_at": "2025-12-27T01:40:31.456819",
+                        "updated_at": "2025-12-27T01:40:31.456820"
+                    }
+                ]
+            }
+        },
+        "station": null
+    },
+    "streamingUrls": [
+        {
+            "id": "stream1",
+            "name": "CAM 01 Streaming URL",
+            "selectedUrl": {}
+        },
+        {
+            "id": "stream2",
+            "name": "CAM 02 Streaming URL",
+            "selectedUrl": {}
+        },
+        {
+            "id": "stream3",
+            "name": "CAM 03 Streaming URL",
+            "selectedUrl": {}
+        },
+        {
+            "id": "stream4",
+            "name": "CAM 04 Streaming URL",
+            "selectedUrl": {}
+        }
+    ],
+    "mqttTopics": [
+        {
+            "id": "btn1",
+            "type": "button",
+            "name": "Button 01",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "btn2",
+            "type": "button",
+            "name": "Button 02",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "btn3",
+            "type": "button",
+            "name": "Button 03",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "btn4",
+            "type": "button",
+            "name": "Button 04",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "btn5",
+            "type": "button",
+            "name": "Button 05",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "btn6",
+            "type": "button",
+            "name": "Button 06",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "btn7",
+            "type": "button",
+            "name": "Button 07",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "swt1",
+            "type": "switch",
+            "name": "Switch 01",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {
+                "latest_state": "1"
+            },
+            "selectedTopic": {
+                "id": 17,
+                "mqtt_client_id": 3,
+                "name": "drsys/client1/swt1",
+                "description": "",
+                "config": {},
+                "status": true,
+                "is_default": false,
+                "created_at": "2025-12-27T01:50:35.673771",
+                "updated_at": "2025-12-27T01:50:35.673775",
+                "mqtt_client": {
+                    "id": 3,
+                    "user_id": 3,
+                    "name": "Mqtt Client 1",
+                    "description": "N/A",
+                    "username": "client1",
+                    "password": "$7$101$p74k8f5xva2pRLbt$SmFBgiYopr9HXl8pqdKrif/+AGnpdkDvwDb6pg2ONgoy8d3YoJgyI8sr/AT9BX1CCjN61DvYSETm+nqPJDdOLg==",
+                    "raw_password": "client1",
+                    "config": {},
+                    "status": true,
+                    "created_at": "2025-12-27T01:50:19.445415",
+                    "updated_at": "2025-12-27T01:50:19.445419",
+                    "user": {
+                        "id": 3,
+                        "email": "channudamray2002.rcu@gmail.com",
+                        "username": "raychannudam",
+                        "fullname": "Channudam Ray",
+                        "age": 23,
+                        "gender": "Male",
+                        "roles": [
+                            {
+                                "id": 2,
+                                "name": "user",
+                                "description": "Regular User",
+                                "created_at": "2025-12-27T01:40:31.456819",
+                                "updated_at": "2025-12-27T01:40:31.456820"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "id": "swt2",
+            "type": "switch",
+            "name": "Switch 02",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "swt3",
+            "type": "switch",
+            "name": "Switch 03",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "swt4",
+            "type": "switch",
+            "name": "Switch 04",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "swt5",
+            "type": "switch",
+            "name": "Switch 05",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "swt6",
+            "type": "switch",
+            "name": "Switch 06",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "swt7",
+            "type": "switch",
+            "name": "Switch 07",
+            "onPayload": "1",
+            "offPayload": "0",
+            "additionalConfig": {}
+        },
+        {
+            "id": "sld1",
+            "type": "slider",
+            "name": "Slider 01",
+            "maxPayload": "1000",
+            "minPayload": "100",
+            "additionalConfig": {
+                "latest_state": "834"
+            },
+            "selectedTopic": {
+                "id": 18,
+                "mqtt_client_id": 3,
+                "name": "drsys/client1/sld1",
+                "description": "",
+                "config": {},
+                "status": true,
+                "is_default": false,
+                "created_at": "2025-12-27T01:50:39.800461",
+                "updated_at": "2025-12-27T01:50:39.800465",
+                "mqtt_client": {
+                    "id": 3,
+                    "user_id": 3,
+                    "name": "Mqtt Client 1",
+                    "description": "N/A",
+                    "username": "client1",
+                    "password": "$7$101$p74k8f5xva2pRLbt$SmFBgiYopr9HXl8pqdKrif/+AGnpdkDvwDb6pg2ONgoy8d3YoJgyI8sr/AT9BX1CCjN61DvYSETm+nqPJDdOLg==",
+                    "raw_password": "client1",
+                    "config": {},
+                    "status": true,
+                    "created_at": "2025-12-27T01:50:19.445415",
+                    "updated_at": "2025-12-27T01:50:19.445419",
+                    "user": {
+                        "id": 3,
+                        "email": "channudamray2002.rcu@gmail.com",
+                        "username": "raychannudam",
+                        "fullname": "Channudam Ray",
+                        "age": 23,
+                        "gender": "Male",
+                        "roles": [
+                            {
+                                "id": 2,
+                                "name": "user",
+                                "description": "Regular User",
+                                "created_at": "2025-12-27T01:40:31.456819",
+                                "updated_at": "2025-12-27T01:40:31.456820"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "id": "sld2",
+            "type": "slider",
+            "name": "Slider 02",
+            "maxPayload": "1000",
+            "minPayload": "100",
+            "additionalConfig": {}
+        },
+        {
+            "id": "sld3",
+            "type": "slider",
+            "name": "Slider 03",
+            "maxPayload": "1000",
+            "minPayload": "100",
+            "additionalConfig": {}
+        },
+        {
+            "id": "sld4",
+            "type": "slider",
+            "name": "Slider 04",
+            "maxPayload": "1000",
+            "minPayload": "100",
+            "additionalConfig": {}
+        },
+        {
+            "id": "sld5",
+            "type": "slider",
+            "name": "Slider 05",
+            "maxPayload": "1000",
+            "minPayload": "100",
+            "additionalConfig": {}
+        },
+        {
+            "id": "sld6",
+            "type": "slider",
+            "name": "Slider 06",
+            "maxPayload": "1000",
+            "minPayload": "100",
+            "additionalConfig": {}
+        },
+        {
+            "id": "sld7",
+            "type": "slider",
+            "name": "Slider 07",
+            "maxPayload": "1000",
+            "minPayload": "100",
+            "additionalConfig": {}
+        }
+    ],
+    "default": {
+        "mqttTopics": [
+            {
+                "id": "altitude",
+                "name": "drsys/client1/altitude"
+            },
+            {
+                "id": "battery",
+                "name": "drsys/client1/battery"
+            },
+            {
+                "id": "gps_latlng",
+                "name": "drsys/client1/gps_latlng"
+            },
+            {
+                "id": "speed",
+                "name": "drsys/client1/speed"
+            },
+            {
+                "id": "temperature",
+                "name": "drsys/client1/temperature"
+            }
+        ]
+    }
+}

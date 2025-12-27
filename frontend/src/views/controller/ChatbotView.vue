@@ -99,8 +99,9 @@
                                 </div>
                                 <div
                                     class="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm max-w-[70%] border border-gray-100 dark:border-gray-700">
-                                    <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ msg.text
-                                    }}</p>
+                                    <!-- <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ msg.text
+                                    }}</p> -->
+                                    <vue-markdown-it :source="msg.text" />
                                 </div>
                             </div>
                         </template>
@@ -178,6 +179,7 @@
 <script setup>
 import { ref, onBeforeUnmount, nextTick, watch } from 'vue';
 import { useChatbotStore } from '@/stores/ChatbotStore';
+import { VueMarkdownIt } from '@f3ve/vue-markdown-it';
 
 const chatbotStore = useChatbotStore();
 const isOpen = ref(false);
