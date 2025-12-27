@@ -1,29 +1,30 @@
 <template>
     <div class="w-full grid grid-cols-12 gap-3">
-        <div class="col-span-8">
+        <div class="col-span-7">
             <LiveStreamView :key="triggerConfigUpdate" :drone-location="currentDroneLocation" />
         </div>
 
-        <div class="col-span-4 flex flex-col space-y-3">
+        <div class="col-span-5 flex flex-col space-y-3">
             <ControlPanelView />
             <!-- <button data-modal-target="openConfigurationModal" data-modal-toggle="openConfigurationModal"
                 class="flex flex-row space-x-2 text-sm py-1 items-center px-4 hover:bg-blue-500 rounded-full border-blue-500 border dark:text-white hover:text-white self-end">
                 <span class="material-symbols-outlined text-sm">tune</span>
                 <p>Open Config</p>
             </button> -->
-            <transition name="button">
-                <button data-modal-target="openConfigurationModal" data-modal-toggle="openConfigurationModal"
-                    class="m-8 absolute bottom-24 right-0 bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-all hover:scale-110">
-                    <span class="material-symbols-outlined">
-                        tune
-                    </span>
-                </button>
-            </transition>
         </div>
 
         <!-- <div class="col-span-6">
             <ConfigurationView @onUpdate="updateConfig" />
         </div> -->
+
+        <transition name="button">
+            <button data-modal-target="openConfigurationModal" data-modal-toggle="openConfigurationModal"
+                class="fixed m-8 bottom-16 right-0 bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-all hover:scale-110">
+                <span class="material-symbols-outlined">
+                    tune
+                </span>
+            </button>
+        </transition>
 
         <PopupModalComponent id="openConfigurationModal" :show-footer="false">
             <template v-slot:header>
