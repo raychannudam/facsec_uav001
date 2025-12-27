@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col space-y-3">
+    <div class="flex flex-col space-y-3 h-[85vh]">
 
         <div class="flex flex-row space-x-3 w-full items-end justify-between">
             <div class="text-2xl flex flex-col items-start space-y-3">
@@ -9,7 +9,7 @@
                     </span>
                     <p>Control Panel</p>
                 </div>
-                <p class="text-gray-600 dark:text-gray-400 text-sm">
+                <p class="text-gray-600 dark:text-gray-400 text-xs">
                     Real-time controller interface for drone.
                 </p>
             </div>
@@ -261,6 +261,11 @@ const handleSwitchToggle = (data) => {
     const switchItem = controllerStore.switches.find(s => s.id === data.id);
     if (switchItem?.selectedTopic?.name) {
         publish(switchItem.selectedTopic.name, String(data.payload));
+        controllerStore.updateMqttTopicAdditionalConfig(controllerStore.selectedController.id, switchItem.id, {
+            "additionalConfig":{    
+                "latest_state":  String(data.payload)
+            }
+        })
     } else {
         console.warn('⚠️ Switch has no topic configured:', data.id);
     }
@@ -270,6 +275,11 @@ const handleSliderChange = (data) => {
     const slider = controllerStore.sliders.find(s => s.id === data.id);
     if (slider?.selectedTopic?.name) {
         publish(slider.selectedTopic.name, String(data.value));
+        controllerStore.updateMqttTopicAdditionalConfig(controllerStore.selectedController.id, slider.id, {
+            "additionalConfig":{    
+                "latest_state":  String(data.value)
+            }
+        })
     } else {
         console.warn('⚠️ Slider has no topic configured:', data.id);
     }

@@ -17,6 +17,9 @@ class ControllerCreateSchema(BaseModel):
     description: Optional[str] = Field(None)
     config: dict = Field(...)
     
+class ControllerAdditionalConfigSchema(BaseModel):
+    additionalConfig: dict = Field(...)
+    
 class ControllerUpdateSchema(BaseModel):
     name: Optional[str] = Field(None)
     description: Optional[str] = Field(None)

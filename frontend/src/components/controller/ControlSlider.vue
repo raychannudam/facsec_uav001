@@ -28,7 +28,6 @@
     </div>
 </template>
 
-
 <script setup>
 import { ref, computed, defineProps, defineEmits, watch } from 'vue';
 
@@ -43,17 +42,37 @@ const emit = defineEmits(['change']);
 
 const clamp = (v, a, b) => Math.max(Math.min(v, Math.max(a, b)), Math.min(a, b));
 
+// Computed properties for min and max values of the slider
 const minValue = computed(() => {
     const raw = Number(props.slider?.minPayload);
     return Number.isFinite(raw) ? Math.floor(raw) : 0;
 });
+
 const maxValue = computed(() => {
     const raw = Number(props.slider?.maxPayload);
     return Number.isFinite(raw) ? Math.floor(raw) : 100;
 });
 
-const value = ref(0);
+// Computed value for the slider based on the latest_state
+const value = computed({
+    get() {
+        // Get the initial value from props (or 0 if not available)
+        return Number(props.slider?.additionalConfig?.latest_state) ?? 0;
+    },
+    set(newValue) {
+        // Update the slider's additionalConfig when the value changes
+        props.slider.additionalConfig.latest_state = String(newValue);
 
+        // Emit the change event
+        emit('change', {
+            id: props.slider?.id,
+            name: props.slider?.name,
+            value: newValue
+        });
+    }
+});
+
+// Watch for changes in minValue and maxValue, and adjust the value accordingly
 watch([minValue, maxValue], ([mn, mx]) => {
     const low = Math.min(mn, mx);
     const high = Math.max(mn, mx);
@@ -63,14 +82,6 @@ watch([minValue, maxValue], ([mn, mx]) => {
     }
     value.value = clamp(value.value, low, high);
 }, { immediate: true });
-
-const handleChange = () => {
-    emit('change', {
-        id: props.slider?.id,
-        name: props.slider?.name,
-        value: value.value
-    });
-};
 </script>
 
 <style scoped>

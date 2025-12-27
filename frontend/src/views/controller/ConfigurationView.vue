@@ -1,21 +1,5 @@
 <template>
     <div class="flex flex-col space-y-3">
-        <!-- Header -->
-        <div class="flex flex-col w-full space-y-3">
-            <!-- Title + Description -->
-            <div class="flex flex-row items-center justify-between">
-                <div class="flex flex-col space-y-3">
-                    <div class="flex flex-row items-center space-x-2">
-                        <span class="text-2xl material-symbols-outlined">settings_input_component</span>
-                        <p class="text-xl font-bold">Configuration</p>
-                    </div>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 leading-tight">
-                        Manage your control panel profiles.
-                    </p>
-                </div>
-            </div>
-        </div>
-
         <hr class="border-0.5 border-gray-200">
 
         <div class="flex flex-col space-y-3 h-[60vh] overflow-scroll">
@@ -106,18 +90,18 @@
                     <!-- Configuration Actions -->
                     <div class="flex flex-wrap gap-2">
                         <!-- Edit -->
-                        <button v-if="!isEditing" @click="isEditing = true" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700
+                        <!-- <button v-if="!isEditing" @click="isEditing = true" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-yellow-600 hover:bg-yellow-700
                        rounded-lg focus:ring-2 focus:ring-yellow-300">
                             <span class="material-symbols-outlined text-sm">edit_note</span>
                             <span class="hidden sm:inline">Edit</span>
-                        </button>
+                        </button> -->
 
                         <!-- Cancel -->
-                        <button v-if="isEditing" @click="cancel" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-red-700 hover:bg-red-800
+                        <!-- <button v-if="isEditing" @click="cancel" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-red-700 hover:bg-red-800
                        rounded-lg focus:ring-2 focus:ring-red-300">
                             <span class="material-symbols-outlined text-sm">cancel</span>
                             <span class="hidden sm:inline">Cancel</span>
-                        </button>
+                        </button> -->
 
                         <!-- Save -->
                         <button v-if="isEditing" @click="saveProfile" class="flex items-center gap-1 px-3 py-1 text-xs font-medium text-white bg-blue-700 hover:bg-blue-800
@@ -213,7 +197,8 @@
                                     'onPayload': mqttTopic.onPayload,
                                     'offPayload': mqttTopic.offPayload,
                                     'minPayload': mqttTopic.minPayload,
-                                    'maxPayload': mqttTopic.maxPayload
+                                    'maxPayload': mqttTopic.maxPayload,
+                                    'additionalConfig': mqttTopic.additionalConfig,
                                 }" />
                         </div>
                     </div>
@@ -276,7 +261,7 @@ export default {
             selectedDrone: undefined,
             availableMqttTopics: [],
             availableStreamingUrls: [],
-            isEditing: false,
+            isEditing: true,
             config: this.getDefaultConfig(),
             showCreateModal: false,
             showDeleteModal: false
@@ -308,27 +293,27 @@ export default {
                     { id: 'stream4', name: 'CAM 04 Streaming URL', selectedUrl: {} },
                 ],
                 mqttTopics: [
-                    { id: 'btn1', type: 'button', name: "Button 01", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'btn2', type: 'button', name: "Button 02", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'btn3', type: 'button', name: "Button 03", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'btn4', type: 'button', name: "Button 04", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'btn5', type: 'button', name: "Button 05", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'btn6', type: 'button', name: "Button 06", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'btn7', type: 'button', name: "Button 07", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'swt1', type: 'switch', name: "Switch 01", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'swt2', type: 'switch', name: "Switch 02", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'swt3', type: 'switch', name: "Switch 03", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'swt4', type: 'switch', name: "Switch 04", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'swt5', type: 'switch', name: "Switch 05", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'swt6', type: 'switch', name: "Switch 06", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'swt7', type: 'switch', name: "Switch 07", onPayload: "1", offPayload: "0", selectedTopic: {} },
-                    { id: 'sld1', type: 'slider', name: "Slider 01", maxPayload: "1000", minPayload: "100", selectedTopic: {} },
-                    { id: 'sld2', type: 'slider', name: "Slider 02", maxPayload: "1000", minPayload: "100", selectedTopic: {} },
-                    { id: 'sld3', type: 'slider', name: "Slider 03", maxPayload: "1000", minPayload: "100", selectedTopic: {} },
-                    { id: 'sld4', type: 'slider', name: "Slider 04", maxPayload: "1000", minPayload: "100", selectedTopic: {} },
-                    { id: 'sld5', type: 'slider', name: "Slider 05", maxPayload: "1000", minPayload: "100", selectedTopic: {} },
-                    { id: 'sld6', type: 'slider', name: "Slider 06", maxPayload: "1000", minPayload: "100", selectedTopic: {} },
-                    { id: 'sld7', type: 'slider', name: "Slider 07", maxPayload: "1000", minPayload: "100", selectedTopic: {} },
+                    { id: 'btn1', type: 'button', name: "Button 01", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'btn2', type: 'button', name: "Button 02", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'btn3', type: 'button', name: "Button 03", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'btn4', type: 'button', name: "Button 04", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'btn5', type: 'button', name: "Button 05", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'btn6', type: 'button', name: "Button 06", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'btn7', type: 'button', name: "Button 07", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'swt1', type: 'switch', name: "Switch 01", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'swt2', type: 'switch', name: "Switch 02", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'swt3', type: 'switch', name: "Switch 03", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'swt4', type: 'switch', name: "Switch 04", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'swt5', type: 'switch', name: "Switch 05", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'swt6', type: 'switch', name: "Switch 06", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'swt7', type: 'switch', name: "Switch 07", onPayload: "1", offPayload: "0", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'sld1', type: 'slider', name: "Slider 01", maxPayload: "1000", minPayload: "100", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'sld2', type: 'slider', name: "Slider 02", maxPayload: "1000", minPayload: "100", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'sld3', type: 'slider', name: "Slider 03", maxPayload: "1000", minPayload: "100", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'sld4', type: 'slider', name: "Slider 04", maxPayload: "1000", minPayload: "100", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'sld5', type: 'slider', name: "Slider 05", maxPayload: "1000", minPayload: "100", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'sld6', type: 'slider', name: "Slider 06", maxPayload: "1000", minPayload: "100", additionalConfig: {}, selectedTopic: {} },
+                    { id: 'sld7', type: 'slider', name: "Slider 07", maxPayload: "1000", minPayload: "100", additionalConfig: {}, selectedTopic: {} },
                 ]
             };
         },
@@ -453,6 +438,7 @@ export default {
                 mqttTopic.maxPayload = data.maxPayload;
                 mqttTopic.onPayload = data.onPayload;
                 mqttTopic.offPayload = data.offPayload;
+                mqttTopic.additionalConfig = data.additionalConfig;
             }
         },
 
@@ -493,7 +479,7 @@ export default {
             this.appStore.displayPageLoading(false);
 
             if (res.status === "success") {
-                this.isEditing = false;
+                // this.isEditing = false;
                 await this.loadProfiles();
                 this.selectedProfile = this.allProfiles.find(p => p.id === currentProfileId);
                 if (this.selectedProfile) {
@@ -501,7 +487,7 @@ export default {
                     this.loadProfileConfig();
                 }
                 await this.$nextTick();
-                initFlowbite();
+                // initFlowbite();
                 this.$emit("onUpdate");
             }
         },
@@ -510,7 +496,7 @@ export default {
             this.isEditing = false;
             this.loadProfileConfig();
             await this.$nextTick();
-            initFlowbite();
+            // initFlowbite();
         },
 
         async getAllDrone(query = "") {

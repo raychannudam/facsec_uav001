@@ -1,96 +1,110 @@
 <template>
     <div class="flex flex-row space-x-3 items-center justify-start relative">
-        <input class="text-xs bg-transparent w-24 focus:border-0 focus:border-b border-transparent dark:border-b-white border-b-gray-900 outline-none ring-0 outline-0" v-model="nameData" type="text" :id="id + 'name'"/>
-        <button :id="id + 'Button'" :data-dropdown-toggle="id" data-dropdown-placement="bottom"
-            class="focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center  flex-1  dark:focus:ring-blue-800 border border-blue-600 shadow-blue-50"
-            type="button">
-            <p class="flex-1 start" v-if="!selectTopic">{{ dropDownDesc }}</p>
-            <p class="flex-1 start" v-else>{{ selectTopic.name }}</p> <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="m1 1 4 4 4-4" />
-            </svg>
-        </button>
-        <!-- Dropdown menu -->
-        <div :id="id"
-            class="z-50 hidden bg-white border border-gray-200 rounded-lg shadow-sm w-full dark:bg-gray-700 dark:border-gray-600">
-            <div class="p-3">
-                <label :for="'search' + id" class="sr-only">Search</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                        </svg>
+        <div class="flex flex-col space-y-3 items-start justify-start w-full">
+            <div class="flex flec-row space-x-3 w-full">
+                <input
+                    class="text-xs bg-transparent w-24 focus:border-0 focus:border-b border-transparent dark:border-b-white border-b-gray-900 outline-none ring-0 outline-0"
+                    v-model="nameData" type="text" :id="id + 'name'" />
+                <button :id="id + 'Button'" :data-dropdown-toggle="id" data-dropdown-placement="bottom"
+                    class="focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center  flex-1  dark:focus:ring-blue-800 border border-blue-600 shadow-blue-50"
+                    type="button">
+                    <p class="flex-1 start" v-if="!selectTopic">{{ dropDownDesc }}</p>
+                    <p class="flex-1 start" v-else>{{ selectTopic.name }}</p> <svg class="w-2.5 h-2.5 ms-3"
+                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="m1 1 4 4 4-4" />
+                    </svg>
+                </button>
+                <!-- Dropdown menu -->
+                <div :id="id"
+                    class="z-50 hidden bg-white border border-gray-200 rounded-lg shadow-sm w-full dark:bg-gray-700 dark:border-gray-600">
+                    <div class="p-3">
+                        <label :for="'search' + id" class="sr-only">Search</label>
+                        <div class="relative">
+                            <div
+                                class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                                </svg>
+                            </div>
+                            <input type="text" :id="'search' + id" v-model="query"
+                                class="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="Search topic...">
+                        </div>
                     </div>
-                    <input type="text" :id="'search' + id" v-model="query"
-                        class="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        placeholder="Search topic...">
+                    <ul class="h-48 px-3 pb-3 overflow-y-auto text-sm text-gray-700 dark:text-gray-200"
+                        :aria-labelledby="id + 'Button'">
+                        <li class="w-full">
+                            <div class="flex items-center rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <input :id="'checkbox-item-' + id + '- default'" type="radio" :value="{}"
+                                    v-model="selectTopic" class="hidden">
+                                <label :for="'checkbox-item-' + id + '- default'"
+                                    class="inline-flex items-center justify-center space-x-3 w-full py-2 text-sm font-medium text-gray-300 text-center cursor-pointer rounded-md bg-blue-500"><span
+                                        class="material-symbols-outlined text-base">
+                                        refresh
+                                    </span>Reset</label>
+                            </div>
+                        </li>
+                        <li v-for="item in data">
+                            <div class="flex items-center ps-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <input :id="'checkbox-item-' + id + '-' + item.name" type="radio" :value="item"
+                                    v-model="selectTopic"
+                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                                <label :for="'checkbox-item-' + id + '-' + item.name"
+                                    class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">{{
+                                        item.name }}</label>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="relative" v-if="type != 'slider'">
+                    <input type="text" :id="id + 'on'" v-model="onPayload"
+                        class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-28 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                        placeholder=" " />
+                    <label :for="id + 'on'"
+                        class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">On</label>
+                </div>
+                <div class="relative" v-else>
+                    <input type="text" :id="id + 'min'" v-model="minPayload"
+                        class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-28 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                        placeholder=" " />
+                    <label :for="id + 'min'"
+                        class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Min
+                    </label>
+                </div>
+                <div class="relative" v-if="type != 'slider'">
+                    <input type="text" :id="id + 'off'" v-model="offPayload"
+                        class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-28 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                        placeholder=" " />
+                    <label :for="id + 'off'"
+                        class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Off
+                    </label>
+                </div>
+                <div class="relative" v-else>
+                    <input type="text" :id="id + 'max'" v-model="maxPayload"
+                        class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-28 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                        placeholder=" " />
+                    <label :for="id + 'max'"
+                        class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Max
+                    </label>
                 </div>
             </div>
-            <ul class="h-48 px-3 pb-3 overflow-y-auto text-sm text-gray-700 dark:text-gray-200"
-                :aria-labelledby="id + 'Button'">
-                <li class="w-full">
-                    <div class="flex items-center rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                        <input :id="'checkbox-item-' + id + '- default'" type="radio" :value="{}" v-model="selectTopic"
-                            class="hidden">
-                        <label :for="'checkbox-item-' + id + '- default'"
-                            class="inline-flex items-center justify-center space-x-3 w-full py-2 text-sm font-medium text-gray-300 text-center cursor-pointer rounded-md bg-blue-500"><span
-                                class="material-symbols-outlined text-base">
-                                refresh
-                            </span>Reset</label>
-                    </div>
-                </li>
-                <li v-for="item in data">
-                    <div class="flex items-center ps-2 rounded-sm hover:bg-gray-100 dark:hover:bg-gray-600">
-                        <input :id="'checkbox-item-' + id + '-' + item.name" type="radio" :value="item"
-                            v-model="selectTopic"
-                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                        <label :for="'checkbox-item-' + id + '-' + item.name"
-                            class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded-sm dark:text-gray-300">{{
-                                item.name }}</label>
-                    </div>
-                </li>
-            </ul>
+            <div class="w-full">
+                <JsonEditorVue v-model="additionalConfig" mode="text"></JsonEditorVue>
+            </div>
+            <hr class="border-0.5 border-gray-200">
         </div>
-        <div class="relative" v-if="type != 'slider'">
-            <input type="text" :id="id + 'on'" v-model="onPayload"
-                class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-14 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                placeholder=" " />
-            <label :for="id + 'on'"
-                class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">On</label>
-        </div>
-        <div class="relative" v-else>
-            <input type="text" :id="id + 'min'" v-model="minPayload"
-                class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-14 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                placeholder=" " />
-            <label :for="id + 'min'"
-                class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Min
-                </label>
-        </div>
-        <div class="relative" v-if="type != 'slider'">
-            <input type="text" :id="id + 'off'" v-model="offPayload"
-                class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-14 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                placeholder=" " />
-            <label :for="id + 'off'"
-                class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Off
-                </label>
-        </div>
-        <div class="relative" v-else>
-            <input type="text" :id="id + 'max'" v-model="maxPayload"
-                class="block rounded-t-lg px-2.5 pb-2.5 pt-5 w-14 text-sm text-gray-900 bg-gray-50 dark:bg-gray-700 border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                placeholder=" " />
-            <label :for="id + 'max'"
-                class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Max
-                </label>
-        </div>
+
     </div>
 </template>
 <script>
 import { initFlowbite } from 'flowbite';
+import JsonEditorVue from "json-editor-vue"
 export default {
     props: ['id', 'name', 'dropDownDesc', 'type', 'data', 'selected'],
+    components: { JsonEditorVue },
     data() {
         return {
             query: "",
@@ -99,7 +113,8 @@ export default {
             offPayload: "",
             minPayload: "",
             maxPayload: "",
-            nameData: this.name
+            nameData: this.name,
+            additionalConfig: {}
         }
     },
     methods: {
@@ -112,6 +127,7 @@ export default {
                     selectedTopic: this.selectTopic,
                     onPayload: this.onPayload,
                     offPayload: this.offPayload,
+                    additionalConfig: this.additionalConfig
                 })
             } else {
                 this.$emit("onTopicSelect", {
@@ -121,6 +137,7 @@ export default {
                     selectedTopic: this.selectTopic,
                     minPayload: this.minPayload,
                     maxPayload: this.maxPayload,
+                    additionalConfig: this.additionalConfig
                 })
             }
 
@@ -142,6 +159,9 @@ export default {
         }
         if (this.selected.maxPayload != "") {
             this.maxPayload = this.selected.maxPayload
+        }
+        if (this.selected.additionalConfig != {}){
+            this.additionalConfig = this.selected.additionalConfig
         }
     },
     watch: {

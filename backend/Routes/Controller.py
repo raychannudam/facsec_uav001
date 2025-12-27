@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from Models import get_db, UserModel
 from Services.Controller import ControllerService
-from Schemas.Controller import ControllerResponseSchema, ControllerCreateSchema, ControllerUpdateSchema
+from Schemas.Controller import ControllerResponseSchema, ControllerCreateSchema, ControllerUpdateSchema, ControllerAdditionalConfigSchema
 from Security.jwt import get_current_user
 
 router = APIRouter(
@@ -32,6 +32,13 @@ def update_controller(controller_id: int, update_data: ControllerUpdateSchema, d
     updated = ControllerService.update_controller(controller_id, update_data, db)
     if not updated:
         raise HTTPException(status_code=404, detail="Controller not found")
+    return updated
+
+@router.put("/update_mqtt_topic_additional_config/{controller_id}")
+def update_mqtt_topic_additional_config(controller_id: int, control_widget_id: str, additional_config: ControllerAdditionalConfigSchema, db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    updated = ControllerService.update_mqtt_topic_additional_config(controller_id, control_widget_id, additional_config.additionalConfig, db)
+    if not updated:
+        raise HTTPException(status_code=500, detail="Error on Update Additional Config")
     return updated
 
 @router.delete("/{controller_id}", response_model=ControllerResponseSchema)

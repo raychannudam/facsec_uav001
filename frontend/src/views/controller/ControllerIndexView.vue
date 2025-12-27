@@ -4,13 +4,49 @@
             <LiveStreamView :key="triggerConfigUpdate" :drone-location="currentDroneLocation" />
         </div>
 
-        <div class="col-span-4">
-            <ConfigurationView @onUpdate="updateConfig" />
+        <div class="col-span-4 flex flex-col space-y-3">
+            <ControlPanelView />
+            <!-- <button data-modal-target="openConfigurationModal" data-modal-toggle="openConfigurationModal"
+                class="flex flex-row space-x-2 text-sm py-1 items-center px-4 hover:bg-blue-500 rounded-full border-blue-500 border dark:text-white hover:text-white self-end">
+                <span class="material-symbols-outlined text-sm">tune</span>
+                <p>Open Config</p>
+            </button> -->
+            <transition name="button">
+                <button data-modal-target="openConfigurationModal" data-modal-toggle="openConfigurationModal"
+                    class="m-8 absolute bottom-24 right-0 bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-all hover:scale-110">
+                    <span class="material-symbols-outlined">
+                        tune
+                    </span>
+                </button>
+            </transition>
         </div>
 
-        <div class="col-span-12">
-            <ControlPanelView />
-        </div>
+        <!-- <div class="col-span-6">
+            <ConfigurationView @onUpdate="updateConfig" />
+        </div> -->
+
+        <PopupModalComponent id="openConfigurationModal" :show-footer="false">
+            <template v-slot:header>
+                <!-- Header -->
+                <div class="flex flex-col w-full space-y-3">
+                    <!-- Title + Description -->
+                    <div class="flex flex-row items-center justify-between">
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex flex-row items-center space-x-2">
+                                <span class="text-2xl material-symbols-outlined">settings_input_component</span>
+                                <p class="text-xl font-bold">Configuration</p>
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-tight">
+                                Manage your control panel profiles.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <template v-slot:body>
+                <ConfigurationView @onUpdate="updateConfig" />
+            </template>
+        </PopupModalComponent>
 
         <!-- Chatbot Component -->
         <ChatbotView />
@@ -26,6 +62,7 @@ import LiveStreamView from './LiveStreamView.vue';
 import ChatbotView from './ChatbotView.vue';
 import { useControllerStore } from '@/stores/ControllerStore';
 import { useMqttStore } from '@/stores/MqttStore';
+import PopupModalComponent from '@/components/utils/PopupModalComponent.vue';
 
 const controllerStore = useControllerStore();
 const mqttStore = useMqttStore();

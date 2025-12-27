@@ -1,6 +1,7 @@
 from Models import Controller
 from Schemas.Controller import ControllerCreateSchema, ControllerUpdateSchema
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 from Models.Controller import ControllerModel
 from Models import UserModel
 from Models import MqttClientModel
@@ -62,6 +63,51 @@ class ControllerService:
         db.commit()
         db.refresh(controller)
         return controller
+
+    @staticmethod
+    @staticmethod
+    @staticmethod
+    def update_mqtt_topic_additional_config(controller_id: int, control_widget_id: str, additionalConfig: dict, db: Session):
+        # Debug: Print the received additionalConfig
+        print("DEBUG: Received additionalConfig:", additionalConfig)
+
+        # Retrieve the controller by ID
+        controller = db.query(ControllerModel).filter(ControllerModel.id == controller_id).first()
+        if not controller:
+            return {"error": "Controller not found"}
+
+        # Track if the update was successful
+        updated = False
+
+        # Ensure config is mutable and modify the mqttTopics in the controller's config
+        mqtt_topics = controller.config.get("mqttTopics", [])
+        for topic in mqtt_topics:
+            if topic["id"] == control_widget_id:
+                topic["additionalConfig"] = additionalConfig
+                updated = True
+                break
+
+        if not updated:
+            return {"error": f"Control widget with ID {control_widget_id} not found"}
+        controller.updated_at = datetime.utcnow()
+
+        # **Flag the config as dirty** (this is the key part)
+        flag_modified(controller, "config")  # Signal that `config` has been modified
+
+        db.flush()  # Force the session to push changes to the database
+        try:
+            db.commit()
+            db.refresh(controller)
+        except Exception as e:
+            db.rollback()
+            return {"error": f"Failed to commit changes: {str(e)}"}
+        
+        return {
+            "message": "Success",
+            "data": controller 
+        }
+            
+
 
     @staticmethod
     def delete_controller(controller_id: int, db: Session):

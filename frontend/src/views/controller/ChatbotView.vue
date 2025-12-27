@@ -1,5 +1,5 @@
 <template>
-    <div class="fixed bottom-4 right-4 z-50">
+    <div class="fixed bottom-8 right-8 z-50">
         <!-- Chat Modal -->
         <transition name="modal">
             <div v-if="isOpen"

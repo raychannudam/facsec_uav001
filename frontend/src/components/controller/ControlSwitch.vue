@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref, defineProps, defineEmits, computed } from 'vue'
 
 const props = defineProps({
     switchData: {
@@ -40,15 +40,18 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['toggle'])
-const isOn = ref(false)
-
+const isOn = computed(() => props.switchData.additionalConfig?.latest_state === "1");
 const toggle = () => {
-    isOn.value = !isOn.value
-    const payload = isOn.value ? props.switchData.onPayload : props.switchData.offPayload
+    const newState = !isOn.value;
+    const payload = newState ? props.switchData.onPayload : props.switchData.offPayload;
+
+    // Emit the change
     emit('toggle', {
         id: props.switchData.id,
         name: props.switchData.name,
         payload: payload
-    })
+    });
+    
+    props.switchData.additionalConfig.latest_state = newState ? "1" : "0";
 }
 </script>

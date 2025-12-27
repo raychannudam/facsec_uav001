@@ -24,6 +24,7 @@
     "@vue/cli-plugin-pwa": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "baseline-browser-mapping": "^2.9.11",
     "vue-cli-plugin-tailwind": "~3.0.0"
   }
 }

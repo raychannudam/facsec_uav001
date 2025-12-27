@@ -32,8 +32,9 @@
     </p>
     <hr class="border-0.5 border-gray-200" />
 
-    <div class="grid grid-cols-12 gap-3 h-[60vh]">
-      <div class="col-span-8 dark:bg-gray-800 bg-gray-100 rounded-md w-full h-full relative overflow-hidden dark:text-white text-gray-900">
+    <div class="grid grid-cols-12 gap-3 h-[85vh]">
+      <div
+        class="col-span-8 dark:bg-gray-800 bg-gray-100 rounded-md w-full h-full relative overflow-hidden dark:text-white text-gray-900">
 
         <div v-if="streamingUrls.stream1 == undefined" class="flex items-center justify-center h-full space-x-3">
           <span class="material-symbols-outlined animate-pulse">videocam</span>
@@ -44,7 +45,7 @@
 
         <!-- Map enlarged -->
         <div id="drone-fly-map" class="absolute left-3 bottom-3 rounded-md shadow-lg"
-          style="width: 35%; height: 28%; z-index: 20; overflow: hidden;"></div>
+          style="width: 35%; height: 20%; z-index: 20; overflow: hidden;"></div>
 
         <!-- Drone info -->
         <div v-if="droneLocation"
@@ -63,21 +64,24 @@
 
       <div class="col-span-4 h-full">
         <div class="grid grid-rows-3 gap-3 w-full h-full">
-          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden dark:text-white text-gray-900">
+          <div
+            class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden dark:text-white text-gray-900">
             <div v-if="streamingUrls.stream2 == undefined" class="flex items-center justify-center space-x-3">
               <span class="material-symbols-outlined animate-pulse">videocam</span>
               <p class="animate-pulse">CAM 02</p>
             </div>
             <iframe v-else :src="streamingUrls.stream2" class="w-full h-full"></iframe>
           </div>
-          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden dark:text-white text-gray-900">
+          <div
+            class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden dark:text-white text-gray-900">
             <div v-if="streamingUrls.stream3 == undefined" class="flex items-center justify-center space-x-3">
               <span class="material-symbols-outlined animate-pulse">videocam</span>
               <p class="animate-pulse">CAM 03</p>
             </div>
             <iframe v-else :src="streamingUrls.stream3" class="w-full h-full"></iframe>
           </div>
-          <div class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden dark:text-white text-gray-900">
+          <div
+            class="dark:bg-gray-800 bg-gray-100 rounded-md flex items-center justify-center overflow-hidden dark:text-white text-gray-900">
             <div v-if="streamingUrls.stream4 == undefined" class="flex items-center justify-center space-x-3">
               <span class="material-symbols-outlined animate-pulse">videocam</span>
               <p class="animate-pulse">CAM 04</p>

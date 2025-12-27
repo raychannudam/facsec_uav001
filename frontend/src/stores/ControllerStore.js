@@ -91,6 +91,21 @@ export const useControllerStore = defineStore("controller", () => {
     return { status, message };
   };
 
+  const updateMqttTopicAdditionalConfig = async (id, widgetId, additionalConfigData) => {
+    let status = "fail";
+    let message = "";
+    let data = {};
+    await api.put(`/api/v1/controllers/update_mqtt_topic_additional_config/${id}?control_widget_id=${widgetId}`, additionalConfigData).then(res=>{
+      data = res.data.data;
+      status = "success";
+      message = "Successfully update an additional config!"
+    }).catch(err=>{
+      message = err.response?.data?.detail || "Failed to update the additional config!"
+    });
+    return {status, message};
+     
+  }
+
   const deleteController = async (id) => {
     let status = "fail";
     let message = "";
@@ -134,5 +149,6 @@ export const useControllerStore = defineStore("controller", () => {
     updateController,
     deleteController,
     selectController,
+    updateMqttTopicAdditionalConfig
   };
 });
