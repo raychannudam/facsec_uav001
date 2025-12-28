@@ -4,6 +4,7 @@ from Schemas import UserCreateSchema, UserResponseSchema
 from passlib.context import CryptContext
 from Services.Controller import ControllerService
 from Schemas.Controller import ControllerCreateSchema
+from Services.Chat import ChatService
 from uuid import uuid4
 import random
 import string
@@ -40,8 +41,8 @@ class UserService:
         # create default controller
         # create default controller (cleanup user if controller creation fails)
         try:
-            controller_name = str(uuid4())
-            controller_description = "Default controller"
+            controller_name = "Default Profile"
+            controller_description = "Default controller profile"
             controller_config = {
                 'selectedDrone': {},
                 'streamingUrls': [],
@@ -68,6 +69,20 @@ class UserService:
             except Exception:
                 db.rollback()
                 print("Failed to cleanup user after controller creation failure")
+            raise
+        
+        # create chat session
+        try:
+            chat_session = ChatService.create_chat_session(new_user.id, db=db)
+            chat_conversation = ChatService.create_chat_conversation(
+                chat_session.id, 
+                new_user.id, 
+                db=db,
+                name="Default Conversation"
+            )
+        except Exception:
+            db.rollback()
+            print("Failed to create chat conversation")
             raise
             
         return new_user

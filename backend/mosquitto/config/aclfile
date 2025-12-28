@@ -1,9 +1,5 @@
 user admin
-topic readwrite drsys/admin/altitude
-topic readwrite drsys/admin/battery
-topic readwrite drsys/admin/gps_latlng
-topic readwrite drsys/admin/speed
-topic readwrite drsys/admin/temperature
+topic #
 
 user user
 topic readwrite drsys/user/altitude

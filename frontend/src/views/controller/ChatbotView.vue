@@ -3,7 +3,7 @@
         <!-- Chat Modal -->
         <transition name="modal">
             <div v-if="isOpen"
-                class="absolute bottom-0 right-0 bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-96 h-[600px] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
+                class="absolute bottom-0 right-0 bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-[30vw] h-[80vh] flex flex-col overflow-hidden border border-gray-200 dark:border-gray-700">
                 <!-- Header -->
                 <div class="bg-blue-600 dark:bg-blue-700 text-white p-4 flex justify-between items-center">
                     <div class="flex items-center gap-2">
@@ -101,7 +101,7 @@
                                     class="bg-white dark:bg-gray-800 rounded-lg p-3 shadow-sm max-w-[70%] border border-gray-100 dark:border-gray-700">
                                     <!-- <p class="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap">{{ msg.text
                                     }}</p> -->
-                                    <vue-markdown-it :source="msg.text" />
+                                    <vue-markdown-it class="text-sm text-start" :source="msg.text" />
                                 </div>
                             </div>
                         </template>
