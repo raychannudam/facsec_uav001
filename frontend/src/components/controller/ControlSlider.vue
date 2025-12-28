@@ -57,7 +57,7 @@ const maxValue = computed(() => {
 const value = computed({
     get() {
         // Get the initial value from props (or 0 if not available)
-        return Number(props.slider?.additionalConfig?.latest_state) ?? 0;
+        return Number(props.slider?.additionalConfig?.latest_state) ?? minValue;
     },
     set(newValue) {
         // Update the slider's additionalConfig when the value changes
