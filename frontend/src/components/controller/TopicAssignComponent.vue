@@ -91,9 +91,9 @@
                     </label>
                 </div>
             </div>
-            <div class="w-full">
+            <!-- <div class="w-full">
                 <JsonEditorVue v-model="additionalConfig" mode="text"></JsonEditorVue>
-            </div>
+            </div> -->
             <hr class="border-0.5 border-gray-200">
         </div>
 
