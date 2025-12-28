@@ -17,7 +17,7 @@
         <div class="flex-1 flex flex-col justify-center">
             <input type="range" :min="minValue" :max="maxValue" v-model="value"
                 class="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer slider mb-2"
-                @input="handleChange" :aria-valuemin="minValue" :aria-valuemax="maxValue" :aria-valuenow="value" />
+                @input="handleChange" :aria-valuemin="minValue" :aria-valuemax="maxValue" :aria-valuenow="value" @mouseup="setToDefualtSliderValue" @mousedown="sendValue"/>
 
             <!-- Min/Max labels -->
             <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
@@ -67,10 +67,39 @@ const value = computed({
         emit('change', {
             id: props.slider?.id,
             name: props.slider?.name,
-            value: newValue
+            value: newValue,
+            minValue: minValue.value,
+            maxValue: maxValue.value
         });
     }
 });
+
+const intervalId = ref(null);
+
+const setToDefualtSliderValue = ()=>{
+    if (minValue.value == -1 && maxValue.value == 1){
+        value.value = 0;
+        if (intervalId.value !== null) {
+        clearInterval(intervalId.value)
+        intervalId.value = null
+        }
+    }
+}
+
+const sendValue = ()=>{
+    if (intervalId.value !== null) return // prevent duplicates
+    if (minValue.value == -1 && maxValue.value == 1){
+        // Emit the change event
+        intervalId.value = setInterval(()=>{
+            emit('change', {
+            id: props.slider?.id,
+            name: props.slider?.name,
+            value: value.value,
+            minValue: minValue.value,
+            maxValue: maxValue.value
+        })},100)
+    }
+}
 
 // Watch for changes in minValue and maxValue, and adjust the value accordingly
 watch([minValue, maxValue], ([mn, mx]) => {

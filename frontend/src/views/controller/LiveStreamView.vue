@@ -45,7 +45,7 @@
 
         <!-- Map enlarged -->
         <div id="drone-fly-map" class="absolute left-3 bottom-3 rounded-md shadow-lg"
-          style="width: 35%; height: 20%; z-index: 20; overflow: hidden;"></div>
+          style="width: 50%; height: 20%; z-index: 20; overflow: hidden;"></div>
 
         <!-- Drone info -->
         <div v-if="droneLocation"
