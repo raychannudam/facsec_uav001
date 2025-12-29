@@ -37,6 +37,8 @@ def get_s1_data() -> str:
     flux_query = f'''
         from(bucket: "{influx_service.bucket}")
             |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+            |> filter(fn: (r) => r["_field"] == "value")
             |> filter(fn: (r) => r["topic"] == "drsys/ESP32/s1")
     '''
     return influx_service.query(flux_query)
@@ -49,6 +51,8 @@ def get_altitude_data() -> str:
     flux_query = f'''
         from(bucket: "{influx_service.bucket}")
             |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+            |> filter(fn: (r) => r["_field"] == "value")
             |> filter(fn: (r) => r["topic"] == "drsys/ESP32/altitude")
     '''
     return influx_service.query(flux_query)
@@ -61,6 +65,8 @@ def get_b1_data() -> str:
     flux_query = f'''
         from(bucket: "{influx_service.bucket}")
             |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+            |> filter(fn: (r) => r["_field"] == "value")
             |> filter(fn: (r) => r["topic"] == "drsys/ESP32/b1")
     '''
     return influx_service.query(flux_query)
@@ -73,6 +79,8 @@ def get_gps_latlng_data() -> str:
     flux_query = f'''
         from(bucket: "{influx_service.bucket}")
             |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+            |> filter(fn: (r) => r["_field"] == "value")
             |> filter(fn: (r) => r["topic"] == "drsys/ESP32/gps_latlng")
     '''
     return influx_service.query(flux_query)
@@ -85,6 +93,8 @@ def get_s2_data() -> str:
     flux_query = f'''
         from(bucket: "{influx_service.bucket}")
             |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+            |> filter(fn: (r) => r["_field"] == "value")
             |> filter(fn: (r) => r["topic"] == "drsys/ESP32/s2")
     '''
     return influx_service.query(flux_query)
@@ -97,6 +107,8 @@ def get_s3_data() -> str:
     flux_query = f'''
         from(bucket: "{influx_service.bucket}")
             |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+            |> filter(fn: (r) => r["_field"] == "value")
             |> filter(fn: (r) => r["topic"] == "drsys/ESP32/s3")
     '''
     return influx_service.query(flux_query)
@@ -109,6 +121,8 @@ def get_slide1_data() -> str:
     flux_query = f'''
         from(bucket: "{influx_service.bucket}")
             |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+            |> filter(fn: (r) => r["_field"] == "value")
             |> filter(fn: (r) => r["topic"] == "drsys/ESP32/slide1")
     '''
     return influx_service.query(flux_query)
@@ -121,6 +135,8 @@ def get_slide2_data() -> str:
     flux_query = f'''
         from(bucket: "{influx_service.bucket}")
             |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+            |> filter(fn: (r) => r["_field"] == "value")
             |> filter(fn: (r) => r["topic"] == "drsys/ESP32/slide2")
     '''
     return influx_service.query(flux_query)
@@ -130,10 +146,13 @@ def get_speed_data() -> str:
     """Get data for drsys/ESP32/speed topic from InfluxDB.
     """
     influx_service = InfluxService()
-    flux_query = f'''
-        from(bucket: "{influx_service.bucket}")
+    speed_data = influx_service.query(
+        '''
+            from(bucket: "{influx_service.bucket}")
             |> range(start: -30d)
+            |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer")
+            |> filter(fn: (r) => r["_field"] == "value")
             |> filter(fn: (r) => r["topic"] == "drsys/ESP32/speed")
-    '''
-    print("Sokleap: ", influx_service.query(flux_query))
-    return influx_service.query(flux_query)
+        '''
+    )
+    return speed_data

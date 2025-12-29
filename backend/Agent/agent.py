@@ -16,6 +16,9 @@ from .tools import (
     get_speed_data,
     query_influxdb
 )
+from Services.Chat import ChatService
+from Security.jwt import get_current_user
+from Models import get_db
 
 load_dotenv()
 
@@ -38,12 +41,25 @@ def get_agent():
 
     tools = [get_station_data, get_s1_data, get_altitude_data, get_b1_data, get_gps_latlng_data, get_s2_data, get_s3_data, get_slide1_data, get_slide2_data, get_speed_data, query_influxdb]
 
+    db: Session = next(get_db())
+    current_user: UserModel = Depends(get_current_user)
+    chat_context = ChatService.get_conversations_by_user(current_user.id, db)
+
+    context = ""
+    for conversation in chat_context:
+        for message in conversation.messages:
+            context += f"User: {message.user_prompt}\nAI: {message.response}\n\n"
+
+
     system_prompt = """
         You are a helpful assistant for the UAV management system named "Mission Control Copilot".
         You have access to a set of tools to answer user questions about UAVs.
         Always be polite and helpful.
         When asked a question, use the available tools to find the answer.
         If you can't find the answer, just say that you don't have enough information.
+
+        Previous Conversations:
+        {context}  # Include the previous conversation context here
     """
 
     # Create agent with correct parameter order
