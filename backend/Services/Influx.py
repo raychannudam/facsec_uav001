@@ -5,9 +5,9 @@ import json
 
 class InfluxService:
     def __init__(self):
-        url = os.getenv("INFLUXDB_URL", "http://152.42.234.202:8087")
-        org = os.getenv("DOCKER_INFLUXDB_INIT_ORG", "drtech")
-        bucket = os.getenv("DOCKER_INFLUXDB_INIT_BUCKET", "drsys")
+        url = os.getenv("INFLUXDB_URL")
+        org = os.getenv("DOCKER_INFLUXDB_INIT_ORG")
+        bucket = os.getenv("DOCKER_INFLUXDB_INIT_BUCKET")
         user = os.getenv("INFLUXDB_USER")
         password = os.getenv("INFLUXDB_PASSWORD")
 
