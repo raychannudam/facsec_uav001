@@ -54,7 +54,8 @@ class ChatService:
 
     @staticmethod
     def create_chat_message(conversation_id: int, user_id: int, user_prompt: str, db: Session) -> ChatMessageModel:
-        agent_executor = get_agent()
+        chat_context = ChatService.get_conversations_by_user(user_id, db)
+        agent_executor = get_agent(chat_context)
 
         response = agent_executor.invoke({
             "messages": [

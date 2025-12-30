@@ -4,6 +4,10 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.agents import create_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_ollama import ChatOllama
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from Models.Users import UserModel
+from Models.Chat import ChatConversationModel
 from .tools import (
     get_station_data, 
     get_s1_data, get_altitude_data, 
@@ -16,13 +20,13 @@ from .tools import (
     get_speed_data,
     query_influxdb
 )
-from Services.Chat import ChatService
+# from Services.Chat import ChatService
 from Security.jwt import get_current_user
 from Models import get_db
 
 load_dotenv()
 
-def get_agent():
+def get_agent(chat_context: list[ChatConversationModel] = []) -> any:
     """
     Initializes and returns a LangChain agent with the specified LLM provider.
     The agent is configured with a system prompt and a set of tools for UAV management.
@@ -43,7 +47,7 @@ def get_agent():
 
     db: Session = next(get_db())
     current_user: UserModel = Depends(get_current_user)
-    chat_context = ChatService.get_conversations_by_user(current_user.id, db)
+    # chat_context = ChatService.get_conversations_by_user(current_user.id, db)
 
     context = ""
     for conversation in chat_context:
@@ -57,7 +61,6 @@ def get_agent():
         Always be polite and helpful.
         When asked a question, use the available tools to find the answer.
         If you can't find the answer, just say that you don't have enough information.
-
         Previous Conversations:
         {context}  # Include the previous conversation context here
     """
